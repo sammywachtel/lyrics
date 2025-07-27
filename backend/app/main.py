@@ -7,6 +7,8 @@ import os
 import logging
 from dotenv import load_dotenv
 from .config import settings
+from .auth import create_auth_dependency
+from .songs import create_songs_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -70,6 +72,13 @@ def initialize_supabase() -> Optional[Client]:
 
 # Initialize Supabase
 supabase = initialize_supabase()
+
+# Initialize authentication
+get_current_user = create_auth_dependency(supabase)
+
+# Include routers
+songs_router = create_songs_router(supabase, get_current_user)
+app.include_router(songs_router)
 
 
 @app.get("/")
@@ -149,6 +158,41 @@ async def test_endpoint() -> Dict[str, Any]:
                 "framework": "FastAPI"
             }
         )
+
+
+@app.post("/api/test-songs")
+async def test_songs_endpoint() -> Dict[str, Any]:
+    """Test endpoint for songs table without RLS."""
+    if supabase is None:
+        return {
+            "message": "Database not configured",
+            "framework": "FastAPI"
+        }
+    
+    try:
+        # Test song creation
+        song_data = {
+            "id": str(__import__("uuid").uuid4()),
+            "user_id": "550e8400-e29b-41d4-a716-446655440000",
+            "title": "Test Song",
+            "content": "Test lyrics content",
+            "metadata": {"artist": "Test Artist", "tags": ["test"], "status": "draft"},
+            "is_archived": False
+        }
+        
+        response = supabase.table("songs").insert(song_data).execute()
+        
+        return {
+            "message": "Test song created successfully",
+            "data": response.data,
+            "framework": "FastAPI"
+        }
+    except Exception as e:
+        return {
+            "error": "Failed to create test song",
+            "details": str(e),
+            "framework": "FastAPI"
+        }
 
 
 if __name__ == "__main__":
