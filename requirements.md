@@ -175,14 +175,22 @@ A web-based AI-assisted lyric-writing tool combining structured songwriting meth
 
 ### Architecture & Tech Stack
 
-- **Frontend**: React (Vite) + TypeScript + TailwindCSS  
-- **State**: Redux Toolkit or Zustand  
-- **Backend**: Node.js (Express) or Go + Supabase (GoTrue) for auth & Postgres  
-- **Deployment**: Docker → Google Cloud Run  
-- **Database**: Supabase (PostgreSQL) with RLS policies  
-- **AI API**: OpenAI / Gemini (configurable)  
-- **Auth**: Supabase GoTrue (email, OAuth)  
-- **Storage**: Supabase Storage for exports
+- **Frontend**: React (Vite) + TypeScript + TailwindCSS
+- **State Management**: Redux Toolkit or Zustand
+- **Backend**: Python 3.10+ using FastAPI framework and Uvicorn ASGI server
+  - FastAPI for async request handling, dependency injection, and auto-generated OpenAPI/Swagger documentation
+  - Pydantic for data validation, settings management, and type-safe request/response models
+  - SQLAlchemy (or Tortoise ORM) for database modeling and migrations
+  - supabase-py client for auth (GoTrue) and database interactions, including real-time subscriptions if needed
+  - HTTPX or aiohttp for any additional async HTTP calls (AI APIs, webhooks)
+- **Deployment**: Docker → Google Cloud Run 
+  - Use a slim Python base image (e.g., `python:3.10-slim`)
+  - Include multi-stage builds to minimize image size
+- **Database**: Supabase (PostgreSQL) with Row-Level Security policies
+- **AI Integration**: Official OpenAI/Gemini Python SDKs for async calls
+- **Authentication**: Supabase GoTrue via supabase-py for email/password and OAuth flows
+- **Storage**: Supabase Storage (via supabase-py) for exports, attachments, and media
+- **Background Tasks**: Celery or FastAPI BackgroundTasks for webhooks reconciliation and billing sync jobs
 
 ## Responsive & Mobile Design
 
