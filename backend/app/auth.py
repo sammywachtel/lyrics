@@ -1,9 +1,10 @@
+import logging
+from typing import Optional
+
 from fastapi import HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from supabase import Client
-from typing import Optional
-import jwt
-import logging
+
 from .models import UserContext
 
 logger = logging.getLogger(__name__)
@@ -54,38 +55,75 @@ class AuthService:
                 )
             
             # Verify JWT token with Supabase
-            response = self.supabase.auth.get_user(token)
-            
-            if not response.user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid authentication token"
-                )
+            try:
+                response = self.supabase.auth.get_user(token)
+                
+                if not response.user:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="Invalid authentication token"
+                    )
+            except Exception as jwt_error:
+                # Handle JWT expiration and other auth errors
+                error_msg = str(jwt_error)
+                logger.warning(f"JWT verification failed: {error_msg}")
+                
+                if ("JWT expired" in error_msg or "PGRST301" in error_msg or 
+                    "403" in error_msg or "Forbidden" in error_msg):
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="Session expired"
+                    )
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="Authentication failed"
+                    )
             
             # Ensure user exists in our users table
             user_id = response.user.id
             user_email = response.user.email
             
             try:
+                # Set the JWT token on the existing client for this request
+                # This approach avoids the headers error while maintaining proper auth context
+                self.supabase.postgrest.auth(token)
+                
                 # Check if user exists in our users table
                 user_check = self.supabase.table("users").select("*").eq("id", user_id).execute()
                 
                 if not user_check.data:
                     # Create user record in our users table
                     logger.info(f"Creating user record for {user_email}")
-                    self.supabase.table("users").insert({
+                    
+                    # Insert the user record - RLS should allow this since auth.uid() = user_id
+                    insert_result = self.supabase.table("users").insert({
                         "id": user_id,
                         "email": user_email,
                         "display_name": user_email.split("@")[0]  # Use email prefix as display name
                     }).execute()
+                    
                     logger.info(f"User record created successfully for {user_email}")
+                    logger.debug(f"Insert result: {insert_result.data}")
                     
             except Exception as e:
                 logger.error(f"Error ensuring user record exists: {e}")
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Failed to initialize user record"
-                )
+                # Log more detailed error information
+                error_details = getattr(e, 'details', str(e))
+                error_msg = str(e)
+                logger.error(f"Detailed error: {error_details}")
+                
+                # Check if this is also a JWT expiration issue
+                if "JWT expired" in error_msg or "PGRST301" in error_msg:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="Session expired"
+                    )
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="Failed to initialize user record"
+                    )
             
             return UserContext(
                 user_id=user_id,
