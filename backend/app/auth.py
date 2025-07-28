@@ -62,9 +62,34 @@ class AuthService:
                     detail="Invalid authentication token"
                 )
             
+            # Ensure user exists in our users table
+            user_id = response.user.id
+            user_email = response.user.email
+            
+            try:
+                # Check if user exists in our users table
+                user_check = self.supabase.table("users").select("*").eq("id", user_id).execute()
+                
+                if not user_check.data:
+                    # Create user record in our users table
+                    logger.info(f"Creating user record for {user_email}")
+                    self.supabase.table("users").insert({
+                        "id": user_id,
+                        "email": user_email,
+                        "display_name": user_email.split("@")[0]  # Use email prefix as display name
+                    }).execute()
+                    logger.info(f"User record created successfully for {user_email}")
+                    
+            except Exception as e:
+                logger.error(f"Error ensuring user record exists: {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to initialize user record"
+                )
+            
             return UserContext(
-                user_id=response.user.id,
-                email=response.user.email,
+                user_id=user_id,
+                email=user_email,
                 is_authenticated=True
             )
             

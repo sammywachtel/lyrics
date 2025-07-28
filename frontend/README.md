@@ -1,69 +1,80 @@
-# React + TypeScript + Vite
+# Songwriting App Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + TypeScript + Vite + TailwindCSS frontend for the AI-assisted songwriting application.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Authentication**: Supabase-powered sign up/sign in
+- **Songs Management**: Create, read, update, delete songs
+- **Responsive UI**: TailwindCSS with mobile-first design
+- **Real-time**: Supabase real-time subscriptions ready
+- **Type Safety**: Full TypeScript integration
 
-## Expanding the ESLint configuration
+## Quick Start
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# Install dependencies
+npm install
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Start development server
+npm run dev
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+# Build for production
+npm run build
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Preview production build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Environment Setup
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Copy `.env.example` to `.env` and configure:
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_API_URL=http://localhost:8000
 ```
+
+## Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── AuthForm.tsx    # Login/signup form
+│   ├── Header.tsx      # Navigation header
+│   ├── SongCard.tsx    # Song display card
+│   ├── SongForm.tsx    # Song create/edit form
+│   └── SongList.tsx    # Songs listing with CRUD
+├── contexts/           # React contexts
+│   └── AuthContext.tsx # Authentication state
+├── lib/               # Utilities and clients
+│   ├── api.ts         # API client for backend
+│   └── supabase.ts    # Supabase client config
+├── App.tsx            # Main app component
+└── main.tsx           # App entry point
+```
+
+## Development
+
+The app automatically handles authentication state and redirects to the appropriate views. When authenticated, users can:
+
+1. View their songs library
+2. Create new songs with title, artist, lyrics, tags
+3. Edit existing songs
+4. Delete songs
+5. Filter by status (draft, in progress, completed, archived)
+
+## Backend Integration
+
+The frontend communicates with the FastAPI backend at `http://localhost:8000` by default. All API calls include authentication headers automatically when the user is signed in.
+
+## Build
+
+Production builds are optimized and include:
+- Tree shaking for minimal bundle size
+- CSS optimization via TailwindCSS
+- TypeScript compilation
+- Asset optimization
+
+Built app is deployable to any static hosting service.
