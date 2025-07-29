@@ -30,22 +30,25 @@ export function SongCard({ song, onEdit, onDelete }: SongCardProps) {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6 hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white shadow-lg rounded-xl border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] transform">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">{song.title}</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{song.title}</h3>
           {song.artist && (
-            <p className="text-sm text-gray-600 mb-2">by {song.artist}</p>
+            <p className="text-sm text-gray-600 mb-2 flex items-center">
+              <span className="mr-1">🎤</span>
+              by {song.artist}
+            </p>
           )}
         </div>
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(song.status)}`}>
-          {song.status}
+        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(song.status)}`}>
+          {song.status.replace('_', ' ')}
         </span>
       </div>
 
-      <div className="mb-4">
-        <div className="text-sm text-gray-700 whitespace-pre-wrap">
-          {truncateLyrics(song.lyrics)}
+      <div className="mb-4 bg-gray-50 rounded-lg p-3">
+        <div className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
+          {song.lyrics ? truncateLyrics(song.lyrics) : "No lyrics yet..."}
         </div>
       </div>
 
@@ -55,32 +58,38 @@ export function SongCard({ song, onEdit, onDelete }: SongCardProps) {
             {song.tags.map((tag, index) => (
               <span
                 key={index}
-                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800"
+                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200"
               >
-                {tag}
+                #{tag}
               </span>
             ))}
           </div>
         </div>
       )}
 
-      <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
-        <span>Created {formatDate(song.created_at)}</span>
-        <span>Updated {formatDate(song.updated_at)}</span>
+      <div className="flex justify-between items-center text-xs text-gray-500 mb-6 bg-gray-50 rounded-lg px-3 py-2">
+        <span className="flex items-center">
+          <span className="mr-1">📅</span>
+          Created {formatDate(song.created_at)}
+        </span>
+        <span className="flex items-center">
+          <span className="mr-1">✏️</span>
+          Updated {formatDate(song.updated_at)}
+        </span>
       </div>
 
-      <div className="flex justify-end space-x-2">
+      <div className="flex gap-2">
         <button
           onClick={onEdit}
-          className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="flex-1 inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
         >
-          Edit
+          📝 Edit
         </button>
         <button
           onClick={onDelete}
-          className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          className="inline-flex items-center px-3 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
         >
-          Delete
+          🗑️
         </button>
       </div>
     </div>

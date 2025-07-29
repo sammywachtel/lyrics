@@ -1,77 +1,95 @@
 # Songwriting Web App Requirements
 
-## Comprehensive Requirements
+## Implementation Status
 
-1. **User Authentication & Account Management**  
-   - Users must be able to create an account and log in securely.  
-   - Support email/password and OAuth (Google, GitHub).  
-   - User sessions should be maintained across browser sessions.  
-   - Logout functionality to clear session.
+### ✅ COMPLETED
 
-2. **Library Management**  
-   - Display a library of all user’s songs with pagination, sorting, and filtering.  
-   - Filter by tags, keywords, creation date, modification date, and archive status.  
-   - Users can create new songs, archive/unarchive existing songs, and delete songs.  
-   - Search bar for song titles and tags.
+1. **User Authentication & Account Management** - IMPLEMENTED  
+   - ✅ Users can create an account and log in securely via Supabase Auth
+   - ✅ Support for email/password authentication
+   - ✅ User sessions maintained across browser sessions
+   - ✅ Logout functionality to clear session
+   - ✅ JWT token validation and user context management
+   - ✅ Automatic user record creation in database
+   - 🔄 OAuth (Google, GitHub) - Planned for next phase
 
-3. **Editable Lyrics Window**  
-   - Rich-text editor supporting undo, redo, copy, paste, and basic formatting (bold, italics, underline).  
-   - Sections tagged with user-defined labels (e.g., Verse, Chorus, Bridge).  
-   - Inline tagging of lines or blocks with keywords/categories.  
-   - Real-time diff highlighting: color-coded additions (green), deletions (red strike), modifications (yellow).  
-   - Manual text edits always preserved; AI suggestions can be accepted or rejected.
+2. **Library Management** - IMPLEMENTED  
+   - ✅ Display a library of all user's songs with pagination, sorting, and filtering
+   - ✅ Filter by status (draft, in_progress, completed, archived)
+   - ✅ Users can create new songs, archive/unarchive existing songs, and delete songs
+   - ✅ Full CRUD operations for songs with proper user isolation
+   - 🔄 Search bar for song titles and tags - Basic filtering implemented, search UI pending
 
-4. **Tagging & Keywords**  
-   - Users can add, edit, and remove keywords for entire songs or specific lines.  
-   - Keywords assist in filtering/searching songs.  
-   - Keyword Manager panel always visible, showing lists of used vs. unused keywords.  
-   - Related-word expansion via reverse dictionary logic (Roget-style), grouping suggestions by emotional, sonic, and metaphorical categories.  
-   - Used keywords are visually marked (e.g., dimmed or checkmark); hover reveals usage locations.
+### 🚧 IN PROGRESS / PARTIALLY IMPLEMENTED
 
-5. **AI Assistant Integration**  
-   - AI-powered assistant panel on the right sidebar or inline.  
-   - Accept natural-language iteration prompts (e.g., “Make the chorus more intimate”).  
-   - AI suggestions respect current song settings: tone, rhythm, rhyme type, narrative POV, genre, artist emulation.  
-   - AI can generate line-level edits, section rewrites, or full-song drafts.  
-   - AI suggests setting changes when mismatches are detected (e.g., uneven line lengths indicating instability), with explanations.  
+1. **Basic Song Editor** - PARTIALLY IMPLEMENTED  
+   - ✅ Basic song title and lyrics editing
+   - ✅ Song metadata storage (artist, tags, status)
+   - 🔄 Rich-text editor with formatting (bold, italics, underline) - Simple textarea currently
+   - ❌ Section tagging with user-defined labels (Verse, Chorus, Bridge)
+   - ❌ Inline keyword/category tagging
+   - ❌ Real-time diff highlighting
+   - ❌ AI suggestion acceptance/rejection interface
+
+### ❌ NOT YET IMPLEMENTED
+
+2. **Advanced Lyrics Editor**  
+   - Rich-text editor supporting undo, redo, copy, paste, and basic formatting
+   - Sections tagged with user-defined labels (e.g., Verse, Chorus, Bridge)
+   - Inline tagging of lines or blocks with keywords/categories
+   - Real-time diff highlighting: color-coded additions (green), deletions (red strike), modifications (yellow)
+   - Manual text edits always preserved; AI suggestions can be accepted or rejected
+
+3. **Tagging & Keywords System**  
+   - Users can add, edit, and remove keywords for entire songs or specific lines
+   - Keywords assist in filtering/searching songs
+   - Keyword Manager panel always visible, showing lists of used vs. unused keywords
+   - Related-word expansion via reverse dictionary logic (Roget-style), grouping suggestions by emotional, sonic, and metaphorical categories
+   - Used keywords are visually marked (e.g., dimmed or checkmark); hover reveals usage locations
+
+4. **AI Assistant Integration**  
+   - AI-powered assistant panel on the right sidebar or inline
+   - Accept natural-language iteration prompts (e.g., "Make the chorus more intimate")
+   - AI suggestions respect current song settings: tone, rhythm, rhyme type, narrative POV, genre, artist emulation
+   - AI can generate line-level edits, section rewrites, or full-song drafts
+   - AI suggests setting changes when mismatches are detected (e.g., uneven line lengths indicating instability), with explanations
    - AI persona defined by system prompt:  
-     > “You are a songwriting expert, capable of writing in any style the user requests. You use the user’s configuration and compositional rules to produce lyrical drafts, suggestions, and commentary.”
+     > "You are a songwriting expert, capable of writing in any style the user requests. You use the user's configuration and compositional rules to produce lyrical drafts, suggestions, and commentary."
 
-6. **Iteration & Versioning**  
-   - Automatic version creation on each AI iteration or manual save.  
-   - Version list displayed in bottom panel with timestamps and version numbers.  
-   - Color-coded diff view between any two versions.  
+5. **Iteration & Versioning System**  
+   - Automatic version creation on each AI iteration or manual save
+   - Version list displayed in bottom panel with timestamps and version numbers
+   - Color-coded diff view between any two versions
    - Bookmarking:  
-     - Auto-bookmark on first version and after any settings change.  
-     - Manual bookmarks with user-provided summary.  
-     - Bookmark list accessible in version panel.  
-   - Settings version history linked to associated lyric versions.
+     - Auto-bookmark on first version and after any settings change
+     - Manual bookmarks with user-provided summary
+     - Bookmark list accessible in version panel
+   - Settings version history linked to associated lyric versions
 
-7. **Configuration & Settings**  
+6. **Advanced Configuration & Settings**  
    - Song Settings panel in left sidebar with:  
-     - Narrative POV (first-person, second-person, third-person, direct address).  
-     - Structural “Boxes” progression (Box 1, Box 2, Box 3).  
-     - Section structure (user-configurable labels and order).  
-     - Line count and stress count targets per section.  
-     - Rhyme scheme and rhyme-type preferences (perfect, family, additive, subtractive, assonance, consonance).  
-     - Prosody parameters (rhythmic stability, front-heavy vs. back-heavy phrasing).  
-     - Genre and list of artists/genres to emulate (stylistic guide).  
-     - Central theme (“Why” question) and core “Six Best Friends” (Who, What, When, Where, Why, How).  
-     - Keyword/Metaphor management settings.  
-   - Settings changes create new configuration versions and auto-bookmark.
+     - Narrative POV (first-person, second-person, third-person, direct address)
+     - Structural "Boxes" progression (Box 1, Box 2, Box 3)
+     - Section structure (user-configurable labels and order)
+     - Line count and stress count targets per section
+     - Rhyme scheme and rhyme-type preferences (perfect, family, additive, subtractive, assonance, consonance)
+     - Prosody parameters (rhythmic stability, front-heavy vs. back-heavy phrasing)
+     - Genre and list of artists/genres to emulate (stylistic guide)
+     - Central theme ("Why" question) and core "Six Best Friends" (Who, What, When, Where, Why, How)
+     - Keyword/Metaphor management settings
+   - Settings changes create new configuration versions and auto-bookmark
 
-8. **Bookmarks & Navigation**  
-   - Song-level bookmarks for favorite songs.  
-   - Version-level bookmarks for key iterations.  
-   - Quick navigation controls to jump between bookmarks.  
-   - Search field for bookmarks by summary text.
+7. **Bookmarks & Navigation**  
+   - Song-level bookmarks for favorite songs
+   - Version-level bookmarks for key iterations
+   - Quick navigation controls to jump between bookmarks
+   - Search field for bookmarks by summary text
 
-
-9. **Collaboration & Sharing (v1 Optional)**  
-   - Share songs with other users by email or user ID.  
-   - Permission levels: read-only, read-write.  
-   - Shared users see songs in their library view.  
-   - Export options: PDF, Markdown, ChordPro.
+8. **Collaboration & Sharing**  
+   - Share songs with other users by email or user ID
+   - Permission levels: read-only, read-write
+   - Shared users see songs in their library view
+   - Export options: PDF, Markdown, ChordPro
 
 ## Subscription & Billing Provisioning
 

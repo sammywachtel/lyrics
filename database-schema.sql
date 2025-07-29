@@ -1,4 +1,10 @@
 -- Songwriting App Database Schema
+-- Migration for existing installations: Add settings column if it doesn't exist
+-- ALTER TABLE songs ADD COLUMN IF NOT EXISTS settings JSONB DEFAULT '{}';
+
+-- drop table test_records;
+-- drop table users;
+-- drop table songs;
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -27,6 +33,7 @@ CREATE TABLE songs (
     title TEXT NOT NULL,
     content TEXT DEFAULT '',
     metadata JSONB DEFAULT '{}',
+    settings JSONB DEFAULT '{}',
     is_archived BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -69,6 +76,9 @@ CREATE INDEX idx_songs_user_id ON songs(user_id);
 CREATE INDEX idx_songs_created_at ON songs(created_at);
 CREATE INDEX idx_songs_title ON songs(title);
 CREATE INDEX idx_songs_archived ON songs(is_archived);
+CREATE INDEX idx_songs_settings_genre ON songs USING GIN ((settings->'style_guide'->'primary_genre'));
+CREATE INDEX idx_songs_settings_pov ON songs USING GIN ((settings->'narrative_pov'));
+CREATE INDEX idx_songs_settings_energy ON songs USING GIN ((settings->'energy_level'));
 
 -- Update timestamp trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()

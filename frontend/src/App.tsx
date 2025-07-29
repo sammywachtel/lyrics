@@ -3,10 +3,14 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AuthForm } from './components/AuthForm'
 import { Header } from './components/Header'
 import { SongList } from './components/SongList'
+import SongEditor from './components/SongEditor'
+import type { Song } from './lib/api'
 
 function AppContent() {
   const { user, loading } = useAuth()
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
+  const [currentView, setCurrentView] = useState<'list' | 'editor'>('list')
+  const [selectedSongId, setSelectedSongId] = useState<string | null>(null)
 
   if (loading) {
     return (
@@ -22,11 +26,36 @@ function AppContent() {
     )
   }
 
+  const handleEditSong = (songId: string) => {
+    setSelectedSongId(songId)
+    setCurrentView('editor')
+  }
+
+  const handleCloseSong = () => {
+    setSelectedSongId(null)
+    setCurrentView('list')
+  }
+
+  const handleSongChange = (song: Song) => {
+    // Song was updated, could refresh the list or handle state updates
+    console.log('Song updated:', song)
+  }
+
+  if (currentView === 'editor' && selectedSongId) {
+    return (
+      <SongEditor
+        songId={selectedSongId}
+        onSongChange={handleSongChange}
+        onClose={handleCloseSong}
+      />
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       <main>
-        <SongList />
+        <SongList onEditSong={handleEditSong} />
       </main>
     </div>
   )

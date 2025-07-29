@@ -21,8 +21,15 @@ This is a full-stack web application for AI-assisted songwriting with the follow
 │   ├── src/
 │   │   ├── App.tsx             # Main React component
 │   │   ├── main.tsx            # Entry point
+│   │   ├── components/         # React components
+│   │   │   └── __tests__/      # Component test files
+│   │   ├── utils/              # Utility functions
+│   │   │   └── __tests__/      # Utility test files
+│   │   ├── __mocks__/          # Jest mock files
+│   │   ├── setupTests.ts       # Jest test setup
 │   │   └── assets/             # Static assets
 │   ├── package.json            # Frontend dependencies
+│   ├── jest.config.js          # Jest testing configuration
 │   ├── vite.config.ts          # Vite configuration
 │   ├── tailwind.config.js      # TailwindCSS configuration
 │   └── tsconfig.json           # TypeScript configuration
@@ -85,7 +92,7 @@ docker-compose up --build
 
 This starts:
 - Frontend on http://localhost:80 (via nginx)
-- Backend on http://localhost:8000
+- Backend on http://localhost:8001
 - API proxied through nginx at /api/
 
 #### Method 2: Manual Development Setup
@@ -94,7 +101,7 @@ This starts:
 # Terminal 1: Backend
 cd backend
 pip install -r requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
 
 # Terminal 2: Frontend
 cd frontend
@@ -131,12 +138,166 @@ From project root (`/Users/samwachtel/PycharmProjects/lyrics/package.json`):
 - `npm run build` - Build frontend for production
 - `npm run backend:install` - Install Python backend dependencies
 - `npm start` - Start production backend server
+- `npm test` - Run all frontend tests once (delegates to frontend)
+- `npm run test:watch` - Run tests in watch mode (delegates to frontend)
+- `npm run test:coverage` - Run tests with coverage report (delegates to frontend)
 
-From frontend directory:
+From frontend directory (`/Users/samwachtel/PycharmProjects/lyrics/frontend/`):
 
 - `npm run dev` - Start Vite development server (port 5173)
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
+- `npm test` - Run all tests once (Jest directly)
+- `npm run test:watch` - Run tests in watch mode for development
+- `npm run test:coverage` - Run tests with coverage report
+
+## Testing Framework and Structure
+
+### Testing Philosophy
+
+**CRITICAL: Testing is mandatory for all feature development and changes.** Always consider testing when:
+- Implementing new features
+- Modifying existing functionality
+- Refactoring code
+- Fixing bugs
+
+Tests should be written as part of the development process, not as an afterthought, to prevent technical debt accumulation.
+
+### Frontend Testing Stack
+
+- **Jest 29.7.0** - JavaScript testing framework
+- **React Testing Library 16.0.0** - Component testing utilities
+- **Jest DOM 6.1.4** - Custom Jest matchers for DOM elements
+- **User Event 14.5.1** - User interaction simulation
+- **ts-jest 29.1.1** - TypeScript support for Jest
+
+### Test Organization
+
+Tests are organized using the `__tests__` folder convention:
+
+```
+frontend/src/
+├── components/
+│   ├── Component.tsx
+│   └── __tests__/
+│       └── Component.test.tsx
+├── utils/
+│   ├── utility.ts
+│   └── __tests__/
+│       └── utility.test.ts
+├── __mocks__/
+│   └── fileMock.js           # Mock for static assets
+└── setupTests.ts             # Global test setup
+```
+
+### Test Configuration
+
+**Jest Configuration** (`frontend/jest.config.js`):
+- ESM module support for modern JavaScript
+- TypeScript compilation with ts-jest
+- jsdom environment for React component testing
+- CSS and asset mocking
+- Coverage reporting
+
+**Test Setup** (`frontend/src/setupTests.ts`):
+- Jest DOM matchers import
+- Window object mocking (matchMedia, scrollTo, ResizeObserver)
+- Global test utilities and configuration
+
+### Running Tests
+
+**From project root (recommended for consistency):**
+```bash
+npm test                    # Run all tests once
+npm run test:watch         # Run tests in watch mode (recommended for development)
+npm run test:coverage      # Run tests with coverage report
+```
+
+**From frontend directory (for direct Jest access):**
+```bash
+cd frontend
+npm test                    # Run all tests once
+npm run test:watch         # Run tests in watch mode
+npm run test:coverage      # Run tests with coverage report
+
+# Run specific test file
+npm test ComponentName.test.tsx
+
+# Run tests matching a pattern
+npm test -- --testNamePattern="should render"
+
+# Run tests for specific component
+npm test -- --testPathPattern="SectionToolbar"
+```
+
+### Test Types and Examples
+
+#### 1. Utility Function Tests
+Test pure functions with various inputs and edge cases:
+
+```typescript
+// Example: src/utils/__tests__/sectionUtils.test.ts
+describe('parseSections', () => {
+  it('should parse multiple sections correctly', () => {
+    const lyrics = `[Verse 1]\nContent\n[Chorus]\nMore content`
+    const sections = parseSections(lyrics)
+    expect(sections).toHaveLength(2)
+    expect(sections[0].name).toBe('Verse 1')
+  })
+})
+```
+
+#### 2. Component Tests
+Test component rendering, user interactions, and prop handling:
+
+```typescript
+// Example: src/components/__tests__/SectionToolbar.test.tsx
+describe('SectionToolbar', () => {
+  it('should call onInsertSection when button clicked', () => {
+    const mockInsert = jest.fn()
+    render(<SectionToolbar onInsertSection={mockInsert} />)
+    
+    fireEvent.click(screen.getByRole('button', { name: 'Verse 1' }))
+    expect(mockInsert).toHaveBeenCalledWith('[Verse 1]')
+  })
+})
+```
+
+### Test Coverage Goals
+
+- **Utility Functions**: 100% coverage for all pure functions
+- **Components**: Test all user interactions, prop variations, and conditional rendering
+- **Integration**: Test component interactions and data flow
+- **Edge Cases**: Handle empty states, error conditions, and boundary values
+
+### Current Test Status
+
+**Section Tagging Feature** (46 tests total):
+- ✅ `sectionUtils.test.ts` - 36 tests covering all utility functions
+- ✅ `SectionToolbar.test.tsx` - 8 tests covering component behavior
+- ✅ `SectionNavigation.test.tsx` - 12 tests covering navigation component
+
+### Testing Best Practices
+
+1. **Write Tests First**: Consider test cases while implementing features
+2. **Test Behavior, Not Implementation**: Focus on what the component does, not how
+3. **Use Descriptive Names**: Test names should clearly describe the expected behavior
+4. **Mock External Dependencies**: Use Jest mocks for APIs, external libraries
+5. **Test Edge Cases**: Empty states, error conditions, boundary values
+6. **Maintain Tests**: Update tests when changing functionality
+
+### Debugging Tests
+
+```bash
+# Run tests with verbose output
+npm test -- --verbose
+
+# Debug specific test file
+npm test -- --testPathPattern="ComponentName" --verbose
+
+# Run tests with Node debugger
+node --inspect-brk node_modules/.bin/jest ComponentName.test.tsx
+```
 
 ## Technology Stack Details
 
@@ -235,18 +396,53 @@ The app is configured for Google Cloud Run deployment:
 
 ## Development Workflow
 
+### Standard Development Process
+
+**CRITICAL: Always follow this testing workflow for any changes:**
+
+1. **Plan Implementation**: Consider test cases and edge scenarios during design
+2. **Make Changes**: Edit files in appropriate directories
+3. **Write/Update Tests**: Create or modify tests for your changes
+4. **Run Tests**: Execute `npm test` to ensure all tests pass
+5. **Manual Testing**: Verify functionality in browser if needed
+6. **Code Review**: Check that tests cover the implemented functionality
+
 ### Making Changes
 
 1. **Frontend Changes**: Edit files in `/Users/samwachtel/PycharmProjects/lyrics/frontend/src/`
+   - **Always write tests** for new components in `__tests__/` folders
+   - **Update existing tests** when modifying components
+   - **Run `npm test`** before considering changes complete
 2. **Backend Changes**: Edit files in `/Users/samwachtel/PycharmProjects/lyrics/backend/app/`
+   - **Write unit tests** for new functionality (when backend testing is implemented)
+   - **Test API endpoints** manually and with automated tests
 3. **Database Changes**: Update schema in Supabase dashboard or via SQL migrations
 4. **Docker Changes**: Modify Dockerfiles or docker-compose.yml as needed
 
-### Testing
+### Testing Verification
 
-- **Backend Health Check**: http://localhost:8000/health
+**Before completing any development task:**
+
+```bash
+# Run all tests (from project root)
+npm test
+
+# OR run from frontend directory
+cd frontend && npm test
+
+# Verify test coverage
+npm run test:coverage
+
+# Check manual functionality
+npm run dev  # Test in browser
+```
+
+### Environment Testing
+
+- **Backend Health Check**: http://localhost:8001/health
 - **Frontend Development**: http://localhost:5173 (Vite dev server)
 - **Full Stack**: http://localhost:80 (Docker compose)
+- **Test Suite**: `npm test` (must pass before any task completion)
 
 ## Current Implementation Status
 
@@ -258,6 +454,9 @@ The app is configured for Google Cloud Run deployment:
 - Database schema with RLS policies
 - Development environment setup
 - Health check endpoints
+- **Comprehensive testing infrastructure** (Jest, React Testing Library, 46 tests)
+- **Section tagging feature** with full test coverage
+- Song CRUD operations with UI components
 
 ### 🚧 In Progress / Placeholder
 
@@ -281,16 +480,18 @@ Based on `/Users/samwachtel/PycharmProjects/lyrics/requirements.md`:
 
 ## Important Notes for Claude Instances
 
-1. **Database Access**: Always use Supabase client through the FastAPI backend, never direct database connections
-2. **Authentication**: Implement auth using Supabase GoTrue, not custom JWT handling
-3. **Environment Variables**: All secrets should go in backend/.env, never commit these files
-4. **CORS**: Already configured for development ports (3000, 5173), update for production
-5. **File Paths**: All paths in this document are absolute paths starting from `/Users/samwachtel/PycharmProjects/lyrics/`
-6. **API Design**: Follow REST conventions, use Pydantic models for request/response validation
-7. **Frontend State**: Plan for Redux Toolkit or Zustand for state management as the app grows
-8. **Mobile Support**: Design with responsive-first approach using TailwindCSS breakpoints
-9. **Modern Python**: Code uses latest stable versions - datetime.now(timezone.utc) instead of datetime.utcnow(), SettingsConfigDict for Pydantic settings
-10. **Supabase Keys**: Use publishable key (not legacy anon key) for SUPABASE_KEY environment variable
+1. **Testing is Mandatory**: Always write comprehensive tests for any new features, modifications, or bug fixes. Run `npm test` before considering any development task complete. Testing prevents technical debt and ensures code quality.
+2. **Database Access**: Always use Supabase client through the FastAPI backend, never direct database connections
+3. **Authentication**: Implement auth using Supabase GoTrue, not custom JWT handling
+4. **Environment Variables**: All secrets should go in backend/.env, never commit these files
+5. **CORS**: Already configured for development ports (3000, 5173), update for production
+6. **File Paths**: All paths in this document are absolute paths starting from `/Users/samwachtel/PycharmProjects/lyrics/`
+7. **API Design**: Follow REST conventions, use Pydantic models for request/response validation
+8. **Frontend State**: Plan for Redux Toolkit or Zustand for state management as the app grows
+9. **Mobile Support**: Design with responsive-first approach using TailwindCSS breakpoints
+10. **Modern Python**: Code uses latest stable versions - datetime.now(timezone.utc) instead of datetime.utcnow(), SettingsConfigDict for Pydantic settings
+11. **Supabase Keys**: Use publishable key (not legacy anon key) for SUPABASE_KEY environment variable
+12. **Test-Driven Development**: When implementing new features, consider test cases during design phase and write tests alongside implementation, not as an afterthought
 
 ## Getting Help
 

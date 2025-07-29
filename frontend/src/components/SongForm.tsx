@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Song, SongCreate, SongUpdate } from '../lib/api'
-import { apiClient } from '../lib/api'
+import { apiClient, createDefaultSettings } from '../lib/api'
 
 interface SongFormProps {
   song?: Song | null
@@ -13,9 +13,28 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
   const [artist, setArtist] = useState(song?.artist || '')
   const [lyrics, setLyrics] = useState(song?.lyrics || '')
   const [status, setStatus] = useState(song?.status || 'draft')
-  const [tags, setTags] = useState(song?.tags.join(', ') || '')
+  const [tags, setTags] = useState(song?.tags?.join(', ') || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Update form state when song prop changes
+  useEffect(() => {
+    if (song) {
+      setTitle(song.title)
+      setArtist(song.artist || '')
+      setLyrics(song.lyrics)
+      setStatus(song.status)
+      setTags(song.tags?.join(', ') || '')
+    } else {
+      // Reset form for new song
+      setTitle('')
+      setArtist('')
+      setLyrics('')
+      setStatus('draft')
+      setTags('')
+    }
+    setError(null)
+  }, [song])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,6 +66,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
           lyrics,
           status: status as any,
           tags: tagArray,
+          settings: createDefaultSettings(),
           metadata: {}
         }
         await apiClient.createSong(createData)
@@ -76,7 +96,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
           type="text"
           id="title"
           required
-          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 bg-white"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -89,7 +109,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
         <input
           type="text"
           id="artist"
-          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 bg-white"
           value={artist}
           onChange={(e) => setArtist(e.target.value)}
         />
@@ -101,7 +121,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
         </label>
         <select
           id="status"
-          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 bg-white"
           value={status}
           onChange={(e) => setStatus(e.target.value as any)}
         >
@@ -120,7 +140,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
           type="text"
           id="tags"
           placeholder="rock, original, collaboration"
-          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 bg-white"
           value={tags}
           onChange={(e) => setTags(e.target.value)}
         />
@@ -133,7 +153,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
         <textarea
           id="lyrics"
           rows={10}
-          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 bg-white"
           value={lyrics}
           onChange={(e) => setLyrics(e.target.value)}
         />

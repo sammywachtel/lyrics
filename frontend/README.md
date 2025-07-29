@@ -33,7 +33,7 @@ Copy `.env.example` to `.env` and configure:
 ```bash
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8001
 ```
 
 ## Project Structure
@@ -67,7 +67,7 @@ The app automatically handles authentication state and redirects to the appropri
 
 ## Backend Integration
 
-The frontend communicates with the FastAPI backend at `http://localhost:8000` by default. All API calls include authentication headers automatically when the user is signed in.
+The frontend communicates with the FastAPI backend at `http://localhost:8001` by default. All API calls include authentication headers automatically when the user is signed in.
 
 ## Build
 

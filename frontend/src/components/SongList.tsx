@@ -4,12 +4,16 @@ import { apiClient } from '../lib/api'
 import { SongCard } from './SongCard'
 import { SongForm } from './SongForm'
 
-export function SongList() {
+interface SongListProps {
+  onEditSong: (songId: string) => void
+}
+
+export function SongList({ onEditSong }: SongListProps) {
   const [songs, setSongs] = useState<Song[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [editingSong, setEditingSong] = useState<Song | null>(null)
+
 
   const loadSongs = async () => {
     try {
@@ -33,10 +37,6 @@ export function SongList() {
     loadSongs()
   }
 
-  const handleSongUpdated = () => {
-    setEditingSong(null)
-    loadSongs()
-  }
 
   const handleDeleteSong = async (songId: string) => {
     if (!confirm('Are you sure you want to delete this song?')) {
@@ -60,77 +60,90 @@ export function SongList() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">My Songs</h1>
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
-        >
-          New Song
-        </button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header Section */}
+      <div className="bg-white border-b-2 border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">My Songs</h1>
+              <p className="mt-2 text-lg text-gray-600">Create and manage your songwriting projects</p>
+            </div>
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-2"
+            >
+              <span className="text-lg">+</span>
+              <span>New Song</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {error && (
-        <div className="mb-6 rounded-md bg-red-50 p-4">
-          <div className="text-sm text-red-800">{error}</div>
-        </div>
-      )}
-
-      {showCreateForm && (
-        <div className="mb-8">
-          <div className="bg-white shadow rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Create New Song</h2>
-              <button
-                onClick={() => setShowCreateForm(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
+      {/* Content Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {error && (
+          <div className="mb-6 rounded-xl bg-red-50 border-l-4 border-red-400 p-6 shadow-sm">
+            <div className="flex">
+              <div className="text-red-400 mr-3">⚠️</div>
+              <div className="text-sm text-red-800 font-medium">{error}</div>
             </div>
-            <SongForm onSuccess={handleSongCreated} onCancel={() => setShowCreateForm(false)} />
           </div>
-        </div>
-      )}
-
-      {editingSong && (
-        <div className="mb-8">
-          <div className="bg-white shadow rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Edit Song</h2>
-              <button
-                onClick={() => setEditingSong(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
-            </div>
-            <SongForm 
-              song={editingSong} 
-              onSuccess={handleSongUpdated} 
-              onCancel={() => setEditingSong(null)} 
-            />
-          </div>
-        </div>
-      )}
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {songs.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <div className="text-gray-500 text-lg">No songs yet</div>
-            <div className="text-gray-400 text-sm mt-2">Create your first song to get started!</div>
-          </div>
-        ) : (
-          songs.map((song) => (
-            <SongCard
-              key={song.id}
-              song={song}
-              onEdit={() => setEditingSong(song)}
-              onDelete={() => handleDeleteSong(song.id)}
-            />
-          ))
         )}
+
+        {showCreateForm && (
+          <div className="mb-8">
+            <div className="bg-white shadow-xl rounded-2xl border border-gray-200 p-8">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Create New Song</h2>
+                  <p className="text-gray-600 mt-1">Start your next musical masterpiece</p>
+                </div>
+                <button
+                  onClick={() => setShowCreateForm(false)}
+                  className="text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+              <SongForm key="create" onSuccess={handleSongCreated} onCancel={() => setShowCreateForm(false)} />
+            </div>
+          </div>
+        )}
+
+
+        {/* Songs Grid */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-lg p-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Your Songs</h2>
+            <p className="text-gray-600 mt-1">{songs.length} {songs.length === 1 ? 'song' : 'songs'} in your library</p>
+          </div>
+          
+          {songs.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-6xl mb-4">🎵</div>
+              <div className="text-xl font-semibold text-gray-700 mb-2">No songs yet</div>
+              <div className="text-gray-500 mb-6">Create your first song to get started!</div>
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              >
+                Create Your First Song
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {songs.map((song) => (
+                <SongCard
+                  key={song.id}
+                  song={song}
+                  onEdit={() => onEditSong(song.id)}
+                  onDelete={() => handleDeleteSong(song.id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

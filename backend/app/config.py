@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     
     # Server settings
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = 8001
     debug: bool = False
     
     # Supabase settings
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     api_description: str = "FastAPI backend for AI-assisted songwriting application"
     
     # CORS settings
-    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:5175"]
 
 
 settings = Settings()

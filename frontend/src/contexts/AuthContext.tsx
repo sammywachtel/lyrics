@@ -32,12 +32,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
+    }).catch((error) => {
+      console.error('Error getting session:', error)
+      setSession(null)
+      setUser(null)
+      setLoading(false)
     })
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state change:', event, session)
+      
+      // Always update session and user state for all auth events
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
@@ -63,8 +71,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    return { error }
+    try {
+      const { error } = await supabase.auth.signOut()
+      
+      // Ensure state is cleared even if there's an error
+      setSession(null)
+      setUser(null)
+      
+      return { error }
+    } catch (error) {
+      console.error('Error during sign out:', error)
+      // Clear state anyway
+      setSession(null)
+      setUser(null)
+      return { error: error as any }
+    }
   }
 
   const value = {

@@ -7,7 +7,7 @@ import uuid
 
 from .models import (
     Song, SongCreate, SongUpdate, SongResponse, SongListResponse, 
-    ErrorResponse, UserContext, SongStatus
+    ErrorResponse, UserContext, SongStatus, SongSettings, SongSettingsUpdate, SongSettingsResponse
 )
 
 logger = logging.getLogger(__name__)
@@ -22,12 +22,20 @@ class SongsService:
     def _db_to_song(self, db_record: dict) -> Song:
         """Convert database record to Song model."""
         metadata = db_record.get("metadata", {})
+        settings_data = db_record.get("settings", {})
         
         # Determine status from metadata and is_archived flag
         if db_record.get("is_archived", False):
             status = SongStatus.ARCHIVED
         else:
             status = SongStatus(metadata.get("status", "draft"))
+        
+        # Parse settings or create default
+        try:
+            settings = SongSettings(**settings_data) if settings_data else SongSettings()
+        except Exception as e:
+            logger.warning(f"Error parsing song settings: {e}. Using defaults.")
+            settings = SongSettings()
         
         return Song(
             id=db_record["id"],
@@ -37,6 +45,7 @@ class SongsService:
             lyrics=db_record.get("content", ""),
             status=status,
             tags=metadata.get("tags", []),
+            settings=settings,
             metadata={k: v for k, v in metadata.items() if k not in ["artist", "tags", "status"]},
             created_at=db_record["created_at"],
             updated_at=db_record["updated_at"]
@@ -61,12 +70,16 @@ class SongsService:
             metadata["tags"] = song_data.tags
             metadata["status"] = song_data.status.value
             
+            # Convert settings to dict for JSON storage
+            settings_dict = song_data.settings.model_dump() if song_data.settings else {}
+            
             song_dict = {
                 "id": str(uuid.uuid4()),
                 "user_id": user.user_id,
                 "title": song_data.title,
                 "content": song_data.lyrics,
                 "metadata": metadata,
+                "settings": settings_dict,
                 "is_archived": song_data.status == SongStatus.ARCHIVED
             }
             
@@ -191,13 +204,16 @@ class SongsService:
             if song_update.metadata is not None:
                 metadata_updates.update(song_update.metadata)
             
+            # Update settings if provided
+            if song_update.settings is not None:
+                update_data["settings"] = song_update.settings.model_dump()
+            
             # Update metadata if there are changes
             if metadata_updates:
                 # Get current metadata and merge
                 current_metadata = existing.metadata.copy()
                 current_metadata.update(metadata_updates)
                 update_data["metadata"] = current_metadata
-            
             
             response = self.supabase.table("songs").update(update_data).eq("id", song_id).eq("user_id", user.user_id).execute()
             
@@ -237,6 +253,65 @@ class SongsService:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to delete song"
+            )
+    
+    async def get_song_settings(self, song_id: str, user: UserContext) -> SongSettings:
+        """Get settings for a specific song."""
+        self._check_database()
+        
+        try:
+            response = self.supabase.table("songs").select("settings").eq("id", song_id).eq("user_id", user.user_id).execute()
+            
+            if not response.data:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Song not found"
+                )
+            
+            settings_data = response.data[0].get("settings", {})
+            try:
+                return SongSettings(**settings_data) if settings_data else SongSettings()
+            except Exception as e:
+                logger.warning(f"Error parsing song settings: {e}. Using defaults.")
+                return SongSettings()
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error getting song settings: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to retrieve song settings"
+            )
+    
+    async def update_song_settings(self, song_id: str, settings_update: SongSettingsUpdate, user: UserContext) -> SongSettings:
+        """Update settings for a specific song."""
+        self._check_database()
+        
+        try:
+            # First check if song exists and belongs to user
+            await self.get_song(song_id, user)
+            
+            # Convert settings to dict for JSON storage
+            settings_dict = settings_update.settings.model_dump()
+            
+            response = self.supabase.table("songs").update({"settings": settings_dict}).eq("id", song_id).eq("user_id", user.user_id).execute()
+            
+            if not response.data:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to update song settings"
+                )
+            
+            return settings_update.settings
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error updating song settings: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update song settings"
             )
 
 
@@ -291,5 +366,24 @@ def create_songs_router(supabase_client: Optional[Client], get_current_user) -> 
         """Delete a song."""
         await songs_service.delete_song(song_id, user)
         return None
+    
+    @router.get("/{song_id}/settings", response_model=SongSettingsResponse)
+    async def get_song_settings(
+        song_id: str,
+        user: UserContext = Depends(get_current_user)
+    ):
+        """Get settings for a specific song."""
+        settings = await songs_service.get_song_settings(song_id, user)
+        return SongSettingsResponse(message="Song settings retrieved successfully", settings=settings)
+    
+    @router.put("/{song_id}/settings", response_model=SongSettingsResponse)
+    async def update_song_settings(
+        song_id: str,
+        settings_update: SongSettingsUpdate,
+        user: UserContext = Depends(get_current_user)
+    ):
+        """Update settings for a specific song."""
+        settings = await songs_service.update_song_settings(song_id, settings_update, user)
+        return SongSettingsResponse(message="Song settings updated successfully", settings=settings)
     
     return router

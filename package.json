@@ -9,12 +9,15 @@
     "backend:stop": "pkill -f uvicorn",
     "stop": "npm run frontend:stop && npm run backend:stop",
     "frontend:dev": "cd frontend && npm run dev",
-    "backend:dev": "cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --log-level debug",
+    "backend:dev": "cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8001 --log-level debug",
     "build": "npm run frontend:build",
     "frontend:build": "cd frontend && npm run build",
     "backend:install": "cd backend && pip install -r requirements.txt",
-    "start": "cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8000",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8001",
+    "test": "cd frontend && npm test",
+    "test:watch": "cd frontend && npm run test:watch",
+    "test:coverage": "cd frontend && npm run test:coverage",
+    "frontend:test": "cd frontend && npm test"
   },
   "keywords": ["songwriting", "ai", "lyrics", "music"],
   "author": "",
