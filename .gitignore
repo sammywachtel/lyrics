@@ -4,3 +4,4 @@
 /backend/.venv/
 /.github/
 /backend/.env
+/.llm_docs/
