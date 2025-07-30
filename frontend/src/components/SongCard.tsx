@@ -122,13 +122,13 @@ export function SongCard({ song, onEdit, onDelete }: SongCardProps) {
         <div className="flex gap-3">
           <button
             onClick={onEdit}
-            className="group/btn flex-1 relative overflow-hidden bg-gradient-creative from-primary-500 to-creative-600 hover:from-primary-600 hover:to-creative-700 text-white font-semibold py-3 px-4 rounded-xl shadow-medium hover:shadow-glow-primary transition-all duration-300 transform hover:scale-[1.02]"
+            className="group/btn flex-1 relative overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
           >
             <span className="relative z-10 flex items-center justify-center space-x-2">
-              <span>📝</span>
-              <span>Edit Song</span>
+              <span className="text-lg">📝</span>
+              <span className="text-sm font-medium">Edit Song</span>
             </span>
-            <div className="absolute inset-0 bg-gradient-creative from-white/10 to-white/5 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
           </button>
           <button
             onClick={onDelete}

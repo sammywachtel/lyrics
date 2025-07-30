@@ -5,3 +5,4 @@
 /.github/
 /backend/.env
 /.llm_docs/
+/.private_docs/
