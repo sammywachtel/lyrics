@@ -8,24 +8,42 @@ export function Header() {
   }
 
   return (
-    <header className="bg-white shadow">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <header className="relative bg-white backdrop-blur-xl border-b border-neutral-200 shadow-soft">
+      {/* No background gradient */}
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
-          <div className="flex items-center">
-            <h1 className="text-xl font-bold text-gray-900">Songwriting App</h1>
+          <div className="flex items-center space-x-4">
+            {/* Logo/Brand */}
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-md">
+                  <span className="text-white font-bold text-2xl">♪</span>
+                </div>
+                <div className="absolute inset-0 rounded-lg bg-indigo-500 opacity-40 blur-sm -z-10"></div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-neutral-900">
+                  Lyricist
+                </h1>
+                <p className="text-xs text-neutral-500 font-medium">AI-Powered Songwriting</p>
+              </div>
+            </div>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
             {user && (
               <>
-                <span className="text-sm text-gray-700">
-                  Welcome, {user.email}
-                </span>
+                <div className="hidden sm:block text-right">
+                  <p className="text-sm font-medium text-neutral-700">Welcome back</p>
+                  <p className="text-xs text-neutral-500">{user.email}</p>
+                </div>
                 <button
                   onClick={handleSignOut}
-                  className="text-sm font-medium text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100"
+                  className="group relative px-4 py-2.5 bg-white/50 hover:bg-white/80 border border-neutral-200/50 hover:border-neutral-300 rounded-xl text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-all duration-200 shadow-soft hover:shadow-medium backdrop-blur-sm"
                 >
-                  Sign Out
+                  <span className="relative z-10">Sign Out</span>
+                  <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                 </button>
               </>
             )}

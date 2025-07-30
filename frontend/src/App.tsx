@@ -14,8 +14,14 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-creative-50 to-warm-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200 border-t-primary-600 mx-auto"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-creative from-primary-500 to-creative-500 opacity-20 blur-xl"></div>
+          </div>
+          <p className="mt-6 text-lg font-medium text-neutral-700 animate-pulse-soft">Loading your creative space...</p>
+        </div>
       </div>
     )
   }
@@ -52,9 +58,14 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-creative-50 to-warm-50">
       <Header />
-      <main>
+      <main className="relative">
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-gradient-creative from-primary-300 to-creative-300 opacity-30 blur-3xl"></div>
+          <div className="absolute top-1/2 -left-40 w-96 h-96 rounded-full bg-gradient-creative from-creative-300 to-warm-300 opacity-25 blur-3xl"></div>
+        </div>
         <SongList onEditSong={handleEditSong} />
       </main>
     </div>
