@@ -110,10 +110,9 @@ jobs:
   deploy:
     name: Build and Deploy
     needs: [test]
-    # Security job runs in parallel but doesn't block deployment
-    if: always() && needs.test.result == 'success'
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Security job runs in parallel but doesn't block deployment  
+    if: always() && needs.test.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     permissions:
       contents: read
