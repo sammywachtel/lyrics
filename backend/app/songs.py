@@ -7,7 +7,9 @@ import uuid
 
 from .models import (
     Song, SongCreate, SongUpdate, SongResponse, SongListResponse, 
-    ErrorResponse, UserContext, SongStatus, SongSettings, SongSettingsUpdate, SongSettingsResponse
+    ErrorResponse, UserContext, SongStatus, SongSettings, SongSettingsUpdate, SongSettingsResponse,
+    SongVersion, SongVersionCreate, SongVersionResponse, SongSettingsHistory, SongSettingsHistoryResponse,
+    ProsodyConfig, ProsodyConfigUpdate, ProsodyConfigResponse, SongSettingsPartialUpdate
 )
 
 logger = logging.getLogger(__name__)
@@ -289,12 +291,14 @@ class SongsService:
         self._check_database()
         
         try:
-            # First check if song exists and belongs to user
-            await self.get_song(song_id, user)
+            # Get current settings for change tracking
+            current_settings = await self.get_song_settings(song_id, user)
+            current_dict = current_settings.model_dump()
             
-            # Convert settings to dict for JSON storage
+            # Convert new settings to dict for JSON storage
             settings_dict = settings_update.settings.model_dump()
             
+            # Update database
             response = self.supabase.table("songs").update({"settings": settings_dict}).eq("id", song_id).eq("user_id", user.user_id).execute()
             
             if not response.data:
@@ -302,6 +306,9 @@ class SongsService:
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Failed to update song settings"
                 )
+            
+            # Log the significant change
+            logger.info(f"Full settings update for song {song_id}")
             
             return settings_update.settings
             
@@ -313,6 +320,356 @@ class SongsService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to update song settings"
             )
+    
+    async def update_song_settings_partial(self, song_id: str, partial_update: SongSettingsPartialUpdate, user: UserContext) -> SongSettings:
+        """Update song settings partially (for auto-save functionality)."""
+        self._check_database()
+        
+        try:
+            # Get current settings
+            current_settings = await self.get_song_settings(song_id, user)
+            current_dict = current_settings.model_dump()
+            
+            # Store original for change tracking
+            original_settings = current_dict.copy()
+            
+            # Apply partial updates - handle both old and new structure
+            update_data = partial_update.model_dump(exclude_unset=True)
+            changed_fields = []
+            
+            for key, value in update_data.items():
+                if value is not None and key in current_dict:
+                    if current_dict[key] != value:
+                        changed_fields.append(key)
+                        current_dict[key] = value
+            
+            # Handle backwards compatibility - map old fields to new structure
+            if partial_update.narrative_pov is not None:
+                current_dict['foundation']['point_of_view'] = partial_update.narrative_pov
+                changed_fields.append('foundation.point_of_view')
+            if partial_update.central_theme is not None:
+                current_dict['foundation']['central_theme'] = partial_update.central_theme
+                changed_fields.append('foundation.central_theme')
+            if partial_update.target_duration_minutes is not None:
+                current_dict['structure']['target_duration_minutes'] = partial_update.target_duration_minutes
+                changed_fields.append('structure.target_duration_minutes')
+            if partial_update.overall_mood is not None:
+                current_dict['style']['overall_mood'] = partial_update.overall_mood
+                changed_fields.append('style.overall_mood')
+            if partial_update.energy_level is not None:
+                current_dict['style']['energy_level'] = partial_update.energy_level
+                changed_fields.append('style.energy_level')
+            if partial_update.ai_creativity_level is not None:
+                current_dict['ai']['creativity_level'] = partial_update.ai_creativity_level
+                changed_fields.append('ai.creativity_level')
+            
+            # Only update if there are actual changes
+            if not changed_fields:
+                return current_settings
+            
+            # Create updated settings
+            updated_settings = SongSettings(**current_dict)
+            settings_dict = updated_settings.model_dump()
+            
+            # Update database
+            response = self.supabase.table("songs").update({"settings": settings_dict}).eq("id", song_id).eq("user_id", user.user_id).execute()
+            
+            if not response.data:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to update song settings"
+                )
+            
+            # Log the change for tracking (this will trigger the database trigger)
+            logger.info(f"Settings updated for song {song_id}: {', '.join(changed_fields)}")
+            
+            return updated_settings
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error updating song settings partially: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update song settings"
+            )
+    
+    async def get_prosody_config(self, song_id: str, user: UserContext) -> ProsodyConfig:
+        """Get prosody configuration for a specific song."""
+        self._check_database()
+        
+        try:
+            response = self.supabase.table("songs").select("prosody_config").eq("id", song_id).eq("user_id", user.user_id).execute()
+            
+            if not response.data:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Song not found"
+                )
+            
+            prosody_data = response.data[0].get("prosody_config", {})
+            try:
+                return ProsodyConfig(**prosody_data) if prosody_data else ProsodyConfig()
+            except Exception as e:
+                logger.warning(f"Error parsing prosody config: {e}. Using defaults.")
+                return ProsodyConfig()
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error getting prosody config: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to retrieve prosody config"
+            )
+    
+    async def update_prosody_config(self, song_id: str, config_update: ProsodyConfigUpdate, user: UserContext) -> ProsodyConfig:
+        """Update prosody configuration for a specific song."""
+        self._check_database()
+        
+        try:
+            # Get current prosody config for change tracking
+            current_config = await self.get_prosody_config(song_id, user)
+            current_dict = current_config.model_dump()
+            
+            # Convert new config to dict for JSON storage
+            config_dict = config_update.prosody_config.model_dump()
+            
+            # Update database  
+            response = self.supabase.table("songs").update({"prosody_config": config_dict}).eq("id", song_id).eq("user_id", user.user_id).execute()
+            
+            if not response.data:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to update prosody config"
+                )
+            
+            # Log the change
+            logger.info(f"Prosody config updated for song {song_id}")
+            
+            return config_update.prosody_config
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error updating prosody config: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update prosody config"
+            )
+    
+    async def create_song_version(self, song_id: str, version_data: SongVersionCreate, user: UserContext) -> SongVersion:
+        """Create a new version of a song."""
+        self._check_database()
+        
+        try:
+            # Get current song state
+            current_song = await self.get_song(song_id, user)
+            
+            # Get next version number
+            version_response = self.supabase.table("song_versions").select("version_number").eq("song_id", song_id).order("version_number", desc=True).limit(1).execute()
+            
+            next_version = 1
+            if version_response.data:
+                next_version = version_response.data[0]["version_number"] + 1
+            
+            # Create version record
+            version_dict = {
+                "id": str(uuid.uuid4()),
+                "song_id": song_id,
+                "user_id": user.user_id,
+                "version_number": next_version,
+                "title": current_song.title,
+                "content": current_song.lyrics,
+                "metadata": current_song.metadata,
+                "settings": current_song.settings.model_dump(),
+                "prosody_config": (await self.get_prosody_config(song_id, user)).model_dump(),
+                "change_summary": version_data.change_summary
+            }
+            
+            response = self.supabase.table("song_versions").insert(version_dict).execute()
+            
+            if not response.data:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to create song version"
+                )
+            
+            return self._db_to_song_version(response.data[0])
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error creating song version: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create song version"
+            )
+    
+    async def get_song_versions(self, song_id: str, user: UserContext, page: int = 1, per_page: int = 10) -> SongVersionResponse:
+        """Get version history for a song."""
+        self._check_database()
+        
+        try:
+            # Verify song exists and belongs to user
+            await self.get_song(song_id, user)
+            
+            offset = (page - 1) * per_page
+            
+            # Get versions
+            response = self.supabase.table("song_versions").select("*").eq("song_id", song_id).eq("user_id", user.user_id).order("version_number", desc=True).range(offset, offset + per_page - 1).execute()
+            
+            versions = [self._db_to_song_version(version_data) for version_data in response.data]
+            
+            return SongVersionResponse(
+                message="Song versions retrieved successfully",
+                versions=versions
+            )
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error getting song versions: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to retrieve song versions"
+            )
+    
+    async def get_settings_history(self, song_id: str, user: UserContext, page: int = 1, per_page: int = 10) -> SongSettingsHistoryResponse:
+        """Get settings change history for a song."""
+        self._check_database()
+        
+        try:
+            # Verify song exists and belongs to user
+            await self.get_song(song_id, user)
+            
+            offset = (page - 1) * per_page
+            
+            # Get total count
+            count_response = self.supabase.table("song_settings_history").select("id", count="exact").eq("song_id", song_id).eq("user_id", user.user_id).execute()
+            total = count_response.count or 0
+            
+            # Get history records
+            response = self.supabase.table("song_settings_history").select("*").eq("song_id", song_id).eq("user_id", user.user_id).order("created_at", desc=True).range(offset, offset + per_page - 1).execute()
+            
+            history = [self._db_to_settings_history(history_data) for history_data in response.data]
+            
+            return SongSettingsHistoryResponse(
+                message="Settings history retrieved successfully",
+                history=history,
+                total=total,
+                page=page,
+                per_page=per_page
+            )
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error getting settings history: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to retrieve settings history"
+            )
+    
+    def _db_to_song_version(self, db_record: dict) -> SongVersion:
+        """Convert database record to SongVersion model."""
+        settings_data = db_record.get("settings", {})
+        prosody_data = db_record.get("prosody_config", {})
+        
+        try:
+            settings = SongSettings(**settings_data) if settings_data else SongSettings()
+        except Exception as e:
+            logger.warning(f"Error parsing version settings: {e}. Using defaults.")
+            settings = SongSettings()
+        
+        try:
+            prosody_config = ProsodyConfig(**prosody_data) if prosody_data else ProsodyConfig()
+        except Exception as e:
+            logger.warning(f"Error parsing version prosody config: {e}. Using defaults.")
+            prosody_config = ProsodyConfig()
+        
+        return SongVersion(
+            id=db_record["id"],
+            song_id=db_record["song_id"],
+            user_id=db_record["user_id"],
+            version_number=db_record["version_number"],
+            title=db_record["title"],
+            content=db_record["content"],
+            metadata=db_record.get("metadata", {}),
+            settings=settings,
+            prosody_config=prosody_config,
+            change_summary=db_record.get("change_summary"),
+            created_at=db_record["created_at"]
+        )
+    
+    def _db_to_settings_history(self, db_record: dict) -> SongSettingsHistory:
+        """Convert database record to SongSettingsHistory model."""
+        return SongSettingsHistory(
+            id=db_record["id"],
+            song_id=db_record["song_id"],
+            user_id=db_record["user_id"],
+            settings_before=db_record.get("settings_before", {}),
+            settings_after=db_record.get("settings_after", {}),
+            prosody_config_before=db_record.get("prosody_config_before", {}),
+            prosody_config_after=db_record.get("prosody_config_after", {}),
+            changed_fields=db_record.get("changed_fields", []),
+            change_type=db_record.get("change_type", "manual"),
+            created_at=db_record["created_at"]
+        )
+    
+    def _detect_settings_changes(self, old_settings: dict, new_settings: dict) -> List[str]:
+        """Detect which settings fields have changed between two settings objects."""
+        changed_fields = []
+        
+        def compare_nested(old_dict, new_dict, prefix=""):
+            for key in set(list(old_dict.keys()) + list(new_dict.keys())):
+                full_key = f"{prefix}.{key}" if prefix else key
+                
+                old_val = old_dict.get(key)
+                new_val = new_dict.get(key)
+                
+                if isinstance(old_val, dict) and isinstance(new_val, dict):
+                    compare_nested(old_val, new_val, full_key)
+                elif old_val != new_val:
+                    changed_fields.append(full_key)
+        
+        compare_nested(old_settings, new_settings)
+        return changed_fields
+    
+    async def create_settings_history_entry(
+        self, 
+        song_id: str, 
+        user_id: str, 
+        old_settings: dict, 
+        new_settings: dict,
+        old_prosody: dict = None,
+        new_prosody: dict = None,
+        change_type: str = "manual"
+    ) -> None:
+        """Manually create a settings history entry (useful for API-level tracking)."""
+        try:
+            changed_fields = self._detect_settings_changes(old_settings, new_settings)
+            
+            if old_prosody and new_prosody:
+                prosody_changes = self._detect_settings_changes(old_prosody, new_prosody)
+                changed_fields.extend([f"prosody.{field}" for field in prosody_changes])
+            
+            if changed_fields:  # Only create entry if there are actual changes
+                history_record = {
+                    "id": str(uuid.uuid4()),
+                    "song_id": song_id,
+                    "user_id": user_id,
+                    "settings_before": old_settings,
+                    "settings_after": new_settings,
+                    "prosody_config_before": old_prosody or {},
+                    "prosody_config_after": new_prosody or {},
+                    "changed_fields": changed_fields,
+                    "change_type": change_type
+                }
+                
+                self.supabase.table("song_settings_history").insert(history_record).execute()
+        except Exception as e:
+            logger.warning(f"Failed to create settings history entry: {e}")
 
 
 def create_songs_router(supabase_client: Optional[Client], get_current_user) -> APIRouter:
@@ -385,5 +742,122 @@ def create_songs_router(supabase_client: Optional[Client], get_current_user) -> 
         """Update settings for a specific song."""
         settings = await songs_service.update_song_settings(song_id, settings_update, user)
         return SongSettingsResponse(message="Song settings updated successfully", settings=settings)
+    
+    @router.patch("/{song_id}/settings", response_model=SongSettingsResponse)
+    async def update_song_settings_partial(
+        song_id: str,
+        partial_update: SongSettingsPartialUpdate,
+        user: UserContext = Depends(get_current_user)
+    ):
+        """Partially update song settings (for auto-save functionality)."""
+        settings = await songs_service.update_song_settings_partial(song_id, partial_update, user)
+        return SongSettingsResponse(message="Song settings updated successfully", settings=settings)
+    
+    @router.get("/{song_id}/prosody-config", response_model=ProsodyConfigResponse)
+    async def get_prosody_config(
+        song_id: str,
+        user: UserContext = Depends(get_current_user)
+    ):
+        """Get prosody configuration for a specific song."""
+        prosody_config = await songs_service.get_prosody_config(song_id, user)
+        return ProsodyConfigResponse(message="Prosody config retrieved successfully", prosody_config=prosody_config)
+    
+    @router.put("/{song_id}/prosody-config", response_model=ProsodyConfigResponse)
+    async def update_prosody_config(
+        song_id: str,
+        config_update: ProsodyConfigUpdate,
+        user: UserContext = Depends(get_current_user)
+    ):
+        """Update prosody configuration for a specific song."""
+        prosody_config = await songs_service.update_prosody_config(song_id, config_update, user)
+        return ProsodyConfigResponse(message="Prosody config updated successfully", prosody_config=prosody_config)
+    
+    @router.post("/{song_id}/versions", response_model=SongVersionResponse, status_code=status.HTTP_201_CREATED)
+    async def create_song_version(
+        song_id: str,
+        version_data: SongVersionCreate,
+        user: UserContext = Depends(get_current_user)
+    ):
+        """Create a new version of a song."""
+        version = await songs_service.create_song_version(song_id, version_data, user)
+        return SongVersionResponse(message="Song version created successfully", version=version)
+    
+    @router.get("/{song_id}/versions", response_model=SongVersionResponse)
+    async def get_song_versions(
+        song_id: str,
+        user: UserContext = Depends(get_current_user),
+        page: int = Query(1, ge=1, description="Page number"),
+        per_page: int = Query(10, ge=1, le=50, description="Items per page")
+    ):
+        """Get version history for a song."""
+        return await songs_service.get_song_versions(song_id, user, page, per_page)
+    
+    @router.get("/{song_id}/settings/history", response_model=SongSettingsHistoryResponse)
+    async def get_settings_history(
+        song_id: str,
+        user: UserContext = Depends(get_current_user),
+        page: int = Query(1, ge=1, description="Page number"),
+        per_page: int = Query(10, ge=1, le=50, description="Items per page")
+    ):
+        """Get settings change history for a song."""
+        return await songs_service.get_settings_history(song_id, user, page, per_page)
+    
+    @router.post("/{song_id}/settings/validate", response_model=dict)
+    async def validate_song_settings(
+        song_id: str,
+        settings: SongSettings,
+        user: UserContext = Depends(get_current_user)
+    ):
+        """Validate song settings without saving them."""
+        try:
+            # Verify song exists and belongs to user
+            await songs_service.get_song(song_id, user)
+            
+            # Validate settings by creating the model
+            validated_settings = SongSettings(**settings.model_dump())
+            
+            return {
+                "valid": True,
+                "message": "Settings are valid",
+                "warnings": [],
+                "errors": []
+            }
+        except ValueError as e:
+            return {
+                "valid": False,
+                "message": "Settings validation failed",
+                "warnings": [],
+                "errors": [str(e)]
+            }
+    
+    @router.get("/{song_id}/settings/defaults", response_model=SongSettingsResponse)
+    async def get_default_settings(
+        song_id: str,
+        user: UserContext = Depends(get_current_user)
+    ):
+        """Get default settings template for a song."""
+        # Verify song exists and belongs to user
+        await songs_service.get_song(song_id, user)
+        
+        default_settings = SongSettings()
+        return SongSettingsResponse(
+            message="Default settings retrieved successfully",
+            settings=default_settings
+        )
+    
+    @router.post("/{song_id}/settings/reset", response_model=SongSettingsResponse)
+    async def reset_song_settings(
+        song_id: str,
+        user: UserContext = Depends(get_current_user)
+    ):
+        """Reset song settings to defaults."""
+        default_settings = SongSettings()
+        settings_update = SongSettingsUpdate(settings=default_settings)
+        
+        updated_settings = await songs_service.update_song_settings(song_id, settings_update, user)
+        return SongSettingsResponse(
+            message="Settings reset to defaults successfully",
+            settings=updated_settings
+        )
     
     return router

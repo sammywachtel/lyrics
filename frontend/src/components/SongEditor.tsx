@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import type { Song, SongSettings } from '../lib/api'
 import { createDefaultSettings, apiClient } from '../lib/api'
-import SongSettingsPanel from './SongSettingsPanel'
 import SectionToolbar from './SectionToolbar'
 import SectionNavigation from './SectionNavigation'
 import SimpleWysiwygEditor from './SimpleWysiwygEditor'
@@ -11,12 +10,16 @@ import { getWordCount, formatTextToPlain } from '../utils/textFormatting'
 interface SongEditorProps {
   songId: string
   onSongChange?: (song: Song) => void
+  onSongLoaded?: (song: Song) => void
+  onSettingsChange?: (settings: SongSettings) => void
   onClose?: () => void
 }
 
 export const SongEditor: React.FC<SongEditorProps> = ({
   songId,
   onSongChange,
+  onSongLoaded,
+  onSettingsChange,
   onClose
 }) => {
   const [song, setSong] = useState<Song | null>(null)
@@ -31,7 +34,6 @@ export const SongEditor: React.FC<SongEditorProps> = ({
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [showSettingsPanel, setShowSettingsPanel] = useState(true)
   const [showSectionNav, setShowSectionNav] = useState(false)
   const [sections, setSections] = useState<ReturnType<typeof parseSections>>([])
   const [currentSection, setCurrentSection] = useState<string>('')
@@ -54,6 +56,11 @@ export const SongEditor: React.FC<SongEditorProps> = ({
         setTags(songData.tags)
         setSettings(songData.settings || createDefaultSettings())
         setError(null)
+        
+        // Notify parent of song load
+        if (onSongLoaded) {
+          onSongLoaded(songData)
+        }
       } catch (err) {
         console.error('Failed to load song:', err)
         setError(err instanceof Error ? err.message : 'Failed to load song')
@@ -107,13 +114,16 @@ export const SongEditor: React.FC<SongEditorProps> = ({
       if (onSongChange) {
         onSongChange(updatedSong)
       }
+      if (onSettingsChange) {
+        onSettingsChange(updatedSong.settings)
+      }
     } catch (err) {
       console.error('Failed to save song:', err)
       setError(err instanceof Error ? err.message : 'Failed to save song')
     } finally {
       setIsSaving(false)
     }
-  }, [song, songId, title, artist, lyrics, status, tags, settings, onSongChange])
+  }, [song, songId, title, artist, lyrics, status, tags, settings, onSongChange, onSettingsChange])
 
   // Auto-save functionality (optional)
   useEffect(() => {
@@ -126,10 +136,10 @@ export const SongEditor: React.FC<SongEditorProps> = ({
     return () => clearTimeout(autoSaveTimer)
   }, [hasUnsavedChanges, handleSave])
 
-  // Handle settings change
-  const handleSettingsChange = useCallback((newSettings: SongSettings) => {
-    setSettings(newSettings)
-  }, [])
+  // This component now works with AppLayout - settings are handled externally
+  // The SongEditor focuses on lyrics editing, song metadata, and saving
+  // Settings are passed down from App -> AppLayout -> SettingsPanel
+
 
   // Parse sections whenever lyrics change
   useEffect(() => {
@@ -215,25 +225,9 @@ export const SongEditor: React.FC<SongEditorProps> = ({
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-neutral-50 via-primary-50/30 to-creative-50/30 flex relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-creative from-primary-200/20 to-creative-200/20 rounded-full blur-3xl -translate-y-48 translate-x-48"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-creative from-creative-200/15 to-warm-200/15 rounded-full blur-3xl translate-y-48 -translate-x-48"></div>
-      </div>
-      
-      {/* Settings Panel */}
-      {showSettingsPanel && (
-        <SongSettingsPanel
-          settings={settings}
-          onSettingsChange={handleSettingsChange}
-          isVisible={showSettingsPanel}
-          onToggleVisibility={() => setShowSettingsPanel(!showSettingsPanel)}
-        />
-      )}
-
+    <div className="h-full flex flex-col relative overflow-hidden">
       {/* Main Editor */}
-      <div className={`flex-1 flex flex-col ${showSettingsPanel ? 'ml-80' : 'ml-0'} transition-all duration-300 relative z-10`}>
+      <div className="flex-1 flex flex-col relative z-10">
         {/* Header */}
         <div className="bg-white/80 backdrop-blur-xl border-b border-white/30 shadow-soft px-4 md:px-6 py-6">
           <div className="flex items-center justify-between">
@@ -246,16 +240,6 @@ export const SongEditor: React.FC<SongEditorProps> = ({
                 <span className="group-hover:-translate-x-1 transition-transform duration-200">←</span>
                 <span className="font-medium">Back</span>
               </button>
-              {!showSettingsPanel && (
-                <button
-                  onClick={() => setShowSettingsPanel(true)}
-                  className="group flex items-center space-x-2 text-neutral-600 hover:text-neutral-800 bg-white/60 hover:bg-white/80 px-3 py-2 rounded-xl border border-neutral-200/50 hover:border-neutral-300 transition-all duration-200 shadow-soft hover:shadow-medium backdrop-blur-sm"
-                  title="Show Settings"
-                >
-                  <span className="group-hover:rotate-180 transition-transform duration-300">⚙️</span>
-                  <span className="font-medium">Settings</span>
-                </button>
-              )}
               <div className="min-w-0 flex-1">
                 <h1 className="text-xl md:text-2xl font-bold bg-gradient-creative from-neutral-900 to-neutral-700 bg-clip-text text-transparent truncate">
                   {title || 'Untitled Song'}
@@ -503,16 +487,11 @@ export const SongEditor: React.FC<SongEditorProps> = ({
                     </div>
                   )}
                 </div>
-                <button
-                  onClick={() => setShowSettingsPanel(true)}
-                  className="mt-8 group relative bg-gradient-creative from-primary-500 to-creative-600 hover:from-primary-600 hover:to-creative-700 text-white font-semibold py-3 px-6 rounded-xl shadow-medium hover:shadow-glow-primary transition-all duration-300 transform hover:scale-105"
-                >
-                  <span className="relative z-10 flex items-center space-x-2">
-                    <span>View all settings</span>
-                    <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>
-                  </span>
-                  <div className="absolute inset-0 rounded-xl bg-gradient-creative from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </button>
+                <div className="mt-8 p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-neutral-200/50">
+                  <p className="text-sm text-neutral-600 text-center">
+                    💡 Use the Settings panel on the left to customize your song's creative parameters.
+                  </p>
+                </div>
               </div>
             )}
           </div>

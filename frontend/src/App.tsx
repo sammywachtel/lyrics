@@ -1,16 +1,19 @@
 import { useState } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AuthForm } from './components/AuthForm'
-import { Header } from './components/Header'
+import { AppLayout } from './components/layout/AppLayout'
 import { SongList } from './components/SongList'
 import SongEditor from './components/SongEditor'
-import type { Song } from './lib/api'
+import type { Song, SongSettings } from './lib/api'
 
 function AppContent() {
   const { user, loading } = useAuth()
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   const [currentView, setCurrentView] = useState<'list' | 'editor'>('list')
   const [selectedSongId, setSelectedSongId] = useState<string | null>(null)
+  const [currentSong, setCurrentSong] = useState<Song | null>(null)
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | 'offline'>('saved')
+  const [settings, setSettings] = useState<SongSettings | undefined>(undefined)
 
   if (loading) {
     return (
@@ -35,6 +38,8 @@ function AppContent() {
   const handleEditSong = (songId: string) => {
     setSelectedSongId(songId)
     setCurrentView('editor')
+    // Reset settings when switching songs
+    setSettings(undefined)
   }
 
   const handleCloseSong = () => {
@@ -44,30 +49,62 @@ function AppContent() {
 
   const handleSongChange = (song: Song) => {
     // Song was updated, could refresh the list or handle state updates
+    setCurrentSong(song)
+    setSettings(song.settings)
+    setSaveStatus('saved')
     console.log('Song updated:', song)
   }
 
+  const handleSongLoaded = (song: Song) => {
+    // Initial song load
+    setCurrentSong(song)
+    setSettings(song.settings)
+    setSaveStatus('saved')
+  }
+
+  const handleSettingsChange = (newSettings: SongSettings) => {
+    setSettings(newSettings)
+    setSaveStatus('saving')
+    // The SongEditor will handle the actual saving
+  }
+
+  const handleSearch = (query: string) => {
+    console.log('Search query:', query)
+    // TODO: Implement search functionality
+  }
+
+  const handleViewChange = (view: string) => {
+    console.log('View changed:', view)
+    // TODO: Handle view changes
+  }
+
+  // If editing a song, show it in the professional layout
   if (currentView === 'editor' && selectedSongId) {
     return (
-      <SongEditor
-        songId={selectedSongId}
-        onSongChange={handleSongChange}
-        onClose={handleCloseSong}
+      <AppLayout
+        currentSong={currentSong}
+        saveStatus={saveStatus}
+        onSearch={handleSearch}
+        onViewChange={handleViewChange}
+        settings={settings}
+        onSettingsChange={handleSettingsChange}
+        editorContent={
+          <SongEditor
+            songId={selectedSongId}
+            onSongChange={handleSongChange}
+            onSongLoaded={handleSongLoaded}
+            onSettingsChange={handleSettingsChange}
+            onClose={handleCloseSong}
+          />
+        }
       />
     )
   }
 
+  // Show song list with its own simple layout
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-creative-50 to-warm-50">
-      <Header />
-      <main className="relative">
-        {/* Background decoration */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-gradient-creative from-primary-300 to-creative-300 opacity-30 blur-3xl"></div>
-          <div className="absolute top-1/2 -left-40 w-96 h-96 rounded-full bg-gradient-creative from-creative-300 to-warm-300 opacity-25 blur-3xl"></div>
-        </div>
-        <SongList onEditSong={handleEditSong} />
-      </main>
+      <SongList onEditSong={handleEditSong} />
     </div>
   )
 }
