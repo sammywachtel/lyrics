@@ -136,7 +136,7 @@ export const SimpleWysiwygEditor: React.FC<SimpleWysiwygEditorProps> = ({
   const minHeight = `${rows * 1.5}rem`
 
   return (
-    <div className="relative">
+    <div className="relative h-full flex flex-col">
       {/* Custom styles for better formatting visibility */}
       <style>{`
         .wysiwyg-editor strong {
@@ -210,17 +210,18 @@ export const SimpleWysiwygEditor: React.FC<SimpleWysiwygEditorProps> = ({
         </button>
       </div>
 
-      {/* Editor */}
-      {isSourceMode ? (
-        <textarea
-          ref={textareaRef}
-          value={value}
-          onChange={handleSourceChange}
-          onKeyUp={onSelectionChange}
-          onMouseUp={onSelectionChange}
-          className={`w-full border-0 px-6 py-6 text-lyrics focus:outline-none font-mono resize-none transition-all duration-200 text-neutral-900 bg-transparent placeholder:text-neutral-400 leading-relaxed ${className}`}
-          style={{ minHeight }}
-          placeholder={`${placeholder}
+      {/* Editor - Flex grow to fill available space */}
+      <div className="flex-1 overflow-y-auto">
+        {isSourceMode ? (
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={handleSourceChange}
+            onKeyUp={onSelectionChange}
+            onMouseUp={onSelectionChange}
+            className={`w-full h-full border-0 px-6 py-6 text-lyrics focus:outline-none font-mono resize-none transition-all duration-200 text-neutral-900 bg-transparent placeholder:text-neutral-400 leading-relaxed ${className}`}
+            style={{ minHeight }}
+            placeholder={`${placeholder}
 
 [Verse 1]
 **Start** with your lyrics...
@@ -229,24 +230,25 @@ export const SimpleWysiwygEditor: React.FC<SimpleWysiwygEditorProps> = ({
 *This* is where the _chorus_ goes...
 
 Use **bold**, *italic*, and _underline_ for formatting!`}
-        />
-      ) : (
-        <div
-          ref={wysiwygRef}
-          contentEditable
-          onInput={handleWysiwygChange}
-          onKeyDown={handleKeyDown}
-          onKeyUp={onSelectionChange}
-          onMouseUp={onSelectionChange}
-          className={`wysiwyg-editor w-full border-0 px-6 py-6 text-lyrics focus:outline-none font-mono resize-none transition-all duration-200 text-neutral-900 bg-transparent leading-relaxed ${className}`}
-          style={{ 
-            minHeight,
-            // Ensure formatting is visible
-            fontFamily: 'JetBrains Mono, Fira Code, Monaco, Cascadia Code, Roboto Mono, monospace'
-          }}
-          suppressContentEditableWarning={true}
-        />
-      )}
+          />
+        ) : (
+          <div
+            ref={wysiwygRef}
+            contentEditable
+            onInput={handleWysiwygChange}
+            onKeyDown={handleKeyDown}
+            onKeyUp={onSelectionChange}
+            onMouseUp={onSelectionChange}
+            className={`wysiwyg-editor w-full h-full border-0 px-6 py-6 text-lyrics focus:outline-none font-mono resize-none transition-all duration-200 text-neutral-900 bg-transparent leading-relaxed overflow-y-auto ${className}`}
+            style={{ 
+              minHeight,
+              // Ensure formatting is visible
+              fontFamily: 'JetBrains Mono, Fira Code, Monaco, Cascadia Code, Roboto Mono, monospace'
+            }}
+            suppressContentEditableWarning={true}
+          />
+        )}
+      </div>
       
       {/* Debug info */}
       <div className="px-6 py-2 text-xs text-neutral-500 bg-neutral-50/50 border-t border-neutral-200/30">

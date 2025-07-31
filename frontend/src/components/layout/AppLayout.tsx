@@ -17,6 +17,14 @@ interface AppLayoutProps {
   settings?: SongSettings
   onSettingsChange?: (settings: SongSettings) => void
   
+  // Editor mode props
+  isEditorMode?: boolean
+  onBack?: () => void
+  onSongUpdate?: (updates: Partial<Song>) => void
+  hasUnsavedChanges?: boolean
+  onSave?: () => void
+  isSaving?: boolean
+  
   // Panel content slots
   settingsContent?: ReactNode
   editorContent?: ReactNode
@@ -31,6 +39,12 @@ export function AppLayout({
   onViewChange,
   settings,
   onSettingsChange,
+  isEditorMode = false,
+  onBack,
+  onSongUpdate,
+  hasUnsavedChanges = false,
+  onSave,
+  isSaving = false,
   settingsContent,
   editorContent,
   toolsContent
@@ -52,6 +66,12 @@ export function AppLayout({
         saveStatus={saveStatus}
         onSearch={onSearch}
         onViewChange={onViewChange}
+        isEditorMode={isEditorMode}
+        onBack={onBack}
+        onSongUpdate={onSongUpdate}
+        hasUnsavedChanges={hasUnsavedChanges}
+        onSave={onSave}
+        isSaving={isSaving}
       />
       
       {/* Main Content Area */}

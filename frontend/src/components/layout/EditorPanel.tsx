@@ -26,21 +26,8 @@ export function EditorPanel({ panelState, children, className = '' }: EditorPane
   
   return (
     <div className={panelClasses}>
-      {/* Editor Header - Optional */}
-      <div className="flex items-center justify-between p-4 border-b border-neutral-200/50">
-        <h2 className="text-lg font-semibold text-neutral-900">Lyrics Editor</h2>
-        
-        {/* Editor Controls */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 text-sm text-neutral-500">
-            <span className="w-2 h-2 rounded-full bg-success-500"></span>
-            <span>Ready</span>
-          </div>
-        </div>
-      </div>
-      
-      {/* Editor Content */}
-      <div className="flex-1 overflow-hidden">
+      {/* Editor Content - Full Height */}
+      <div className="flex-1 overflow-hidden flex flex-col">
         {children || (
           <div className="h-full p-6">
             {/* Placeholder editor content */}

@@ -8,7 +8,9 @@ import {
   ChevronDownIcon,
   CloudIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  ArrowLeftIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 import type { PanelState } from '../../hooks/usePanelState'
 import type { Song } from '../../lib/api'
@@ -19,6 +21,13 @@ interface AppHeaderProps {
   onSearch?: (query: string) => void
   onViewChange?: (view: string) => void
   saveStatus?: 'saved' | 'saving' | 'error' | 'offline'
+  // Editor mode props
+  isEditorMode?: boolean
+  onBack?: () => void
+  onSongUpdate?: (updates: Partial<Song>) => void
+  hasUnsavedChanges?: boolean
+  onSave?: () => void
+  isSaving?: boolean
 }
 
 const SAVE_STATUS_CONFIG = {
@@ -49,14 +58,54 @@ export function AppHeader({
   currentSong, 
   onSearch, 
   onViewChange: _onViewChange,
-  saveStatus = 'saved'
+  saveStatus = 'saved',
+  isEditorMode = false,
+  onBack,
+  onSongUpdate,
+  hasUnsavedChanges = false,
+  onSave,
+  isSaving = false
 }: AppHeaderProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [showSongMeta, setShowSongMeta] = useState(false)
+  const [isEditingMeta, setIsEditingMeta] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const [editArtist, setEditArtist] = useState('')
+  const [editStatus, setEditStatus] = useState<Song['status']>('draft')
+  const [editTags, setEditTags] = useState('')
   
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSearch?.(searchQuery)
+  }
+  
+  const handleEditMetadata = () => {
+    if (currentSong) {
+      setEditTitle(currentSong.title)
+      setEditArtist(currentSong.artist || '')
+      setEditStatus(currentSong.status)
+      setEditTags(currentSong.tags.join(', '))
+      setIsEditingMeta(true)
+      setShowSongMeta(true)
+    }
+  }
+  
+  const handleSaveMetadata = () => {
+    if (onSongUpdate) {
+      onSongUpdate({
+        title: editTitle,
+        artist: editArtist || undefined,
+        status: editStatus,
+        tags: editTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+      })
+    }
+    setIsEditingMeta(false)
+    setShowSongMeta(false)
+  }
+  
+  const handleCancelEdit = () => {
+    setIsEditingMeta(false)
+    setShowSongMeta(false)
   }
   
   const saveConfig = SAVE_STATUS_CONFIG[saveStatus]
@@ -65,8 +114,20 @@ export function AppHeader({
   return (
     <header className="h-16 bg-white/80 backdrop-blur-md border-b border-neutral-200/50 shadow-soft">
       <div className="h-full px-4 flex items-center justify-between">
-        {/* Left Section - Logo & Navigation */}
+        {/* Left Section - Back Button, Logo & Navigation */}
         <div className="flex items-center gap-4">
+          {/* Back Button (Editor Mode Only) */}
+          {isEditorMode && onBack && (
+            <button
+              onClick={onBack}
+              className="group flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/60 transition-all duration-200 text-neutral-600 hover:text-neutral-800 border border-white/30 hover:border-white/50 shadow-soft hover:shadow-medium backdrop-blur-sm"
+              title="Back to Song List"
+            >
+              <ArrowLeftIcon className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform duration-200" />
+              <span className="font-medium hidden sm:inline">Back</span>
+            </button>
+          )}
+          
           {/* Mobile Menu Button */}
           {panelState.isMobile && (
             <button
@@ -89,8 +150,39 @@ export function AppHeader({
             </div>
           </div>
           
-          {/* Song Metadata */}
-          {currentSong && (
+          {/* Song Metadata (Enhanced for Editor Mode) */}
+          {currentSong && isEditorMode && (
+            <div className="hidden md:flex items-center gap-2 ml-4 pl-4 border-l border-neutral-200">
+              <button
+                onClick={() => setShowSongMeta(!showSongMeta)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-white/60 transition-all duration-200 group backdrop-blur-sm border border-white/30 hover:border-white/50 shadow-soft"
+              >
+                <div className="text-left">
+                  <div className="text-sm font-medium text-neutral-900 max-w-48 truncate">
+                    {currentSong.title || 'Untitled Song'}
+                  </div>
+                  <div className="text-xs text-neutral-500 max-w-48 truncate flex items-center gap-2">
+                    <span>{currentSong.artist || 'No artist'}</span>
+                    <span>•</span>
+                    <span className="capitalize">{currentSong.status.replace('_', ' ')}</span>
+                    {hasUnsavedChanges && (
+                      <>
+                        <span>•</span>
+                        <span className="text-warm-600 flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-warm-500 animate-pulse"></span>
+                          Unsaved
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <ChevronDownIcon className={`w-4 h-4 text-neutral-400 transition-transform ${showSongMeta ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
+          )}
+          
+          {/* Song Metadata (Simple for Non-Editor Mode) */}
+          {currentSong && !isEditorMode && (
             <div className="hidden md:flex items-center gap-2 ml-4 pl-4 border-l border-neutral-200">
               <button
                 onClick={() => setShowSongMeta(!showSongMeta)}
@@ -128,11 +220,45 @@ export function AppHeader({
         
         {/* Right Section - View Controls & Status */}
         <div className="flex items-center gap-4">
-          {/* Save Status */}
-          <div className="hidden sm:flex items-center gap-2 text-xs">
-            <SaveIcon className={`w-4 h-4 ${saveConfig.className}`} />
-            <span className={saveConfig.className}>{saveConfig.text}</span>
-          </div>
+          {/* Save Button (Editor Mode Only) */}
+          {isEditorMode && onSave && (
+            <button
+              onClick={onSave}
+              disabled={isSaving || !hasUnsavedChanges}
+              className={`relative overflow-hidden px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
+                hasUnsavedChanges && !isSaving
+                  ? 'bg-gradient-to-r from-primary-500 to-creative-600 hover:from-primary-600 hover:to-creative-700 text-white shadow-medium hover:shadow-glow-primary border border-white/20'
+                  : 'bg-neutral-100 text-neutral-500 cursor-not-allowed shadow-soft border border-neutral-200'
+              }`}
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                {isSaving ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Saving...</span>
+                  </>
+                ) : hasUnsavedChanges ? (
+                  <>
+                    <span>💾</span>
+                    <span>Save</span>
+                  </>
+                ) : (
+                  <>
+                    <span>✓</span>
+                    <span>Saved</span>
+                  </>
+                )}
+              </span>
+            </button>
+          )}
+          
+          {/* Save Status (Non-Editor Mode) */}
+          {!isEditorMode && (
+            <div className="hidden sm:flex items-center gap-2 text-xs">
+              <SaveIcon className={`w-4 h-4 ${saveConfig.className}`} />
+              <span className={saveConfig.className}>{saveConfig.text}</span>
+            </div>
+          )}
           
           {/* View Toggle Buttons - Tablet/Desktop */}
           {!panelState.isMobile && (
@@ -257,30 +383,144 @@ export function AppHeader({
         </div>
       )}
       
-      {/* Song Metadata Dropdown */}
+      {/* Enhanced Song Metadata Dropdown */}
       {showSongMeta && currentSong && (
-        <div className="absolute top-16 left-0 right-0 bg-white border-b border-neutral-200 shadow-lg z-50 md:left-auto md:right-auto md:w-96 md:ml-64 md:rounded-b-lg md:border md:shadow-medium">
-          <div className="p-4">
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Title</label>
-                <div className="text-sm text-neutral-900">{currentSong.title || 'Untitled Song'}</div>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Artist</label>
-                <div className="text-sm text-neutral-900">{currentSong.artist || 'No artist set'}</div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+        <div className="absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-neutral-200 shadow-lg z-50 md:left-auto md:right-auto md:w-96 md:ml-64 md:rounded-b-xl md:border md:shadow-medium">
+          <div className="p-6">
+            {isEditingMeta ? (
+              /* Editing Mode */
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
+                    <span>✏️</span>
+                    <span>Edit Song Details</span>
+                  </h3>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="p-1 rounded-md hover:bg-neutral-100 transition-colors"
+                  >
+                    <XMarkIcon className="w-4 h-4 text-neutral-500" />
+                  </button>
+                </div>
+                
                 <div>
-                  <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Created</label>
-                  <div className="text-sm text-neutral-900">{new Date(currentSong.created_at).toLocaleDateString()}</div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Title</label>
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 text-sm"
+                    placeholder="Enter song title..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Artist</label>
+                  <input
+                    type="text"
+                    value={editArtist}
+                    onChange={(e) => setEditArtist(e.target.value)}
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 text-sm"
+                    placeholder="Enter artist name..."
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Status</label>
+                    <select
+                      value={editStatus}
+                      onChange={(e) => setEditStatus(e.target.value as Song['status'])}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 text-sm"
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                      <option value="archived">Archived</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Tags</label>
+                    <input
+                      type="text"
+                      value={editTags}
+                      onChange={(e) => setEditTags(e.target.value)}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 text-sm"
+                      placeholder="tag1, tag2..."
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={handleSaveMetadata}
+                    className="flex-1 bg-gradient-to-r from-primary-500 to-creative-600 hover:from-primary-600 hover:to-creative-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-medium"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="px-4 py-2 text-neutral-600 bg-neutral-100 hover:bg-neutral-200 rounded-lg transition-colors duration-200 font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* View Mode */
+              <div className="space-y-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
+                    <span>🎵</span>
+                    <span>Song Details</span>
+                  </h3>
+                  {isEditorMode && onSongUpdate && (
+                    <button
+                      onClick={handleEditMetadata}
+                      className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+                    >
+                      <PencilIcon className="w-3 h-3" />
+                      Edit
+                    </button>
+                  )}
+                </div>
+                
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Title</label>
+                  <div className="text-sm text-neutral-900 font-medium">{currentSong.title || 'Untitled Song'}</div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Modified</label>
-                  <div className="text-sm text-neutral-900">{new Date(currentSong.updated_at).toLocaleDateString()}</div>
+                  <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Artist</label>
+                  <div className="text-sm text-neutral-900">{currentSong.artist || 'No artist set'}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Status</label>
+                  <div className="text-sm text-neutral-900 capitalize">{currentSong.status.replace('_', ' ')}</div>
+                </div>
+                {currentSong.tags && currentSong.tags.length > 0 && (
+                  <div>
+                    <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Tags</label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {currentSong.tags.map((tag, index) => (
+                        <span key={index} className="px-2 py-1 bg-primary-100 text-primary-700 rounded-md text-xs font-medium">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-neutral-200">
+                  <div>
+                    <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Created</label>
+                    <div className="text-sm text-neutral-900">{new Date(currentSong.created_at).toLocaleDateString()}</div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Modified</label>
+                    <div className="text-sm text-neutral-900">{new Date(currentSong.updated_at).toLocaleDateString()}</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}

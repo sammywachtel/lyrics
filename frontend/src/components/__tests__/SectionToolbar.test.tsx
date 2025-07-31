@@ -19,13 +19,13 @@ describe('SectionToolbar', () => {
       />
     )
 
-    // Check for common section buttons
-    expect(screen.getByRole('button', { name: 'Verse 1' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Verse 2' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Verse 3' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Chorus' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Pre-Chorus' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Bridge' })).toBeInTheDocument()
+    // Check for common section buttons (now with emojis)
+    expect(screen.getByRole('button', { name: '📝 Verse 1' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '📝 Verse 2' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '📝 Verse 3' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '🎵 Chorus' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '🎵 Pre-Chorus' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '🌉 Bridge' })).toBeInTheDocument()
   })
 
   it('should call onInsertSection when section button is clicked', () => {
@@ -37,7 +37,7 @@ describe('SectionToolbar', () => {
       />
     )
 
-    const verseButton = screen.getByRole('button', { name: 'Verse 1' })
+    const verseButton = screen.getByRole('button', { name: '📝 Verse 1' })
     fireEvent.click(verseButton)
 
     expect(mockOnInsertSection).toHaveBeenCalledWith('[Verse 1]')
@@ -53,13 +53,13 @@ describe('SectionToolbar', () => {
     )
 
     // Test multiple buttons
-    fireEvent.click(screen.getByRole('button', { name: 'Chorus' }))
+    fireEvent.click(screen.getByRole('button', { name: '🎵 Chorus' }))
     expect(mockOnInsertSection).toHaveBeenCalledWith('[Chorus]')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Bridge' }))
+    fireEvent.click(screen.getByRole('button', { name: '🌉 Bridge' }))
     expect(mockOnInsertSection).toHaveBeenCalledWith('[Bridge]')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Pre-Chorus' }))
+    fireEvent.click(screen.getByRole('button', { name: '🎵 Pre-Chorus' }))
     expect(mockOnInsertSection).toHaveBeenCalledWith('[Pre-Chorus]')
 
     expect(mockOnInsertSection).toHaveBeenCalledTimes(3)
@@ -74,7 +74,7 @@ describe('SectionToolbar', () => {
       />
     )
 
-    expect(screen.queryByText('📋 Sections')).not.toBeInTheDocument()
+    expect(screen.queryByText('Navigate Sections')).not.toBeInTheDocument()
   })
 
   it('should show sections button when existing sections present', () => {
@@ -86,7 +86,7 @@ describe('SectionToolbar', () => {
       />
     )
 
-    const sectionsButton = screen.getByText('📋 Sections')
+    const sectionsButton = screen.getByText('Navigate Sections')
     expect(sectionsButton).toBeInTheDocument()
   })
 
@@ -99,7 +99,7 @@ describe('SectionToolbar', () => {
       />
     )
 
-    const sectionsButton = screen.getByText('📋 Sections')
+    const sectionsButton = screen.getByText('Navigate Sections')
     fireEvent.click(sectionsButton)
 
     expect(mockOnShowSectionNav).toHaveBeenCalledTimes(1)
@@ -114,11 +114,11 @@ describe('SectionToolbar', () => {
       />
     )
 
-    const verseButton = screen.getByRole('button', { name: 'Verse 1' })
-    expect(verseButton).toHaveClass('px-2', 'py-1', 'text-xs', 'font-medium')
+    const verseButton = screen.getByRole('button', { name: '📝 Verse 1' })
+    expect(verseButton).toHaveClass('px-3', 'py-2', 'text-xs', 'font-medium')
 
-    const sectionsButton = screen.getByText('📋 Sections')
-    expect(sectionsButton).toHaveClass('px-3', 'py-1', 'text-xs', 'font-medium', 'text-blue-600')
+    const sectionsButton = screen.getByText('Navigate Sections').closest('button')
+    expect(sectionsButton).toHaveClass('px-4', 'py-2', 'text-sm', 'font-medium')
   })
 
   it('should have proper accessibility attributes', () => {
@@ -130,10 +130,10 @@ describe('SectionToolbar', () => {
       />
     )
 
-    const verseButton = screen.getByRole('button', { name: 'Verse 1' })
+    const verseButton = screen.getByRole('button', { name: '📝 Verse 1' })
     expect(verseButton).toHaveAttribute('title', 'Insert Verse 1 section')
 
-    const sectionsButton = screen.getByText('📋 Sections')
+    const sectionsButton = screen.getByText('Navigate Sections').closest('button')
     expect(sectionsButton).toHaveAttribute('title', 'Navigate between sections')
   })
 
