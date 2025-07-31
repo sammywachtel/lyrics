@@ -1,6 +1,23 @@
 import { supabase } from './supabase'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001'
+// Helper function to get environment variable that works in both Vite and Jest
+const getApiBaseUrl = (): string => {
+  // In Jest/test environment, use process.env
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+    return process.env.VITE_API_URL || 'http://localhost:8001'
+  }
+  
+  // In Vite environment, use import.meta.env (this won't be processed by Jest)
+  try {
+    // @ts-ignore - Jest will not process this line
+    return import.meta.env.VITE_API_URL || 'http://localhost:8001'
+  } catch {
+    // Fallback for any other environment
+    return process.env.VITE_API_URL || 'http://localhost:8001'
+  }
+}
+
+const API_BASE_URL = getApiBaseUrl()
 
 // Enums matching backend
 export type NarrativePOV = 'first_person' | 'second_person' | 'third_person' | 'direct_address'

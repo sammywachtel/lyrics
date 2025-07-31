@@ -59,6 +59,7 @@ jobs:
         run: npm run test:coverage
         env:
           CI: true
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Upload test coverage
         uses: codecov/codecov-action@v4

@@ -1,6 +1,17 @@
 export default {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  
+  // Memory optimization settings
+  maxWorkers: 1, // Use single worker to reduce memory usage
+  workerIdleMemoryLimit: '1GB',
+  logHeapUsage: true,
+  
+  // Limit concurrent tests to prevent memory overload
+  maxConcurrency: 1,
+  forceExit: true,
+  detectOpenHandles: true,
+  
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/src/__mocks__/fileMock.js'
