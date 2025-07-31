@@ -516,6 +516,8 @@ export const SimpleWysiwygEditor: React.FC<SimpleWysiwygEditorProps> = ({
             onChange={handleSourceChange}
             onKeyUp={onSelectionChange}
             onMouseUp={onSelectionChange}
+            onFocus={onSelectionChange}
+            onClick={onSelectionChange}
             className={`w-full h-full border-0 px-6 py-6 text-lyrics focus:outline-none font-mono resize-none transition-all duration-200 text-neutral-900 bg-transparent placeholder:text-neutral-400 leading-relaxed ${className}`}
             style={{ minHeight }}
             placeholder={`${placeholder}
@@ -536,6 +538,8 @@ Use **bold**, *italic*, and _underline_ for formatting!`}
             onKeyDown={handleKeyDown}
             onKeyUp={onSelectionChange}
             onMouseUp={onSelectionChange}
+            onFocus={onSelectionChange}
+            onClick={onSelectionChange}
             onPaste={(e) => {
               e.preventDefault()
               const text = e.clipboardData.getData('text/plain')

@@ -58,26 +58,16 @@ export const SectionToolbar: React.FC<SectionToolbarProps> = ({
       
       {hasExistingSections && (
         <div className="flex items-center gap-2">
-          {onToggleSidebar && (
+          {onToggleSidebar && !showSidebar && (
             <button
               onClick={onToggleSidebar}
-              className={`group relative overflow-hidden px-4 py-2 text-sm font-medium transition-all duration-200 transform hover:scale-105 backdrop-blur-sm rounded-xl border ${
-                showSidebar 
-                  ? 'text-primary-800 bg-gradient-creative from-primary-200/80 to-creative-200/80 border-primary-300 shadow-medium'
-                  : 'text-primary-700 bg-gradient-creative from-primary-100/80 to-creative-100/80 hover:from-primary-200/80 hover:to-creative-200/80 border-primary-200/50 hover:border-primary-300 hover:shadow-medium'
-              }`}
-              title={showSidebar ? 'Hide section sidebar' : currentSection ? `Currently in ${currentSection} - Show section sidebar` : 'Show section sidebar'}
+              className="group relative overflow-hidden px-4 py-2 text-sm font-medium text-primary-700 bg-gradient-creative from-primary-100/80 to-creative-100/80 hover:from-primary-200/80 hover:to-creative-200/80 border-primary-200/50 hover:border-primary-300 hover:shadow-medium transition-all duration-200 transform hover:scale-105 backdrop-blur-sm rounded-xl border"
+              title={currentSection ? `Currently in: ${currentSection} - Click to show sidebar` : 'Show section sidebar'}
             >
               <span className="relative z-10 flex items-center space-x-2">
-                <span className={`transition-transform duration-200 ${
-                  showSidebar ? 'rotate-0' : 'group-hover:rotate-12'
-                }`}>
-                  {showSidebar ? '🗂️' : '📂'}
-                </span>
+                <span className="group-hover:rotate-12 transition-transform duration-200">📂</span>
                 <span className="flex items-center gap-2">
-                  {showSidebar ? (
-                    'Hide Sidebar'
-                  ) : currentSection ? (
+                  {currentSection ? (
                     <>
                       <span className="font-medium text-primary-800">{currentSection}</span>
                       <span className="text-primary-600">•</span>

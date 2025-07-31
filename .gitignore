@@ -1,7 +1,6 @@
 /.idea/
 /node_modules/
 /backend/.venv/
-/.github/
 /backend/.env
 /.llm_docs/
 /.private_docs/

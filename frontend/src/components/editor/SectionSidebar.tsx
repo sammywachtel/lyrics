@@ -159,8 +159,12 @@ export const SectionSidebar: React.FC<SectionSidebarProps> = ({
                   </div>
                 ) : (
                   <button
-                    onClick={() => onJumpToSection(section.name)}
-                    className="w-full text-left"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      console.log('Jumping to section:', section.name)
+                      onJumpToSection(section.name)
+                    }}
+                    className="w-full text-left focus:outline-none"
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-base">{icon}</span>

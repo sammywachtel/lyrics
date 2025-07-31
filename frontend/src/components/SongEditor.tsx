@@ -224,29 +224,64 @@ export const SongEditor: React.FC<SongEditorProps> = ({
 
   // Update current section based on cursor position
   const updateCurrentSection = useCallback(() => {
+    if (sections.length === 0) {
+      if (currentSection !== '') {
+        setCurrentSection('')
+      }
+      return
+    }
+
     const selection = window.getSelection()
     if (!selection || selection.rangeCount === 0) {
       return
     }
     
     try {
-      // Get the current cursor position in the text
-      const range = selection.getRangeAt(0)
-      const preCaretRange = range.cloneRange()
-      
       // Find the editor element (either WYSIWYG or textarea)
       const editorElement = wysiwygEditorRef.current?.querySelector('.wysiwyg-editor') || 
                            wysiwygEditorRef.current?.querySelector('textarea')
       
       if (!editorElement) return
+
+      let currentLineNumber = 0
       
-      preCaretRange.selectNodeContents(editorElement)
-      preCaretRange.setEnd(range.endContainer, range.endOffset)
-      
-      // Get text up to cursor position
-      const textBeforeCursor = preCaretRange.toString()
-      const linesBeforeCursor = textBeforeCursor.split('\n')
-      const currentLineNumber = linesBeforeCursor.length - 1
+      if (editorElement instanceof HTMLTextAreaElement) {
+        // For textarea (source mode)
+        const cursorPosition = editorElement.selectionStart
+        const textBeforeCursor = lyrics.substring(0, cursorPosition)
+        currentLineNumber = textBeforeCursor.split('\n').length - 1
+      } else {
+        // For contentEditable (WYSIWYG mode)
+        const range = selection.getRangeAt(0)
+        
+        // Try to find the prosody line element containing the cursor
+        let targetNode = range.startContainer
+        let prosodyLine: HTMLElement | null = null
+        
+        // Walk up the DOM tree to find the prosody line
+        while (targetNode && targetNode !== editorElement) {
+          if (targetNode instanceof HTMLElement && targetNode.classList.contains('prosody-line')) {
+            prosodyLine = targetNode
+            break
+          }
+          if (targetNode instanceof HTMLElement && targetNode.hasAttribute('data-line')) {
+            prosodyLine = targetNode
+            break
+          }
+          targetNode = targetNode.parentNode
+        }
+        
+        if (prosodyLine && prosodyLine.hasAttribute('data-line')) {
+          currentLineNumber = parseInt(prosodyLine.getAttribute('data-line') || '0')
+        } else {
+          // Fallback: calculate line number from text content
+          const preCaretRange = range.cloneRange()
+          preCaretRange.selectNodeContents(editorElement)
+          preCaretRange.setEnd(range.endContainer, range.endOffset)
+          const textBeforeCursor = preCaretRange.toString()
+          currentLineNumber = textBeforeCursor.split('\n').length - 1
+        }
+      }
       
       // Find which section contains this line
       const sectionAtCursor = getSectionAtLine(sections, currentLineNumber)
@@ -337,13 +372,19 @@ export const SongEditor: React.FC<SongEditorProps> = ({
   // Jump to a specific section
   const handleJumpToSection = useCallback((sectionName: string) => {
     const section = sections.find(s => s.name === sectionName)
-    if (!section) return
+    if (!section) {
+      console.warn('Section not found:', sectionName)
+      return
+    }
     
     // Find the editor element
     const editorElement = wysiwygEditorRef.current?.querySelector('.wysiwyg-editor') || 
                          wysiwygEditorRef.current?.querySelector('textarea')
     
-    if (!editorElement) return
+    if (!editorElement) {
+      console.warn('Editor element not found')
+      return
+    }
     
     try {
       // Focus the editor first
@@ -355,17 +396,25 @@ export const SongEditor: React.FC<SongEditorProps> = ({
         // For textarea (source mode)
         const lines = lyrics.split('\n')
         const targetLineIndex = section.startLine
-        const charPosition = lines.slice(0, targetLineIndex).join('\n').length + (targetLineIndex > 0 ? 1 : 0)
         
+        // Calculate character position for the start of the target line
+        let charPosition = 0
+        for (let i = 0; i < targetLineIndex && i < lines.length; i++) {
+          charPosition += lines[i].length + 1 // +1 for the newline character
+        }
+        
+        // Set cursor position
         editorElement.setSelectionRange(charPosition, charPosition)
-        editorElement.scrollTop = targetLineIndex * 20 // Approximate line height
+        
+        // Scroll to the line
+        const lineHeight = 24 // Approximate line height in pixels
+        editorElement.scrollTop = Math.max(0, (targetLineIndex - 2) * lineHeight)
       } else {
         // For contentEditable (WYSIWYG mode)
-        // First try to find section border
-        const sectionBorders = editorElement.querySelectorAll('.section-border')
         let targetElement: HTMLElement | null = null
         
-        // Look for the section border with matching data-section attribute
+        // First try to find section border with matching data-section attribute
+        const sectionBorders = editorElement.querySelectorAll('.section-border')
         for (const border of sectionBorders) {
           if (border.getAttribute('data-section') === sectionName) {
             targetElement = border as HTMLElement
@@ -373,44 +422,76 @@ export const SongEditor: React.FC<SongEditorProps> = ({
           }
         }
         
-        // Fallback to prosody lines if no section border found
+        // If no section border found, look for the prosody line at the section start
         if (!targetElement) {
-          const prosodyLines = editorElement.querySelectorAll('[data-line]')
-          targetElement = prosodyLines[section.startLine] as HTMLElement
+          const prosodyLines = editorElement.querySelectorAll('.prosody-line[data-line]')
+          for (const line of prosodyLines) {
+            const lineNumber = parseInt((line as HTMLElement).getAttribute('data-line') || '0')
+            if (lineNumber === section.startLine) {
+              targetElement = line as HTMLElement
+              break
+            }
+          }
+        }
+        
+        // Final fallback: use querySelector with data-line attribute
+        if (!targetElement) {
+          targetElement = editorElement.querySelector(`[data-line="${section.startLine}"]`) as HTMLElement
         }
         
         if (targetElement) {
           // Scroll to the target element
           targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
           
-          // Set cursor at the beginning of the element
+          // Set cursor position
           const selection = window.getSelection()
           const range = document.createRange()
           
-          // For section borders, place cursor after the border
           if (targetElement.classList.contains('section-border')) {
-            // Find the next text node after the section border
-            let nextElement = targetElement.nextElementSibling
+            // For section borders, place cursor after the border in the next prosody line
+            let nextElement = targetElement.nextElementSibling as HTMLElement
             while (nextElement && !nextElement.classList.contains('prosody-line')) {
-              nextElement = nextElement.nextElementSibling
+              nextElement = nextElement.nextElementSibling as HTMLElement
             }
-            if (nextElement && nextElement.firstChild) {
-              range.setStart(nextElement.firstChild, 0)
-              range.setEnd(nextElement.firstChild, 0)
+            
+            if (nextElement) {
+              // Find the first text node in the next line
+              const walker = document.createTreeWalker(
+                nextElement,
+                NodeFilter.SHOW_TEXT,
+                null
+              )
+              const firstTextNode = walker.nextNode()
+              if (firstTextNode) {
+                range.setStart(firstTextNode, 0)
+                range.setEnd(firstTextNode, 0)
+              }
             }
-          } else if (targetElement.firstChild) {
-            // For prosody lines, place cursor at start of line
-            range.setStart(targetElement.firstChild, 0)
-            range.setEnd(targetElement.firstChild, 0)
+          } else {
+            // For prosody lines, place cursor at the start of the text content
+            const walker = document.createTreeWalker(
+              targetElement,
+              NodeFilter.SHOW_TEXT,
+              null
+            )
+            const firstTextNode = walker.nextNode()
+            if (firstTextNode) {
+              range.setStart(firstTextNode, 0)
+              range.setEnd(firstTextNode, 0)
+            }
           }
           
           selection?.removeAllRanges()
           selection?.addRange(range)
+          
+          console.log('Jumped to section:', sectionName, 'at line:', section.startLine)
+        } else {
+          console.warn('Could not find target element for section:', sectionName)
         }
       }
       
       // Update current section after jumping
-      setTimeout(updateCurrentSection, 100)
+      setTimeout(updateCurrentSection, 150)
     } catch (error) {
       console.error('Error jumping to section:', error)
       // Fallback: just focus the editor

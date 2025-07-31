@@ -1,0 +1,253 @@
+name: CI/CD Pipeline - Songwriting App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PROJECT_ID: lyrics-467218
+  GAR_LOCATION: us-central1
+  REPOSITORY: songwriting-app
+  SERVICE_BACKEND: songwriting-backend
+  SERVICE_FRONTEND: songwriting-frontend
+  REGION: us-central1
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # Test stage - runs on every push and PR
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run frontend linting
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: npm run test:coverage
+        env:
+          CI: true
+
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          directory: ./frontend/coverage
+          flags: frontend
+          name: frontend-coverage
+          fail_ci_if_error: false
+
+      - name: Run backend tests (placeholder)
+        working-directory: ./backend
+        run: |
+          # TODO: Add backend tests when implemented
+          echo "Backend tests would run here"
+          python -c "import app.main; print('Backend imports successfully')"
+
+  # Security scanning stage
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Build and deploy stage - only on main branch pushes
+  deploy:
+    name: Build and Deploy
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      id-token: write
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+          # Fallback to service account key if WIF not configured
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: 'latest'
+
+      - name: Configure Docker authentication
+        run: |
+          gcloud auth configure-docker $GAR_LOCATION-docker.pkg.dev --quiet
+
+      - name: Create Artifact Registry repository
+        run: |
+          gcloud artifacts repositories describe $REPOSITORY \
+            --location=$GAR_LOCATION || \
+          gcloud artifacts repositories create $REPOSITORY \
+            --repository-format=docker \
+            --location=$GAR_LOCATION \
+            --description="Docker repository for songwriting app"
+
+      - name: Build and scan backend image
+        run: |
+          # Build backend image
+          docker build -f Dockerfile.backend \
+            -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:$GITHUB_SHA \
+            -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:latest \
+            .
+          
+          # Scan image for vulnerabilities
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image --exit-code 0 --severity HIGH,CRITICAL \
+            $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:$GITHUB_SHA
+
+      - name: Build and scan frontend image
+        run: |
+          # Build frontend image
+          docker build -f Dockerfile.frontend \
+            -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA \
+            -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:latest \
+            .
+          
+          # Scan image for vulnerabilities
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image --exit-code 0 --severity HIGH,CRITICAL \
+            $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA
+
+      - name: Push images to Artifact Registry
+        run: |
+          docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:$GITHUB_SHA
+          docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:latest
+          docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA
+          docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:latest
+
+      - name: Deploy backend to Cloud Run
+        id: deploy-backend
+        run: |
+          gcloud run deploy $SERVICE_BACKEND \
+            --image $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:$GITHUB_SHA \
+            --region $REGION \
+            --allow-unauthenticated \
+            --set-env-vars "SUPABASE_URL=${{ secrets.SUPABASE_URL }},SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" \
+            --memory 1Gi \
+            --cpu 1 \
+            --min-instances 0 \
+            --max-instances 10 \
+            --concurrency 80 \
+            --timeout 300 \
+            --port 8001 \
+            --cpu-throttling \
+            --no-cpu-boost \
+            --execution-environment gen2 \
+            --service-account ${{ secrets.CLOUD_RUN_SA_EMAIL }} \
+            --labels "app=songwriting,tier=backend,env=production" \
+            --quiet
+          
+          # Get backend URL for frontend configuration
+          echo "BACKEND_URL=$(gcloud run services describe $SERVICE_BACKEND --region=$REGION --format='value(status.url)')" >> $GITHUB_OUTPUT
+
+      - name: Deploy frontend to Cloud Run
+        run: |
+          gcloud run deploy $SERVICE_FRONTEND \
+            --image $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA \
+            --region $REGION \
+            --allow-unauthenticated \
+            --set-env-vars "VITE_API_URL=${{ steps.deploy-backend.outputs.BACKEND_URL }}" \
+            --memory 512Mi \
+            --cpu 1 \
+            --min-instances 0 \
+            --max-instances 5 \
+            --concurrency 100 \
+            --timeout 60 \
+            --port 80 \
+            --cpu-throttling \
+            --no-cpu-boost \
+            --execution-environment gen2 \
+            --service-account ${{ secrets.CLOUD_RUN_SA_EMAIL }} \
+            --labels "app=songwriting,tier=frontend,env=production" \
+            --quiet
+
+      - name: Run deployment health checks
+        run: |
+          # Wait for services to be ready
+          sleep 30
+          
+          # Health check backend
+          BACKEND_URL=$(gcloud run services describe $SERVICE_BACKEND --region=$REGION --format='value(status.url)')
+          echo "Testing backend health at: $BACKEND_URL/health"
+          curl -f $BACKEND_URL/health || exit 1
+          
+          # Health check frontend
+          FRONTEND_URL=$(gcloud run services describe $SERVICE_FRONTEND --region=$REGION --format='value(status.url)')
+          echo "Testing frontend at: $FRONTEND_URL"
+          curl -f $FRONTEND_URL || exit 1
+          
+          echo "✅ All services deployed successfully!"
+          echo "🚀 Frontend URL: $FRONTEND_URL"
+          echo "🔧 Backend URL: $BACKEND_URL"
+
+      - name: Clean up old images
+        run: |
+          # Keep only the 5 most recent images to save storage costs
+          gcloud artifacts docker images list $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND \
+            --sort-by=~CREATE_TIME --limit=999 --format="value(IMAGE)" | tail -n +6 | \
+            xargs -I {} gcloud artifacts docker images delete {} --quiet || true
+          
+          gcloud artifacts docker images list $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND \
+            --sort-by=~CREATE_TIME --limit=999 --format="value(IMAGE)" | tail -n +6 | \
+            xargs -I {} gcloud artifacts docker images delete {} --quiet || true
