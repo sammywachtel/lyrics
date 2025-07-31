@@ -17,7 +17,7 @@ jest.mock('../../lib/api', () => ({
 
 // Mock the SimpleWysiwygEditor component
 jest.mock('../SimpleWysiwygEditor', () => {
-  import React from 'react'
+  const React = require('react')
   
   const MockEditor = React.forwardRef(({ value, onChange, placeholder }, ref) => {
     React.useImperativeHandle(ref, () => ({
