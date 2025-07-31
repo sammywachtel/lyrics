@@ -130,7 +130,6 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
     setTimeout(() => {
       textarea.focus()
       textarea.setSelectionRange(newSelectionStart, newSelectionEnd)
-      updateActiveFormats()
     }, 0)
   }, [textareaRef, getSelectedText, onTextChange])
 
