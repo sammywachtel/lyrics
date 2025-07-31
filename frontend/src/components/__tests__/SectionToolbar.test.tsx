@@ -74,7 +74,7 @@ describe('SectionToolbar', () => {
       />
     )
 
-    expect(screen.queryByText('Navigate Sections')).not.toBeInTheDocument()
+    expect(screen.queryByText('Quick Nav')).not.toBeInTheDocument()
   })
 
   it('should show sections button when existing sections present', () => {
@@ -86,7 +86,7 @@ describe('SectionToolbar', () => {
       />
     )
 
-    const sectionsButton = screen.getByText('Navigate Sections')
+    const sectionsButton = screen.getByText('Quick Nav')
     expect(sectionsButton).toBeInTheDocument()
   })
 
@@ -99,7 +99,7 @@ describe('SectionToolbar', () => {
       />
     )
 
-    const sectionsButton = screen.getByText('Navigate Sections')
+    const sectionsButton = screen.getByText('Quick Nav')
     fireEvent.click(sectionsButton)
 
     expect(mockOnShowSectionNav).toHaveBeenCalledTimes(1)
@@ -117,7 +117,7 @@ describe('SectionToolbar', () => {
     const verseButton = screen.getByRole('button', { name: '📝 Verse 1' })
     expect(verseButton).toHaveClass('px-3', 'py-2', 'text-xs', 'font-medium')
 
-    const sectionsButton = screen.getByText('Navigate Sections').closest('button')
+    const sectionsButton = screen.getByText('Quick Nav').closest('button')
     expect(sectionsButton).toHaveClass('px-4', 'py-2', 'text-sm', 'font-medium')
   })
 
@@ -133,8 +133,8 @@ describe('SectionToolbar', () => {
     const verseButton = screen.getByRole('button', { name: '📝 Verse 1' })
     expect(verseButton).toHaveAttribute('title', 'Insert Verse 1 section')
 
-    const sectionsButton = screen.getByText('Navigate Sections').closest('button')
-    expect(sectionsButton).toHaveAttribute('title', 'Navigate between sections')
+    const sectionsButton = screen.getByText('Quick Nav').closest('button')
+    expect(sectionsButton).toHaveAttribute('title', 'Navigate between sections (modal)')
   })
 
   it('should display quick insert label', () => {

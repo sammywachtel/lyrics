@@ -3,9 +3,10 @@ import type { Song, SongSettings } from '../lib/api'
 import { createDefaultSettings, apiClient } from '../lib/api'
 import SectionToolbar from './SectionToolbar'
 import SectionNavigation from './SectionNavigation'
+import SectionSidebar from './editor/SectionSidebar'
 import SimpleWysiwygEditor from './SimpleWysiwygEditor'
 import { parseSections, getSectionAtLine } from '../utils/sectionUtils'
-import { getWordCount, formatTextToPlain } from '../utils/textFormatting'
+import { getWordCount } from '../utils/textFormatting'
 
 interface SongEditorProps {
   songId: string
@@ -39,6 +40,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({
   const [error, setError] = useState<string | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showSectionNav, setShowSectionNav] = useState(false)
+  const [showSectionSidebar, setShowSectionSidebar] = useState(true)
   const [sections, setSections] = useState<ReturnType<typeof parseSections>>([])
   const [currentSection, setCurrentSection] = useState<string>('')
   
@@ -204,7 +206,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({
     // Clean up previous handler when component unmounts or handleSave changes
     return () => {
       if (onSaveHandler) {
-        onSaveHandler(null)
+        onSaveHandler(() => Promise.resolve())
       }
     }
   }, [onSaveHandler, handleSave])
@@ -222,18 +224,43 @@ export const SongEditor: React.FC<SongEditorProps> = ({
 
   // Update current section based on cursor position
   const updateCurrentSection = useCallback(() => {
-    // For WYSIWYG editor, we'll determine section based on plain text representation
-    const plainLyrics = formatTextToPlain(lyrics)
     const selection = window.getSelection()
-    if (!selection || selection.rangeCount === 0) return
+    if (!selection || selection.rangeCount === 0) {
+      return
+    }
     
-    // Simplified section detection - this could be enhanced
-    const textBeforeCursor = plainLyrics.substring(0, plainLyrics.length * 0.5) // Rough estimate
-    const currentLine = textBeforeCursor.split('\n').length - 1
-    
-    const sectionAtCursor = getSectionAtLine(sections, currentLine)
-    setCurrentSection(sectionAtCursor?.name || '')
-  }, [lyrics, sections])
+    try {
+      // Get the current cursor position in the text
+      const range = selection.getRangeAt(0)
+      const preCaretRange = range.cloneRange()
+      
+      // Find the editor element (either WYSIWYG or textarea)
+      const editorElement = wysiwygEditorRef.current?.querySelector('.wysiwyg-editor') || 
+                           wysiwygEditorRef.current?.querySelector('textarea')
+      
+      if (!editorElement) return
+      
+      preCaretRange.selectNodeContents(editorElement)
+      preCaretRange.setEnd(range.endContainer, range.endOffset)
+      
+      // Get text up to cursor position
+      const textBeforeCursor = preCaretRange.toString()
+      const linesBeforeCursor = textBeforeCursor.split('\n')
+      const currentLineNumber = linesBeforeCursor.length - 1
+      
+      // Find which section contains this line
+      const sectionAtCursor = getSectionAtLine(sections, currentLineNumber)
+      const newCurrentSection = sectionAtCursor?.name || ''
+      
+      // Only update if changed to prevent unnecessary re-renders
+      if (newCurrentSection !== currentSection) {
+        setCurrentSection(newCurrentSection)
+      }
+    } catch (error) {
+      console.debug('Section detection error:', error)
+      // Fallback: don't update current section if detection fails
+    }
+  }, [lyrics, sections, currentSection])
 
   // Handle lyrics change with section parsing
   const handleLyricsChange = useCallback((newLyrics: string) => {
@@ -251,15 +278,147 @@ export const SongEditor: React.FC<SongEditorProps> = ({
     updateCurrentSection()
   }, [lyrics, updateCurrentSection])
 
-  // Jump to a specific section
-  const handleJumpToSection = useCallback((_sectionName: string) => {
-    // For WYSIWYG editor, we'll focus the editor
-    // This could be enhanced to actually jump to the section
-    if (wysiwygEditorRef.current) {
-      wysiwygEditorRef.current.focus()
-      updateCurrentSection()
+  // Add new section at the end with smart naming
+  const handleAddSection = useCallback(() => {
+    // Smart section naming based on existing sections
+    const verseCount = sections.filter(s => s.name.toLowerCase().includes('verse')).length
+    const chorusCount = sections.filter(s => s.name.toLowerCase().includes('chorus')).length
+    const bridgeCount = sections.filter(s => s.name.toLowerCase().includes('bridge')).length
+    
+    let defaultName: string
+    if (verseCount === 0) {
+      defaultName = 'Verse 1'
+    } else if (chorusCount === 0 && verseCount > 0) {
+      defaultName = 'Chorus'
+    } else if (bridgeCount === 0 && verseCount > 0 && chorusCount > 0) {
+      defaultName = 'Bridge'
+    } else {
+      defaultName = `Verse ${verseCount + 1}`
     }
-  }, [updateCurrentSection])
+    
+    const newSectionTag = `[${defaultName}]`
+    const newLyrics = lyrics + (lyrics ? '\n\n' : '') + newSectionTag + '\n'
+    setLyrics(newLyrics)
+    updateCurrentSection()
+  }, [lyrics, sections, updateCurrentSection])
+
+  // Delete a section with improved regex escaping
+  const handleDeleteSection = useCallback((sectionName: string) => {
+    // Escape special regex characters more safely
+    const escapedName = sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    // Remove the section tag and any immediately following newlines
+    const newLyrics = lyrics.replace(new RegExp(`\\[${escapedName}\\]\\n?`, 'g'), '')
+    setLyrics(newLyrics)
+    updateCurrentSection()
+  }, [lyrics, updateCurrentSection])
+
+  // Rename a section with validation
+  const handleRenameSection = useCallback((oldName: string, newName: string) => {
+    // Validate new name
+    if (!newName.trim() || newName === oldName) return
+    
+    // Check if new name already exists
+    const existingNames = sections.map(s => s.name.toLowerCase())
+    if (existingNames.includes(newName.toLowerCase()) && newName.toLowerCase() !== oldName.toLowerCase()) {
+      alert(`A section named '${newName}' already exists. Please choose a different name.`)
+      return
+    }
+    
+    // Escape special regex characters
+    const escapedOldName = oldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const newTag = `[${newName.trim()}]`
+    
+    // Replace all instances of the old section name
+    const newLyrics = lyrics.replace(new RegExp(`\\[${escapedOldName}\\]`, 'g'), newTag)
+    setLyrics(newLyrics)
+    updateCurrentSection()
+  }, [lyrics, sections, updateCurrentSection])
+
+  // Jump to a specific section
+  const handleJumpToSection = useCallback((sectionName: string) => {
+    const section = sections.find(s => s.name === sectionName)
+    if (!section) return
+    
+    // Find the editor element
+    const editorElement = wysiwygEditorRef.current?.querySelector('.wysiwyg-editor') || 
+                         wysiwygEditorRef.current?.querySelector('textarea')
+    
+    if (!editorElement) return
+    
+    try {
+      // Focus the editor first
+      if (editorElement instanceof HTMLElement) {
+        editorElement.focus()
+      }
+      
+      if (editorElement instanceof HTMLTextAreaElement) {
+        // For textarea (source mode)
+        const lines = lyrics.split('\n')
+        const targetLineIndex = section.startLine
+        const charPosition = lines.slice(0, targetLineIndex).join('\n').length + (targetLineIndex > 0 ? 1 : 0)
+        
+        editorElement.setSelectionRange(charPosition, charPosition)
+        editorElement.scrollTop = targetLineIndex * 20 // Approximate line height
+      } else {
+        // For contentEditable (WYSIWYG mode)
+        // First try to find section border
+        const sectionBorders = editorElement.querySelectorAll('.section-border')
+        let targetElement: HTMLElement | null = null
+        
+        // Look for the section border with matching data-section attribute
+        for (const border of sectionBorders) {
+          if (border.getAttribute('data-section') === sectionName) {
+            targetElement = border as HTMLElement
+            break
+          }
+        }
+        
+        // Fallback to prosody lines if no section border found
+        if (!targetElement) {
+          const prosodyLines = editorElement.querySelectorAll('[data-line]')
+          targetElement = prosodyLines[section.startLine] as HTMLElement
+        }
+        
+        if (targetElement) {
+          // Scroll to the target element
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          
+          // Set cursor at the beginning of the element
+          const selection = window.getSelection()
+          const range = document.createRange()
+          
+          // For section borders, place cursor after the border
+          if (targetElement.classList.contains('section-border')) {
+            // Find the next text node after the section border
+            let nextElement = targetElement.nextElementSibling
+            while (nextElement && !nextElement.classList.contains('prosody-line')) {
+              nextElement = nextElement.nextElementSibling
+            }
+            if (nextElement && nextElement.firstChild) {
+              range.setStart(nextElement.firstChild, 0)
+              range.setEnd(nextElement.firstChild, 0)
+            }
+          } else if (targetElement.firstChild) {
+            // For prosody lines, place cursor at start of line
+            range.setStart(targetElement.firstChild, 0)
+            range.setEnd(targetElement.firstChild, 0)
+          }
+          
+          selection?.removeAllRanges()
+          selection?.addRange(range)
+        }
+      }
+      
+      // Update current section after jumping
+      setTimeout(updateCurrentSection, 100)
+    } catch (error) {
+      console.error('Error jumping to section:', error)
+      // Fallback: just focus the editor
+      if (editorElement instanceof HTMLElement) {
+        editorElement.focus()
+      }
+    }
+  }, [sections, lyrics, updateCurrentSection])
 
 
   if (isLoading) {
@@ -298,7 +457,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({
   }
 
   return (
-    <div className="h-full flex flex-col relative overflow-hidden">
+    <div className="h-full flex relative overflow-hidden">
       {/* Main Editor */}
       <div className="flex-1 flex flex-col relative z-10">
         {/* Editor Top Bar - Minimal */}
@@ -333,7 +492,10 @@ export const SongEditor: React.FC<SongEditorProps> = ({
             <SectionToolbar
               onInsertSection={handleInsertSection}
               onShowSectionNav={() => setShowSectionNav(!showSectionNav)}
+              onToggleSidebar={() => setShowSectionSidebar(!showSectionSidebar)}
               hasExistingSections={sections.length > 0}
+              showSidebar={showSectionSidebar}
+              currentSection={currentSection}
             />
           </div>
           
@@ -399,6 +561,22 @@ export const SongEditor: React.FC<SongEditorProps> = ({
 
         </div>
       </div>
+      
+      {/* Section Sidebar - Persistent */}
+      {showSectionSidebar && sections.length > 0 && (
+        <div className="w-72 flex-shrink-0">
+          <SectionSidebar
+            sections={sections}
+            onJumpToSection={handleJumpToSection}
+            onAddSection={handleAddSection}
+            onDeleteSection={handleDeleteSection}
+            onRenameSection={handleRenameSection}
+            onHideSidebar={() => setShowSectionSidebar(false)}
+            currentSection={currentSection}
+            className="h-full"
+          />
+        </div>
+      )}
     </div>
   )
 }

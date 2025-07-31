@@ -134,3 +134,296 @@ mark {
   border-radius: 2px;
   font-weight: 600;
 }
+
+/* Prosody Analysis Styles */
+.prosody-indicators {
+  position: relative;
+}
+
+.prosody-line-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.5rem;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.prosody-line-wrapper.current-line {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.prosody-line-wrapper:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Line stability indicators */
+.line-number-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 1.5rem;
+  border-left: 4px solid;
+  padding-left: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-neutral-500);
+  transition: all 0.2s ease;
+}
+
+.line-number {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+/* Line ending stability classes */
+.line-stable {
+  border-left-color: var(--color-success-500) !important;
+}
+
+.line-mixed {
+  border-left-color: var(--color-warm-500) !important;
+}
+
+.line-unstable {
+  border-left-color: #ef4444 !important;
+}
+
+.stable-ending {
+  position: relative;
+}
+
+.mixed-ending {
+  position: relative;
+}
+
+.unstable-ending {
+  position: relative;
+}
+
+/* Rhyme scheme badges */
+.rhyme-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.rhyme-badge:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Rhyme scheme colors */
+.rhyme-a { background-color: var(--color-primary-500); }
+.rhyme-b { background-color: var(--color-success-500); }
+.rhyme-c { background-color: var(--color-creative-500); }
+.rhyme-d { background-color: var(--color-warm-500); }
+.rhyme-e { background-color: #ef4444; }
+.rhyme-f { background-color: #ec4899; }
+.rhyme-g { background-color: #14b8a6; }
+.rhyme-h { background-color: #f97316; }
+
+/* Line content styling */
+.line-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.line-text {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lyrics);
+  line-height: 1.5;
+}
+
+.syllable-count {
+  font-size: 0.625rem;
+  color: var(--color-neutral-400);
+  font-weight: 500;
+  padding: 0.125rem 0.375rem;
+  background-color: var(--color-neutral-100);
+  border-radius: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.prosody-line-wrapper:hover .syllable-count {
+  opacity: 1;
+}
+
+/* Rhyme connection visualization */
+.rhyme-connections {
+  position: absolute;
+  left: 3rem;
+  top: 0;
+  width: 2rem;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Section stability summary */
+.section-stability-summary {
+  background-color: var(--color-neutral-50);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 0.5rem 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.section-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-neutral-800);
+}
+
+.stability-icon {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.section-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  color: var(--color-neutral-500);
+}
+
+.stat-value {
+  font-weight: 600;
+  color: var(--color-neutral-700);
+  font-family: var(--font-mono);
+}
+
+/* Cliché highlighting */
+.cliche-highlight {
+  position: relative;
+  display: inline-block;
+}
+
+.cliche-text {
+  background-color: rgba(245, 158, 11, 0.2);
+  border-bottom: 2px dotted var(--color-warm-500);
+  cursor: help;
+}
+
+.cliche-suggestion {
+  position: absolute;
+  top: -1.5rem;
+  right: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.cliche-highlight:hover .cliche-suggestion {
+  opacity: 1;
+}
+
+.suggestion-button {
+  background-color: var(--color-warm-500);
+  color: white;
+  border: none;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.suggestion-button:hover {
+  background-color: var(--color-warm-600);
+  transform: scale(1.05);
+}
+
+/* Prosody analysis loading state */
+.prosody-analyzing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-neutral-500);
+}
+
+.prosody-analyzing::before {
+  content: '';
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid var(--color-primary-200);
+  border-top-color: var(--color-primary-600);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Enhanced Section Border Styles for Clean Unlabeled Separators */
+.section-border {
+  position: relative;
+  margin: 24px 0 16px 0;
+  padding: 0;
+  height: 1px;
+  border-top: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.section-border::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #3B82F6, transparent);
+  transition: width 0.2s ease;
+}
+
+.section-border:hover::after {
+  width: 60px;
+}
+
+/* Accessibility: Ensure section borders are announced to screen readers */
+.section-border[aria-label] {
+  position: relative;
+}
+
+/* Mobile responsive section borders */
+@media (max-width: 768px) {
+  .section-border {
+    margin: 20px 0 12px 0;
+  }
+  
+  .section-border::after {
+    width: 30px;
+  }
+  
+  .section-border:hover::after {
+    width: 45px;
+  }
+}
