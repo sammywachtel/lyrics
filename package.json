@@ -19,11 +19,19 @@
     "test:coverage": "cd frontend && npm run test:coverage",
     "frontend:test": "cd frontend && npm test"
   },
-  "keywords": ["songwriting", "ai", "lyrics", "music"],
+  "keywords": [
+    "songwriting",
+    "ai",
+    "lyrics",
+    "music"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "lint": "^0.8.19"
   }
 }
