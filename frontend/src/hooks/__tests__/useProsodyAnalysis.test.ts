@@ -4,8 +4,8 @@ import * as prosodyUtils from '../../utils/prosodyAnalysis'
 
 // Mock lodash debounce to make tests synchronous
 jest.mock('lodash', () => ({
-  debounce: (fn: any) => {
-    const debounced = (...args: any[]) => fn(...args)
+  debounce: (fn: (...args: unknown[]) => unknown) => {
+    const debounced = (...args: unknown[]) => fn(...args)
     debounced.cancel = jest.fn()
     return debounced
   },

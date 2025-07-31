@@ -660,7 +660,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({
       </div>
       
       {/* Section Sidebar - Persistent */}
-      {showSectionSidebar && sections.length > 0 && (
+      {showSectionSidebar && (
         <div className="w-72 flex-shrink-0">
           <SectionSidebar
             sections={sections}

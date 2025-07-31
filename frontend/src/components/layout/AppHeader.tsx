@@ -57,7 +57,7 @@ export function AppHeader({
   panelState, 
   currentSong, 
   onSearch, 
-  onViewChange: _onViewChange,
+  // onViewChange is unused in this component but required by interface
   saveStatus = 'saved',
   isEditorMode = false,
   onBack,

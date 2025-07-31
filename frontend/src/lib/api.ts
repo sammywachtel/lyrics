@@ -96,7 +96,7 @@ export interface Song {
   status: 'draft' | 'in_progress' | 'completed' | 'archived'
   tags: string[]
   settings: SongSettings
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
   created_at: string
   updated_at: string
 }
@@ -108,7 +108,7 @@ export interface SongCreate {
   status: 'draft' | 'in_progress' | 'completed' | 'archived'
   tags: string[]
   settings?: SongSettings
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
 }
 
 export interface SongUpdate {
@@ -118,7 +118,7 @@ export interface SongUpdate {
   status?: 'draft' | 'in_progress' | 'completed' | 'archived'
   tags?: string[]
   settings?: SongSettings
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface SongSettingsUpdate {
@@ -270,8 +270,8 @@ class ApiClient {
   }
 
   // Health check
-  async healthCheck(): Promise<any> {
-    return this.request<any>('/health')
+  async healthCheck(): Promise<{ status: string; timestamp: string; database: string }> {
+    return this.request<{ status: string; timestamp: string; database: string }>('/health')
   }
 }
 

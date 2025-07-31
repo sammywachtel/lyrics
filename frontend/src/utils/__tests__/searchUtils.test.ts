@@ -8,6 +8,7 @@ import {
   highlightMatches
 } from '../searchUtils'
 import type { Song } from '../../lib/api'
+import { createDefaultSettings } from '../../lib/api'
 
 // Mock songs for testing
 const mockSongs: Song[] = [
@@ -21,7 +22,7 @@ const mockSongs: Song[] = [
     tags: ['love', 'ballad'],
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-02T00:00:00Z',
-    settings: {} as any,
+    settings: createDefaultSettings(),
     metadata: {}
   },
   {
@@ -34,7 +35,7 @@ const mockSongs: Song[] = [
     tags: ['rock', 'anthem'],
     created_at: '2024-01-03T00:00:00Z',
     updated_at: '2024-01-04T00:00:00Z',
-    settings: {} as any,
+    settings: createDefaultSettings(),
     metadata: {}
   },
   {
@@ -47,7 +48,7 @@ const mockSongs: Song[] = [
     tags: ['acoustic', 'folk'],
     created_at: '2024-01-05T00:00:00Z',
     updated_at: '2024-01-05T00:00:00Z',
-    settings: {} as any,
+    settings: createDefaultSettings(),
     metadata: {}
   }
 ]

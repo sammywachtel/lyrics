@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear state anyway
       setSession(null)
       setUser(null)
-      return { error: error as any }
+      return { error: error instanceof Error ? error : new Error('Unknown error') }
     }
   }
 
