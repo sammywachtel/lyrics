@@ -97,7 +97,7 @@ export function useProsodyAnalysis({
     // }
     // return analysis.lines[currentLineIndex];
     return null; // Disabled for now
-  }, [analysis]);
+  }, []);
 
   // Manual refresh function
   const refreshAnalysis = useCallback(() => {

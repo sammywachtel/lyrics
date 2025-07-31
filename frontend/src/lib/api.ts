@@ -9,7 +9,7 @@ const getApiBaseUrl = (): string => {
   
   // In Vite environment, use import.meta.env (this won't be processed by Jest)
   try {
-    // @ts-ignore - Jest will not process this line
+    // @ts-expect-error - Jest will not process this line
     return import.meta.env.VITE_API_URL || 'http://localhost:8001'
   } catch {
     // Fallback for any other environment
