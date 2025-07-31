@@ -17,6 +17,7 @@ jest.mock('../../lib/api', () => ({
 
 // Mock the SimpleWysiwygEditor component
 jest.mock('../SimpleWysiwygEditor', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react')
   
   const MockEditor = React.forwardRef(({ value, onChange, placeholder }, ref) => {
