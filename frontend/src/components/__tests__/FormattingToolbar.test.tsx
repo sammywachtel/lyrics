@@ -194,7 +194,7 @@ describe('FormattingToolbar', () => {
       HTMLTextAreaElement.prototype.addEventListener = jest.fn((type, listener) => {
         if (type === 'keydown') {
           // Store the keydown listener for testing
-          (HTMLTextAreaElement.prototype as any).keydownListener = listener
+          (HTMLTextAreaElement.prototype as HTMLTextAreaElement & { keydownListener?: EventListener }).keydownListener = listener
         }
       })
       
@@ -222,7 +222,7 @@ describe('FormattingToolbar', () => {
       } as KeyboardEvent
       
       // Call the stored keydown listener
-      const listener = (HTMLTextAreaElement.prototype as any).keydownListener
+      const listener = (HTMLTextAreaElement.prototype as HTMLTextAreaElement & { keydownListener?: EventListener }).keydownListener
       if (listener) {
         listener(keydownEvent)
       }

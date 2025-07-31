@@ -4,7 +4,7 @@ import { createDefaultSettings, apiClient } from '../lib/api'
 import SectionToolbar from './SectionToolbar'
 import SectionNavigation from './SectionNavigation'
 import SectionSidebar from './editor/SectionSidebar'
-import SimpleWysiwygEditor from './SimpleWysiwygEditor'
+import SimpleWysiwygEditor, { type SimpleWysiwygEditorRef } from './SimpleWysiwygEditor'
 import { parseSections, getSectionAtLine } from '../utils/sectionUtils'
 import { getWordCount } from '../utils/textFormatting'
 
@@ -44,7 +44,8 @@ export const SongEditor: React.FC<SongEditorProps> = ({
   const [sections, setSections] = useState<ReturnType<typeof parseSections>>([])
   const [currentSection, setCurrentSection] = useState<string>('')
   
-  const wysiwygEditorRef = useRef<HTMLDivElement>(null)
+  
+  const wysiwygEditorRef = useRef<SimpleWysiwygEditorRef>(null)
   const isMountedRef = useRef(true)
   const handleSaveRef = useRef<(() => Promise<void>) | null>(null)
 
@@ -220,10 +221,15 @@ export const SongEditor: React.FC<SongEditorProps> = ({
   useEffect(() => {
     const parsedSections = parseSections(lyrics)
     setSections(parsedSections)
-  }, [lyrics])
+    
+    // Reset current section if it no longer exists
+    if (currentSection && !parsedSections.find(s => s.name === currentSection)) {
+      setCurrentSection('')
+    }
+  }, [lyrics, currentSection])
 
   // Update current section based on cursor position
-  const updateCurrentSection = useCallback(() => {
+  const updateCurrentSection = useCallback(() => {    
     if (sections.length === 0) {
       if (currentSection !== '') {
         setCurrentSection('')
@@ -237,9 +243,12 @@ export const SongEditor: React.FC<SongEditorProps> = ({
     }
     
     try {
-      // Find the editor element (either WYSIWYG or textarea)
-      const editorElement = wysiwygEditorRef.current?.querySelector('.wysiwyg-editor') || 
-                           wysiwygEditorRef.current?.querySelector('textarea')
+      // Get the correct editor element from the ref
+      const editorElement = wysiwygEditorRef.current?.isSourceMode() 
+        ? wysiwygEditorRef.current?.getTextareaElement()
+        : wysiwygEditorRef.current?.getWysiwygElement()
+      
+      if (!editorElement) return
       
       if (!editorElement) return
 
@@ -255,7 +264,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({
         const range = selection.getRangeAt(0)
         
         // Try to find the prosody line element containing the cursor
-        let targetNode = range.startContainer
+        let targetNode: Node | null = range.startContainer
         let prosodyLine: HTMLElement | null = null
         
         // Walk up the DOM tree to find the prosody line
@@ -377,9 +386,15 @@ export const SongEditor: React.FC<SongEditorProps> = ({
       return
     }
     
-    // Find the editor element
-    const editorElement = wysiwygEditorRef.current?.querySelector('.wysiwyg-editor') || 
-                         wysiwygEditorRef.current?.querySelector('textarea')
+    // Get the correct editor element from the ref
+    const editorElement = wysiwygEditorRef.current?.isSourceMode() 
+      ? wysiwygEditorRef.current?.getTextareaElement()
+      : wysiwygEditorRef.current?.getWysiwygElement()
+    
+    if (!editorElement) {
+      console.warn('Editor element not found')
+      return
+    }
     
     if (!editorElement) {
       console.warn('Editor element not found')
@@ -484,7 +499,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({
           selection?.removeAllRanges()
           selection?.addRange(range)
           
-          console.log('Jumped to section:', sectionName, 'at line:', section.startLine)
+          // Section jump completed
         } else {
           console.warn('Could not find target element for section:', sectionName)
         }
@@ -583,6 +598,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({
           {/* Lyrics Editor - Fills Available Height */}
           <div className="flex-1 relative overflow-hidden">
             <SimpleWysiwygEditor
+              ref={wysiwygEditorRef}
               value={lyrics}
               onChange={handleLyricsChange}
               onSelectionChange={updateCurrentSection}

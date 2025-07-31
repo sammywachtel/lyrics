@@ -41,7 +41,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   const convertToMarkdown = useCallback((html: string) => {
     if (!html) return ''
     
-    let markdown = html
+    const markdown = html
       // Convert <br> tags back to line breaks
       .replace(/<br\s*\/?>/gi, '\n')
       // Convert HTML tags to markdown
@@ -67,7 +67,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     if (sourceText !== value) {
       setSourceText(value)
     }
-  }, [value])
+  }, [value, sourceText])
 
   // Update editor content when value changes externally
   useEffect(() => {
@@ -90,7 +90,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         editorRef.current.innerHTML = htmlContent
       }
     }
-  }, [editorRef.current, convertToHtml, isSourceMode, value])
+  }, [convertToHtml, isSourceMode, value])
 
   // Handle content changes in WYSIWYG mode
   const handleWysiwygChange = useCallback(() => {

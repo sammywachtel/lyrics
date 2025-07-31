@@ -53,7 +53,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
           title,
           artist: artist || undefined,
           lyrics,
-          status: status as any,
+          status,
           tags: tagArray,
           metadata: {}
         }
@@ -64,7 +64,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
           title,
           artist: artist || undefined,
           lyrics,
-          status: status as any,
+          status,
           tags: tagArray,
           settings: createDefaultSettings(),
           metadata: {}
@@ -123,7 +123,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
           id="status"
           className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 bg-white"
           value={status}
-          onChange={(e) => setStatus(e.target.value as any)}
+          onChange={(e) => setStatus(e.target.value as 'draft' | 'in_progress' | 'completed' | 'archived')}
         >
           <option value="draft">Draft</option>
           <option value="in_progress">In Progress</option>

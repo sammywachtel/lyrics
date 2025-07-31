@@ -160,10 +160,10 @@ function SettingsContent({ settings, onSettingsChange, activeTab, collapsedSecti
   }, [settings, onSettingsChange])
 
   // Handle nested object updates
-  const updateNestedSettings = useCallback(<T extends Record<string, any>>(
+  const updateNestedSettings = useCallback(<T extends Record<string, unknown>>(
     parentKey: keyof SongSettings,
     childKey: keyof T,
-    value: any
+    value: unknown
   ) => {
     const parentValue = settings[parentKey] as T
     updateSettings(parentKey, {
@@ -248,7 +248,7 @@ function SettingsContent({ settings, onSettingsChange, activeTab, collapsedSecti
               </label>
               <select
                 value={settings.narrative_pov}
-                onChange={(e) => updateSettings('narrative_pov', e.target.value as any)}
+                onChange={(e) => updateSettings('narrative_pov', e.target.value as 'first_person' | 'second_person' | 'third_person' | 'omniscient' | 'epistolary' | 'apostrophe')}
                 className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 {NARRATIVE_POV_OPTIONS.map(option => (
@@ -291,8 +291,8 @@ function SettingsContent({ settings, onSettingsChange, activeTab, collapsedSecti
                     </label>
                     <input
                       type="text"
-                      value={(settings.six_best_friends as any)[key] || ''}
-                      onChange={(e) => updateNestedSettings('six_best_friends', key as any, e.target.value || undefined)}
+                      value={(settings.six_best_friends as Record<string, string | undefined>)[key] || ''}
+                      onChange={(e) => updateNestedSettings('six_best_friends', key as keyof typeof settings.six_best_friends, e.target.value || undefined)}
                       placeholder={placeholder}
                       className="w-full border border-neutral-300 rounded-lg px-2 py-1.5 text-xs bg-white focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                     />
@@ -412,7 +412,7 @@ function SettingsContent({ settings, onSettingsChange, activeTab, collapsedSecti
                       />
                       <select
                         value={section.type}
-                        onChange={(e) => updateSectionStructure(index, 'type', e.target.value as any)}
+                        onChange={(e) => updateSectionStructure(index, 'type', e.target.value)}
                         className="border border-neutral-300 rounded px-2 py-1 text-xs bg-white focus:ring-1 focus:ring-primary-500"
                       >
                         {SECTION_TYPE_OPTIONS.map(option => (
@@ -666,8 +666,8 @@ function SettingsContent({ settings, onSettingsChange, activeTab, collapsedSecti
 
 // Sub-components for complex tabs
 interface KeywordSettingsTabProps {
-  settings: any
-  onUpdate: (settings: any) => void
+  settings: SongSettings
+  onUpdate: (settings: SongSettings) => void
 }
 
 const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpdate }) => {
@@ -849,8 +849,8 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
 }
 
 interface StyleSettingsTabProps {
-  settings: any
-  onUpdate: (settings: any) => void
+  settings: SongSettings
+  onUpdate: (settings: SongSettings) => void
 }
 
 const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate }) => {

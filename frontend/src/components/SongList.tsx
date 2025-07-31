@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { Song } from '../lib/api'
 import { apiClient } from '../lib/api'
 import { SongCard } from './SongCard'
@@ -22,7 +22,7 @@ export function SongList({ onEditSong }: SongListProps) {
   const [isSearching, setIsSearching] = useState(false)
 
 
-  const loadSongs = async () => {
+  const loadSongs = useCallback(async () => {
     try {
       setLoading(true)
       const response = await apiClient.listSongs()
@@ -37,11 +37,11 @@ export function SongList({ onEditSong }: SongListProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentSearch])
 
   useEffect(() => {
     loadSongs()
-  }, [])
+  }, [loadSongs])
 
   const handleSongCreated = () => {
     setShowCreateForm(false)

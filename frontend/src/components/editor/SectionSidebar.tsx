@@ -43,7 +43,7 @@ export const SectionSidebar: React.FC<SectionSidebarProps> = ({
   onAddSection,
   onDeleteSection,
   onRenameSection,
-  onReorderSections,
+  // onReorderSections, // Future feature - section reordering
   onHideSidebar,
   currentSection,
   className = ''
@@ -161,7 +161,7 @@ export const SectionSidebar: React.FC<SectionSidebarProps> = ({
                   <button
                     onClick={(e) => {
                       e.preventDefault()
-                      console.log('Jumping to section:', section.name)
+                      // Jump to section
                       onJumpToSection(section.name)
                     }}
                     className="w-full text-left focus:outline-none"

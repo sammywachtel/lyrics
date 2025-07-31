@@ -15,17 +15,26 @@ interface SimpleWysiwygEditorProps {
   showRhymeScheme?: boolean
 }
 
-export const SimpleWysiwygEditor: React.FC<SimpleWysiwygEditorProps> = ({
-  value,
-  onChange,
-  onSelectionChange,
-  placeholder = 'Start typing...',
-  className = '',
-  rows = 24,
-  showProsodyAnalysis = true,
-  showStabilityIndicators = true,
-  showRhymeScheme = true
-}) => {
+export interface SimpleWysiwygEditorRef {
+  getTextareaElement: () => HTMLTextAreaElement | null
+  getWysiwygElement: () => HTMLDivElement | null
+  isSourceMode: () => boolean
+}
+
+export const SimpleWysiwygEditor = React.forwardRef<SimpleWysiwygEditorRef, SimpleWysiwygEditorProps>((
+  {
+    value,
+    onChange,
+    onSelectionChange,
+    placeholder = 'Start typing...',
+    className = '',
+    rows = 24,
+    showProsodyAnalysis = true,
+    showStabilityIndicators = true,
+    showRhymeScheme = true
+  },
+  forwardedRef
+) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const wysiwygRef = useRef<HTMLDivElement>(null)
   const [isSourceMode, setIsSourceMode] = useState(false)
@@ -44,30 +53,6 @@ export const SimpleWysiwygEditor: React.FC<SimpleWysiwygEditorProps> = ({
     }
   })
 
-  // Get section icon and color for visual headers
-  const getSectionIcon = useCallback((sectionName: string): string => {
-    const lowerName = sectionName.toLowerCase()
-    if (lowerName.includes('verse')) return '📝'
-    if (lowerName.includes('chorus') || lowerName.includes('hook')) return '🎵'
-    if (lowerName.includes('bridge')) return '🌉'
-    if (lowerName.includes('pre') || lowerName.includes('prechorus')) return '🔄'
-    if (lowerName.includes('intro')) return '🎬'
-    if (lowerName.includes('outro') || lowerName.includes('end')) return '🎭'
-    if (lowerName.includes('breakdown') || lowerName.includes('break')) return '⚡'
-    return '🎼'
-  }, [])
-  
-  const getSectionColor = useCallback((sectionName: string): string => {
-    const lowerName = sectionName.toLowerCase()
-    if (lowerName.includes('verse')) return 'from-blue-100 to-blue-200 text-blue-800 border-blue-300'
-    if (lowerName.includes('chorus') || lowerName.includes('hook')) return 'from-green-100 to-green-200 text-green-800 border-green-300'
-    if (lowerName.includes('bridge')) return 'from-amber-100 to-amber-200 text-amber-800 border-amber-300'
-    if (lowerName.includes('pre') || lowerName.includes('prechorus')) return 'from-purple-100 to-purple-200 text-purple-800 border-purple-300'
-    if (lowerName.includes('intro')) return 'from-cyan-100 to-cyan-200 text-cyan-800 border-cyan-300'
-    if (lowerName.includes('outro') || lowerName.includes('end')) return 'from-rose-100 to-rose-200 text-rose-800 border-rose-300'
-    if (lowerName.includes('breakdown') || lowerName.includes('break')) return 'from-orange-100 to-orange-200 text-orange-800 border-orange-300'
-    return 'from-neutral-100 to-neutral-200 text-neutral-800 border-neutral-300'
-  }, [])
 
   // Convert markdown to HTML for display with prosody indicators
   const convertToHtml = useCallback((text: string, lineAnalyses?: LineAnalysis[]) => {
@@ -115,7 +100,7 @@ export const SimpleWysiwygEditor: React.FC<SimpleWysiwygEditorProps> = ({
     }
     
     return html
-  }, [showProsodyAnalysis, getSectionIcon, getSectionColor])
+  }, [showProsodyAnalysis])
 
   // Convert HTML back to markdown
   const convertToMarkdown = useCallback((html: string) => {
@@ -127,7 +112,7 @@ export const SimpleWysiwygEditor: React.FC<SimpleWysiwygEditorProps> = ({
     // Convert section borders back to bracket format
     processedHtml = processedHtml.replace(
       /<div class="section-border"[^>]*data-section="([^"]+)"[^>]*><\/div>/gi, 
-      '[\$1]'
+      '[$1]'
     )
     
     // Extract text from prosody line divs, preserving line breaks
@@ -354,6 +339,13 @@ export const SimpleWysiwygEditor: React.FC<SimpleWysiwygEditorProps> = ({
   }, [isSourceMode, formatBold, formatItalic, formatUnderline, handleWysiwygChange])
 
   const minHeight = `${rows * 1.5}rem`
+
+  // Expose both textarea and wysiwyg refs to parent
+  React.useImperativeHandle(forwardedRef, () => ({
+    getTextareaElement: () => textareaRef.current,
+    getWysiwygElement: () => wysiwygRef.current,
+    isSourceMode: () => isSourceMode
+  } as SimpleWysiwygEditorRef), [isSourceMode])
 
   return (
     <div className="relative h-full flex flex-col">
@@ -592,6 +584,9 @@ Use **bold**, *italic*, and _underline_ for formatting!`}
       </div>
     </div>
   )
-}
+})
+
+// Add display name for debugging
+SimpleWysiwygEditor.displayName = 'SimpleWysiwygEditor'
 
 export default SimpleWysiwygEditor

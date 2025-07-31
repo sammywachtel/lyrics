@@ -214,7 +214,7 @@ export function detectRhymeScheme(lines: LineAnalysis[]): { scheme: string; conn
         assigned = true;
         
         // Add to connections
-        let connection = connections.find(c => c.lines.includes(i));
+        const connection = connections.find(c => c.lines.includes(i));
         if (connection) {
           if (!connection.lines.includes(index)) {
             connection.lines.push(index);

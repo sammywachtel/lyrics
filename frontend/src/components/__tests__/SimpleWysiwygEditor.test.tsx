@@ -1,6 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen, waitFor } from '@testing-library/react'
 import SimpleWysiwygEditor from '../SimpleWysiwygEditor'
 
 // Mock the prosody analysis hook

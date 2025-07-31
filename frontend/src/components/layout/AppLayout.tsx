@@ -124,6 +124,3 @@ export function AppLayout({
   )
 }
 
-// Re-export the hook for consumers
-export { usePanelState } from '../../hooks/usePanelState'
-export type { PanelState } from '../../hooks/usePanelState'

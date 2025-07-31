@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { SimpleWysiwygEditor } from '../SimpleWysiwygEditor'
@@ -235,7 +235,7 @@ describe.skip('SimpleWysiwygEditor Integration Tests', () => {
     it('should preserve content when switching modes', async () => {
       const user = userEvent.setup()
       
-      const { rerender } = render(
+      render(
         <SimpleWysiwygEditor
           value="**Bold** text"
           onChange={mockOnChange}

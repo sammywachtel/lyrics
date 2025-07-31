@@ -40,10 +40,10 @@ export const SongSettingsPanel: React.FC<SongSettingsPanelProps> = ({
   }, [settings, onSettingsChange])
 
   // Handle nested object updates
-  const updateNestedSettings = useCallback(<T extends Record<string, any>>(
+  const updateNestedSettings = useCallback(<T extends Record<string, unknown>>(
     parentKey: keyof SongSettings,
     childKey: keyof T,
-    value: any
+    value: unknown
   ) => {
     const parentValue = settings[parentKey] as T
     updateSettings(parentKey, {
@@ -85,7 +85,7 @@ export const SongSettingsPanel: React.FC<SongSettingsPanelProps> = ({
     childKey: string,
     value: string[]
   ) => {
-    updateNestedSettings(parentKey, childKey as any, value)
+    updateNestedSettings(parentKey, childKey as keyof typeof parentKey, value)
   }, [updateNestedSettings])
 
   // Add/remove from arrays
@@ -94,7 +94,7 @@ export const SongSettingsPanel: React.FC<SongSettingsPanelProps> = ({
     childKey: string,
     value: string
   ) => {
-    const current = (settings[parentKey] as any)[childKey] as string[]
+    const current = (settings[parentKey] as Record<string, string[]>)[childKey]
     if (!current.includes(value)) {
       updateArrayField(parentKey, childKey, [...current, value])
     }
@@ -105,7 +105,7 @@ export const SongSettingsPanel: React.FC<SongSettingsPanelProps> = ({
     childKey: string,
     value: string
   ) => {
-    const current = (settings[parentKey] as any)[childKey] as string[]
+    const current = (settings[parentKey] as Record<string, string[]>)[childKey]
     updateArrayField(parentKey, childKey, current.filter(item => item !== value))
   }, [settings, updateArrayField])
 
@@ -195,7 +195,7 @@ export const SongSettingsPanel: React.FC<SongSettingsPanelProps> = ({
               </label>
               <select
                 value={settings.narrative_pov}
-                onChange={(e) => updateSettings('narrative_pov', e.target.value as any)}
+                onChange={(e) => updateSettings('narrative_pov', e.target.value as 'first_person' | 'second_person' | 'third_person' | 'omniscient' | 'epistolary' | 'apostrophe')}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 bg-white"
               >
                 {NARRATIVE_POV_OPTIONS.map(option => (
@@ -238,8 +238,8 @@ export const SongSettingsPanel: React.FC<SongSettingsPanelProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={(settings.six_best_friends as any)[key] || ''}
-                      onChange={(e) => updateNestedSettings('six_best_friends', key as any, e.target.value || undefined)}
+                      value={(settings.six_best_friends as Record<string, string | undefined>)[key] || ''}
+                      onChange={(e) => updateNestedSettings('six_best_friends', key as keyof typeof settings.six_best_friends, e.target.value || undefined)}
                       placeholder={placeholder}
                       className="w-full border border-gray-300 rounded-md px-2 py-1 text-xs text-gray-900 bg-white"
                     />
@@ -308,7 +308,7 @@ export const SongSettingsPanel: React.FC<SongSettingsPanelProps> = ({
                       />
                       <select
                         value={section.type}
-                        onChange={(e) => updateSectionStructure(index, 'type', e.target.value as any)}
+                        onChange={(e) => updateSectionStructure(index, 'type', e.target.value)}
                         className="border border-gray-300 rounded px-2 py-1 text-xs"
                       >
                         {SECTION_TYPE_OPTIONS.map(option => (
@@ -623,8 +623,8 @@ export const SongSettingsPanel: React.FC<SongSettingsPanelProps> = ({
 
 // Keyword Settings Sub-component
 const KeywordSettingsTab: React.FC<{
-  settings: any
-  onUpdate: (settings: any) => void
+  settings: SongSettings
+  onUpdate: (settings: SongSettings) => void
 }> = ({ settings, onUpdate }) => {
   const [newKeyword, setNewKeyword] = useState('')
   const [newMetaphor, setNewMetaphor] = useState('')
@@ -807,8 +807,8 @@ const KeywordSettingsTab: React.FC<{
 
 // Style Settings Sub-component
 const StyleSettingsTab: React.FC<{
-  settings: any
-  onUpdate: (settings: any) => void
+  settings: SongSettings
+  onUpdate: (settings: SongSettings) => void
 }> = ({ settings, onUpdate }) => {
   const [newGenre, setNewGenre] = useState('')
   const [newArtist, setNewArtist] = useState('')
