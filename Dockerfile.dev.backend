@@ -1,0 +1,31 @@
+# Development Dockerfile for backend with hot-reloading
+FROM python:3.11-slim
+
+# Install dependencies for development
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    curl \
+    dumb-init \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements
+COPY backend/requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Expose port
+EXPOSE 8001
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8001", "--log-level", "debug"]

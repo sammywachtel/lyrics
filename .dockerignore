@@ -1,0 +1,55 @@
+# Git
+.git
+.gitignore
+.github
+
+# Docker
+.dockerignore
+Dockerfile*
+docker-compose*
+
+# Node.js
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Build directories
+frontend/dist/
+frontend/build/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Documentation
+docs/
+
+# Other
+.DS_Store
+*.pem
+*.log
+README.md
+LICENSE
