@@ -11,7 +11,7 @@ POOL_ID="github-actions-pool"
 PROVIDER_ID="github-actions-provider"
 SA_NAME="github-actions-sa"
 SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
-GITHUB_REPO="samwachtel/lyrics"  # Update with your actual GitHub repo
+GITHUB_REPO="sammywachtel/lyrics"  # Update with your actual GitHub repo
 
 echo "🚀 Setting up Google Cloud authentication for GitHub Actions..."
 echo "Project ID: $PROJECT_ID"
