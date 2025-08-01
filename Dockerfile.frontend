@@ -27,8 +27,7 @@ FROM nginx:1.25-alpine
 # Install security updates and dumb-init
 RUN apk update && apk upgrade && apk add --no-cache dumb-init
 
-# Create non-root user for nginx
-RUN addgroup -g 1001 -S nginx && adduser -S nginx -u 1001 -G nginx
+# Use existing nginx user (no need to create as it already exists in nginx:alpine)
 
 # Copy built application
 COPY --from=build --chown=nginx:nginx /app/dist /usr/share/nginx/html

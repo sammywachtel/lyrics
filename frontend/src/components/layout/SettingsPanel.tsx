@@ -858,10 +858,13 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
   const [newArtist, setNewArtist] = useState('')
 
   const addGenre = () => {
-    if (newGenre.trim() && !settings.sub_genres.includes(newGenre.trim())) {
+    if (newGenre.trim() && !settings.style_guide.sub_genres.includes(newGenre.trim())) {
       onUpdate({
         ...settings,
-        sub_genres: [...settings.sub_genres, newGenre.trim()]
+        style_guide: {
+          ...settings.style_guide,
+          sub_genres: [...settings.style_guide.sub_genres, newGenre.trim()]
+        }
       })
       setNewGenre('')
     }
@@ -870,15 +873,21 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
   const removeGenre = (genre: string) => {
     onUpdate({
       ...settings,
-      sub_genres: settings.sub_genres.filter((g: string) => g !== genre)
+      style_guide: {
+        ...settings.style_guide,
+        sub_genres: settings.style_guide.sub_genres.filter((g: string) => g !== genre)
+      }
     })
   }
 
   const addArtist = () => {
-    if (newArtist.trim() && !settings.artist_references.includes(newArtist.trim())) {
+    if (newArtist.trim() && !settings.style_guide.artist_references.includes(newArtist.trim())) {
       onUpdate({
         ...settings,
-        artist_references: [...settings.artist_references, newArtist.trim()]
+        style_guide: {
+          ...settings.style_guide,
+          artist_references: [...settings.style_guide.artist_references, newArtist.trim()]
+        }
       })
       setNewArtist('')
     }
@@ -887,7 +896,10 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
   const removeArtist = (artist: string) => {
     onUpdate({
       ...settings,
-      artist_references: settings.artist_references.filter((a: string) => a !== artist)
+      style_guide: {
+        ...settings.style_guide,
+        artist_references: settings.style_guide.artist_references.filter((a: string) => a !== artist)
+      }
     })
   }
 
@@ -900,8 +912,8 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
         </label>
         <input
           type="text"
-          value={settings.primary_genre || ''}
-          onChange={(e) => onUpdate({ ...settings, primary_genre: e.target.value || undefined })}
+          value={settings.style_guide.primary_genre || ''}
+          onChange={(e) => onUpdate({ ...settings, style_guide: { ...settings.style_guide, primary_genre: e.target.value || undefined } })}
           placeholder="e.g., Pop, Rock, Country, etc."
           className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         />
@@ -929,7 +941,7 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
           </button>
         </div>
         <div className="flex flex-wrap gap-1">
-          {settings.sub_genres.map((genre: string) => (
+          {settings.style_guide.sub_genres.map((genre: string) => (
             <span
               key={genre}
               className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-warm-100 text-warm-800 border border-warm-200"
@@ -968,7 +980,7 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
           </button>
         </div>
         <div className="flex flex-wrap gap-1">
-          {settings.artist_references.map((artist: string) => (
+          {settings.style_guide.artist_references.map((artist: string) => (
             <span
               key={artist}
               className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-neutral-100 text-neutral-800 border border-neutral-200"
@@ -988,14 +1000,14 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
       {/* Innovation Level */}
       <div>
         <label className="block text-sm font-medium text-neutral-700 mb-2">
-          Innovation vs. Tradition: {settings.innovation_level}
+          Innovation vs. Tradition: {settings.style_guide.innovation_level}
         </label>
         <input
           type="range"
           min="1"
           max="10"
-          value={settings.innovation_level}
-          onChange={(e) => onUpdate({ ...settings, innovation_level: parseInt(e.target.value) })}
+          value={settings.style_guide.innovation_level}
+          onChange={(e) => onUpdate({ ...settings, style_guide: { ...settings.style_guide, innovation_level: parseInt(e.target.value) } })}
           className="w-full accent-primary-500"
         />
         <div className="flex justify-between text-xs text-neutral-500 mt-1">
@@ -1009,8 +1021,8 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
         <label className="flex items-center">
           <input
             type="checkbox"
-            checked={settings.avoid_cliches}
-            onChange={(e) => onUpdate({ ...settings, avoid_cliches: e.target.checked })}
+            checked={settings.style_guide.avoid_cliches}
+            onChange={(e) => onUpdate({ ...settings, style_guide: { ...settings.style_guide, avoid_cliches: e.target.checked } })}
             className="rounded border-neutral-300 text-primary-600 mr-2 focus:ring-primary-500"
           />
           <span className="text-sm text-neutral-700">Avoid common genre cliches</span>
