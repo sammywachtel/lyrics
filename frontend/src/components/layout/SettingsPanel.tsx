@@ -676,10 +676,13 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
   const [newAvoidWord, setNewAvoidWord] = useState('')
 
   const addKeyword = () => {
-    if (newKeyword.trim() && !settings.primary_keywords.includes(newKeyword.trim())) {
+    if (newKeyword.trim() && !settings.keyword_settings.primary_keywords.includes(newKeyword.trim())) {
       onUpdate({
         ...settings,
-        primary_keywords: [...settings.primary_keywords, newKeyword.trim()]
+        keyword_settings: {
+          ...settings.keyword_settings,
+          primary_keywords: [...settings.keyword_settings.primary_keywords, newKeyword.trim()]
+        }
       })
       setNewKeyword('')
     }
@@ -688,15 +691,21 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
   const removeKeyword = (keyword: string) => {
     onUpdate({
       ...settings,
-      primary_keywords: settings.primary_keywords.filter((k: string) => k !== keyword)
+      keyword_settings: {
+        ...settings.keyword_settings,
+        primary_keywords: settings.keyword_settings.primary_keywords.filter((k: string) => k !== keyword)
+      }
     })
   }
 
   const addMetaphor = () => {
-    if (newMetaphor.trim() && !settings.metaphor_themes.includes(newMetaphor.trim())) {
+    if (newMetaphor.trim() && !settings.keyword_settings.metaphor_themes.includes(newMetaphor.trim())) {
       onUpdate({
         ...settings,
-        metaphor_themes: [...settings.metaphor_themes, newMetaphor.trim()]
+        keyword_settings: {
+          ...settings.keyword_settings,
+          metaphor_themes: [...settings.keyword_settings.metaphor_themes, newMetaphor.trim()]
+        }
       })
       setNewMetaphor('')
     }
@@ -705,15 +714,21 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
   const removeMetaphor = (metaphor: string) => {
     onUpdate({
       ...settings,
-      metaphor_themes: settings.metaphor_themes.filter((m: string) => m !== metaphor)
+      keyword_settings: {
+        ...settings.keyword_settings,
+        metaphor_themes: settings.keyword_settings.metaphor_themes.filter((m: string) => m !== metaphor)
+      }
     })
   }
 
   const addAvoidWord = () => {
-    if (newAvoidWord.trim() && !settings.avoid_words.includes(newAvoidWord.trim())) {
+    if (newAvoidWord.trim() && !settings.keyword_settings.avoid_words.includes(newAvoidWord.trim())) {
       onUpdate({
         ...settings,
-        avoid_words: [...settings.avoid_words, newAvoidWord.trim()]
+        keyword_settings: {
+          ...settings.keyword_settings,
+          avoid_words: [...settings.keyword_settings.avoid_words, newAvoidWord.trim()]
+        }
       })
       setNewAvoidWord('')
     }
@@ -722,7 +737,10 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
   const removeAvoidWord = (word: string) => {
     onUpdate({
       ...settings,
-      avoid_words: settings.avoid_words.filter((w: string) => w !== word)
+      keyword_settings: {
+        ...settings.keyword_settings,
+        avoid_words: settings.keyword_settings.avoid_words.filter((w: string) => w !== word)
+      }
     })
   }
 
@@ -750,7 +768,7 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
           </button>
         </div>
         <div className="flex flex-wrap gap-1">
-          {settings.primary_keywords.map((keyword: string) => (
+          {settings.keyword_settings.primary_keywords.map((keyword: string) => (
             <span
               key={keyword}
               className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-100 text-primary-800 border border-primary-200"
@@ -789,7 +807,7 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
           </button>
         </div>
         <div className="flex flex-wrap gap-1">
-          {settings.metaphor_themes.map((metaphor: string) => (
+          {settings.keyword_settings.metaphor_themes.map((metaphor: string) => (
             <span
               key={metaphor}
               className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-creative-100 text-creative-800 border border-creative-200"
@@ -828,7 +846,7 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
           </button>
         </div>
         <div className="flex flex-wrap gap-1">
-          {settings.avoid_words.map((word: string) => (
+          {settings.keyword_settings.avoid_words.map((word: string) => (
             <span
               key={word}
               className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 border border-red-200"

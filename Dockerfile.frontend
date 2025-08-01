@@ -1,5 +1,5 @@
 # Multi-stage build for optimized frontend container
-FROM node:20-alpine as build
+FROM node:20-alpine AS build
 
 # Install security updates
 RUN apk update && apk upgrade && apk add --no-cache dumb-init
@@ -12,8 +12,8 @@ WORKDIR /app
 # Copy package files with proper ownership
 COPY --chown=nextjs:nodejs frontend/package*.json ./
 
-# Install dependencies with npm ci for faster, reliable builds
-RUN npm ci --only=production && npm cache clean --force
+# Install dependencies with npm ci for faster, reliable builds (include devDependencies for build tools)
+RUN npm ci && npm cache clean --force
 
 # Copy source code with proper ownership
 COPY --chown=nextjs:nodejs frontend/ .
