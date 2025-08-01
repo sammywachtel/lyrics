@@ -186,7 +186,7 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
     if (!textarea) return
 
     const handleKeyDownEvent = (e: KeyboardEvent) => {
-      handleKeyDown(e as React.KeyboardEvent<HTMLTextAreaElement>)
+      handleKeyDown(e as unknown as React.KeyboardEvent<HTMLTextAreaElement>)
     }
 
     const handleSelectionChange = () => {

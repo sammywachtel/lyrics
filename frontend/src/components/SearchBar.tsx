@@ -38,7 +38,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   }, [filters, onSearch])
 
   // Handle filter changes
-  const handleFilterChange = useCallback((key: keyof SearchFilters, value: string | boolean) => {
+  const handleFilterChange = useCallback((key: keyof SearchFilters, value: string | boolean | string[]) => {
     const newFilters = { ...filters, [key]: value }
     setFilters(newFilters)
     onSearch(newFilters)

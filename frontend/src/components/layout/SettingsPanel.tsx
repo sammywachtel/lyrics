@@ -4,6 +4,10 @@ import type { PanelState } from '../../hooks/usePanelState'
 import type { 
   SongSettings, 
   SectionStructure,
+  KeywordSettings,
+  StyleGuide,
+  NarrativePOV,
+  SectionType
 } from '../../lib/api'
 import {
   createDefaultSectionStructure,
@@ -248,7 +252,7 @@ function SettingsContent({ settings, onSettingsChange, activeTab, collapsedSecti
               </label>
               <select
                 value={settings.narrative_pov}
-                onChange={(e) => updateSettings('narrative_pov', e.target.value as 'first_person' | 'second_person' | 'third_person' | 'omniscient' | 'epistolary' | 'apostrophe')}
+                onChange={(e) => updateSettings('narrative_pov', e.target.value as NarrativePOV)}
                 className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 {NARRATIVE_POV_OPTIONS.map(option => (
@@ -412,7 +416,7 @@ function SettingsContent({ settings, onSettingsChange, activeTab, collapsedSecti
                       />
                       <select
                         value={section.type}
-                        onChange={(e) => updateSectionStructure(index, 'type', e.target.value)}
+                        onChange={(e) => updateSectionStructure(index, 'type', e.target.value as SectionType)}
                         className="border border-neutral-300 rounded px-2 py-1 text-xs bg-white focus:ring-1 focus:ring-primary-500"
                       >
                         {SECTION_TYPE_OPTIONS.map(option => (
@@ -666,8 +670,8 @@ function SettingsContent({ settings, onSettingsChange, activeTab, collapsedSecti
 
 // Sub-components for complex tabs
 interface KeywordSettingsTabProps {
-  settings: SongSettings
-  onUpdate: (settings: SongSettings) => void
+  settings: KeywordSettings
+  onUpdate: (settings: KeywordSettings) => void
 }
 
 const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpdate }) => {
@@ -676,13 +680,10 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
   const [newAvoidWord, setNewAvoidWord] = useState('')
 
   const addKeyword = () => {
-    if (newKeyword.trim() && !settings.keyword_settings.primary_keywords.includes(newKeyword.trim())) {
+    if (newKeyword.trim() && !settings.primary_keywords.includes(newKeyword.trim())) {
       onUpdate({
         ...settings,
-        keyword_settings: {
-          ...settings.keyword_settings,
-          primary_keywords: [...settings.keyword_settings.primary_keywords, newKeyword.trim()]
-        }
+        primary_keywords: [...settings.primary_keywords, newKeyword.trim()]
       })
       setNewKeyword('')
     }
@@ -691,21 +692,15 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
   const removeKeyword = (keyword: string) => {
     onUpdate({
       ...settings,
-      keyword_settings: {
-        ...settings.keyword_settings,
-        primary_keywords: settings.keyword_settings.primary_keywords.filter((k: string) => k !== keyword)
-      }
+      primary_keywords: settings.primary_keywords.filter((k: string) => k !== keyword)
     })
   }
 
   const addMetaphor = () => {
-    if (newMetaphor.trim() && !settings.keyword_settings.metaphor_themes.includes(newMetaphor.trim())) {
+    if (newMetaphor.trim() && !settings.metaphor_themes.includes(newMetaphor.trim())) {
       onUpdate({
         ...settings,
-        keyword_settings: {
-          ...settings.keyword_settings,
-          metaphor_themes: [...settings.keyword_settings.metaphor_themes, newMetaphor.trim()]
-        }
+        metaphor_themes: [...settings.metaphor_themes, newMetaphor.trim()]
       })
       setNewMetaphor('')
     }
@@ -714,21 +709,15 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
   const removeMetaphor = (metaphor: string) => {
     onUpdate({
       ...settings,
-      keyword_settings: {
-        ...settings.keyword_settings,
-        metaphor_themes: settings.keyword_settings.metaphor_themes.filter((m: string) => m !== metaphor)
-      }
+      metaphor_themes: settings.metaphor_themes.filter((m: string) => m !== metaphor)
     })
   }
 
   const addAvoidWord = () => {
-    if (newAvoidWord.trim() && !settings.keyword_settings.avoid_words.includes(newAvoidWord.trim())) {
+    if (newAvoidWord.trim() && !settings.avoid_words.includes(newAvoidWord.trim())) {
       onUpdate({
         ...settings,
-        keyword_settings: {
-          ...settings.keyword_settings,
-          avoid_words: [...settings.keyword_settings.avoid_words, newAvoidWord.trim()]
-        }
+        avoid_words: [...settings.avoid_words, newAvoidWord.trim()]
       })
       setNewAvoidWord('')
     }
@@ -737,10 +726,7 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
   const removeAvoidWord = (word: string) => {
     onUpdate({
       ...settings,
-      keyword_settings: {
-        ...settings.keyword_settings,
-        avoid_words: settings.keyword_settings.avoid_words.filter((w: string) => w !== word)
-      }
+      avoid_words: settings.avoid_words.filter((w: string) => w !== word)
     })
   }
 
@@ -768,7 +754,7 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
           </button>
         </div>
         <div className="flex flex-wrap gap-1">
-          {settings.keyword_settings.primary_keywords.map((keyword: string) => (
+          {settings.primary_keywords.map((keyword: string) => (
             <span
               key={keyword}
               className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-100 text-primary-800 border border-primary-200"
@@ -807,7 +793,7 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
           </button>
         </div>
         <div className="flex flex-wrap gap-1">
-          {settings.keyword_settings.metaphor_themes.map((metaphor: string) => (
+          {settings.metaphor_themes.map((metaphor: string) => (
             <span
               key={metaphor}
               className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-creative-100 text-creative-800 border border-creative-200"
@@ -846,7 +832,7 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
           </button>
         </div>
         <div className="flex flex-wrap gap-1">
-          {settings.keyword_settings.avoid_words.map((word: string) => (
+          {settings.avoid_words.map((word: string) => (
             <span
               key={word}
               className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 border border-red-200"
@@ -867,8 +853,8 @@ const KeywordSettingsTab: React.FC<KeywordSettingsTabProps> = ({ settings, onUpd
 }
 
 interface StyleSettingsTabProps {
-  settings: SongSettings
-  onUpdate: (settings: SongSettings) => void
+  settings: StyleGuide
+  onUpdate: (settings: StyleGuide) => void
 }
 
 const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate }) => {
@@ -876,13 +862,10 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
   const [newArtist, setNewArtist] = useState('')
 
   const addGenre = () => {
-    if (newGenre.trim() && !settings.style_guide.sub_genres.includes(newGenre.trim())) {
+    if (newGenre.trim() && !settings.sub_genres.includes(newGenre.trim())) {
       onUpdate({
         ...settings,
-        style_guide: {
-          ...settings.style_guide,
-          sub_genres: [...settings.style_guide.sub_genres, newGenre.trim()]
-        }
+        sub_genres: [...settings.sub_genres, newGenre.trim()]
       })
       setNewGenre('')
     }
@@ -891,21 +874,15 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
   const removeGenre = (genre: string) => {
     onUpdate({
       ...settings,
-      style_guide: {
-        ...settings.style_guide,
-        sub_genres: settings.style_guide.sub_genres.filter((g: string) => g !== genre)
-      }
+      sub_genres: settings.sub_genres.filter((g: string) => g !== genre)
     })
   }
 
   const addArtist = () => {
-    if (newArtist.trim() && !settings.style_guide.artist_references.includes(newArtist.trim())) {
+    if (newArtist.trim() && !settings.artist_references.includes(newArtist.trim())) {
       onUpdate({
         ...settings,
-        style_guide: {
-          ...settings.style_guide,
-          artist_references: [...settings.style_guide.artist_references, newArtist.trim()]
-        }
+        artist_references: [...settings.artist_references, newArtist.trim()]
       })
       setNewArtist('')
     }
@@ -914,10 +891,7 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
   const removeArtist = (artist: string) => {
     onUpdate({
       ...settings,
-      style_guide: {
-        ...settings.style_guide,
-        artist_references: settings.style_guide.artist_references.filter((a: string) => a !== artist)
-      }
+      artist_references: settings.artist_references.filter((a: string) => a !== artist)
     })
   }
 
@@ -930,8 +904,8 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
         </label>
         <input
           type="text"
-          value={settings.style_guide.primary_genre || ''}
-          onChange={(e) => onUpdate({ ...settings, style_guide: { ...settings.style_guide, primary_genre: e.target.value || undefined } })}
+          value={settings.primary_genre || ''}
+          onChange={(e) => onUpdate({ ...settings, primary_genre: e.target.value || undefined })}
           placeholder="e.g., Pop, Rock, Country, etc."
           className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         />
@@ -959,7 +933,7 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
           </button>
         </div>
         <div className="flex flex-wrap gap-1">
-          {settings.style_guide.sub_genres.map((genre: string) => (
+          {settings.sub_genres.map((genre: string) => (
             <span
               key={genre}
               className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-warm-100 text-warm-800 border border-warm-200"
@@ -998,7 +972,7 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
           </button>
         </div>
         <div className="flex flex-wrap gap-1">
-          {settings.style_guide.artist_references.map((artist: string) => (
+          {settings.artist_references.map((artist: string) => (
             <span
               key={artist}
               className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-neutral-100 text-neutral-800 border border-neutral-200"
@@ -1018,14 +992,14 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
       {/* Innovation Level */}
       <div>
         <label className="block text-sm font-medium text-neutral-700 mb-2">
-          Innovation vs. Tradition: {settings.style_guide.innovation_level}
+          Innovation vs. Tradition: {settings.innovation_level}
         </label>
         <input
           type="range"
           min="1"
           max="10"
-          value={settings.style_guide.innovation_level}
-          onChange={(e) => onUpdate({ ...settings, style_guide: { ...settings.style_guide, innovation_level: parseInt(e.target.value) } })}
+          value={settings.innovation_level}
+          onChange={(e) => onUpdate({ ...settings, innovation_level: parseInt(e.target.value) })}
           className="w-full accent-primary-500"
         />
         <div className="flex justify-between text-xs text-neutral-500 mt-1">
@@ -1039,8 +1013,8 @@ const StyleSettingsTab: React.FC<StyleSettingsTabProps> = ({ settings, onUpdate 
         <label className="flex items-center">
           <input
             type="checkbox"
-            checked={settings.style_guide.avoid_cliches}
-            onChange={(e) => onUpdate({ ...settings, style_guide: { ...settings.style_guide, avoid_cliches: e.target.checked } })}
+            checked={settings.avoid_cliches}
+            onChange={(e) => onUpdate({ ...settings, avoid_cliches: e.target.checked })}
             className="rounded border-neutral-300 text-primary-600 mr-2 focus:ring-primary-500"
           />
           <span className="text-sm text-neutral-700">Avoid common genre cliches</span>
