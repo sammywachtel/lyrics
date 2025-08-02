@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 // Simple fallback to avoid Jest parsing issues with import.meta
 const API_BASE_URL = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' 
   ? 'http://localhost:8001'  // Test environment
-  : 'http://localhost:8001'  // Default for now, will be set by environment
+  : import.meta.env.VITE_API_URL || 'http://localhost:8001'  // Use environment variable or fallback to local
 
 // Enums matching backend
 export type NarrativePOV = 'first_person' | 'second_person' | 'third_person' | 'direct_address'

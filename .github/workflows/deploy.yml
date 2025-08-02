@@ -164,26 +164,11 @@ jobs:
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
             aquasec/trivy image --exit-code 0 --severity HIGH,CRITICAL \
             $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:$GITHUB_SHA
-
-      - name: Build and scan frontend image
-        run: |
-          # Build frontend image
-          docker build -f Dockerfile.frontend \
-            -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA \
-            -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:latest \
-            .
-          
-          # Scan image for vulnerabilities
-          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-            aquasec/trivy image --exit-code 0 --severity HIGH,CRITICAL \
-            $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA
-
-      - name: Push images to Artifact Registry
+      
+      - name: Push backend image to Artifact Registry
         run: |
           docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:$GITHUB_SHA
           docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:latest
-          docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA
-          docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:latest
 
       - name: Deploy backend to Cloud Run
         id: deploy-backend
@@ -210,13 +195,32 @@ jobs:
           # Get backend URL for frontend configuration
           echo "BACKEND_URL=$(gcloud run services describe $SERVICE_BACKEND --region=$REGION --format='value(status.url)')" >> $GITHUB_OUTPUT
 
+      - name: Build and scan frontend image with backend URL
+        run: |
+          # Build frontend image with the backend URL as a build arg
+          docker build -f Dockerfile.frontend \
+            --build-arg VITE_API_URL=${{ steps.deploy-backend.outputs.BACKEND_URL }} \
+            -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA \
+            -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:latest \
+            .
+          
+          # Scan image for vulnerabilities
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image --exit-code 0 --severity HIGH,CRITICAL \
+            $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA
+      
+      - name: Push frontend image to Artifact Registry
+        run: |
+          docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA
+          docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:latest
+
       - name: Deploy frontend to Cloud Run
         run: |
           gcloud run deploy $SERVICE_FRONTEND \
             --image $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA \
             --region $REGION \
             --allow-unauthenticated \
-            --set-env-vars "VITE_API_URL=${{ steps.deploy-backend.outputs.BACKEND_URL }}" \
+            --set-env-vars "VITE_API_URL=${{ steps.deploy-backend.outputs.BACKEND_URL }},BACKEND_URL=${{ steps.deploy-backend.outputs.BACKEND_URL }}" \
             --memory 512Mi \
             --cpu 1 \
             --min-instances 0 \

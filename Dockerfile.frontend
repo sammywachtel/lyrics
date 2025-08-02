@@ -1,6 +1,9 @@
 # Multi-stage build for optimized frontend container
 FROM node:20-alpine AS build
 
+# Accept build arguments
+ARG VITE_API_URL=http://localhost:8001
+
 # Install security updates
 RUN apk update && apk upgrade && apk add --no-cache dumb-init
 
@@ -8,6 +11,9 @@ RUN apk update && apk upgrade && apk add --no-cache dumb-init
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
 WORKDIR /app
+
+# Set environment variable for build
+ENV VITE_API_URL=$VITE_API_URL
 
 # Copy package files with proper ownership
 COPY --chown=nextjs:nodejs frontend/package*.json ./
@@ -24,16 +30,16 @@ RUN npm run build
 # Production stage with security hardening
 FROM nginx:1.25-alpine
 
-# Install security updates and dumb-init
-RUN apk update && apk upgrade && apk add --no-cache dumb-init
+# Install security updates, dumb-init, and gettext for envsubst
+RUN apk update && apk upgrade && apk add --no-cache dumb-init gettext
 
 # Use existing nginx user (no need to create as it already exists in nginx:alpine)
 
 # Copy built application
 COPY --from=build --chown=nginx:nginx /app/dist /usr/share/nginx/html
 
-# Copy optimized nginx configuration (use Cloud Run config if available)
-COPY --chown=nginx:nginx nginx.cloudrun.conf /etc/nginx/nginx.conf
+# Copy nginx template for environment variable substitution
+COPY --chown=nginx:nginx nginx.template.conf /etc/nginx/nginx.template.conf
 
 # Copy entrypoint script
 COPY --chown=nginx:nginx docker-entrypoint.sh /docker-entrypoint.sh
