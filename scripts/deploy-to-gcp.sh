@@ -144,7 +144,7 @@ deploy_services() {
         --source . \
         --region $REGION \
         --allow-unauthenticated \
-        --port 80 \
+        --port 8080 \
         --cpu 1 \
         --memory 512Mi \
         --min-instances 0 \
