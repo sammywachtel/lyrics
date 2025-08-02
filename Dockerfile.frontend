@@ -35,6 +35,10 @@ COPY --from=build --chown=nginx:nginx /app/dist /usr/share/nginx/html
 # Copy optimized nginx configuration (use Cloud Run config if available)
 COPY --chown=nginx:nginx nginx.cloudrun.conf /etc/nginx/nginx.conf
 
+# Copy entrypoint script
+COPY --chown=nginx:nginx docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Create nginx directories with proper permissions
 RUN mkdir -p /var/cache/nginx /var/run /var/log/nginx /tmp/nginx && \
     chown -R nginx:nginx /var/cache/nginx /var/run /var/log/nginx /usr/share/nginx/html /tmp/nginx && \
@@ -49,6 +53,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 EXPOSE 8080
 
-# Use dumb-init to handle signals properly
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+# Use dumb-init to handle signals properly with our entrypoint
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

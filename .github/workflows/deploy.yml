@@ -223,7 +223,7 @@ jobs:
             --max-instances 5 \
             --concurrency 100 \
             --timeout 60 \
-            --port 80 \
+            --port 8080 \
             --cpu-throttling \
             --no-cpu-boost \
             --execution-environment gen2 \
