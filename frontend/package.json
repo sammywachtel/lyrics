@@ -14,9 +14,11 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@lexical/react": "^0.33.1",
     "@supabase/supabase-js": "^2.52.1",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.1.0",
+    "lexical": "^0.33.1",
     "lodash": "^4.17.21",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"

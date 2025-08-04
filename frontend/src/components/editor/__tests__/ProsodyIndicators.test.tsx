@@ -1,5 +1,6 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
+import '@testing-library/jest-dom'
 import { ProsodyIndicators, SectionStabilitySummary, ClicheHighlight } from '../ProsodyIndicators'
 import { LineAnalysis, RhymeConnection } from '../../../utils/prosodyAnalysis'
 
@@ -65,8 +66,8 @@ describe('ProsodyIndicators', () => {
         />
       )
 
-      expect(screen.getByText('5')).toBeInTheDocument()
-      expect(screen.getByText('4')).toBeInTheDocument()
+      expect(screen.getAllByText('5')).toHaveLength(2) // Two lines have 5 syllables
+      expect(screen.getAllByText('4')).toHaveLength(1)
     })
 
     it('should highlight current line', () => {

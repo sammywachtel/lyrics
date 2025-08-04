@@ -164,8 +164,9 @@ Even more content`
     it('should insert section at end of text', () => {
       const lyrics = 'Existing content'
       const result = insertSectionAtPosition(lyrics, lyrics.length, '[Outro]')
-      expect(result.newLyrics).toBe('Existing content\n[Outro]')
-      expect(result.newPosition).toBe(24)
+      // New behavior: section goes above the current line
+      expect(result.newLyrics).toBe('\n[Outro]\nExisting content')
+      expect(result.newPosition).toBe(9) // After "\n[Outro]\n"
     })
 
     it('should handle insertion with existing newlines', () => {

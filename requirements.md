@@ -91,6 +91,26 @@
    - Shared users see songs in their library view
    - Export options: PDF, Markdown, ChordPro
 
+9. **Song Notes & Ideas System**  
+   - Song-specific notes and ideas that inform AI assistant suggestions
+   - Notes input field in song editor for capturing creative direction (e.g., "I want to try to use the phrase 'digging through the ground' somewhere in the song, but I don't know how to work it in yet")
+   - AI assistant considers notes alongside other song settings when providing suggestions
+   - Notes are suggestions, not requirements - AI uses them contextually rather than prioritizing them unless explicitly marked as priority
+   - Notes persist with song versions and can be edited/updated as the song evolves
+
+10. **Idea Library & Capture System**  
+   - Dedicated "Idea Library" for capturing and managing song concepts and inspirations
+   - Quick capture interface optimized for mobile to record ideas on-the-go
+   - AI integration for new song creation:
+     - When creating new songs, AI suggests relevant ideas from the library as potential starting points
+     - User can choose to start with a blank song or use an idea as foundation
+     - AI helps populate initial song settings (title, theme, etc.) based on selected idea
+   - AI reminder system during songwriting:
+     - AI contextually suggests relevant ideas from library while writing that might fit current song
+     - Helps prevent forgotten ideas and increases idea utilization
+     - Subtle integration to avoid interrupting creative flow
+   - Idea management features: categorization, search, archive, and delete unused ideas
+
 ## Subscription & Billing Provisioning
 
 To prepare for a future subscription-based business model, the following provisions and scaffolding should be built into the application now:

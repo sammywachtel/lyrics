@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react'
 import type { Song, SongSettings } from '../lib/api'
 import { createDefaultSettings, apiClient } from '../lib/api'
 import SectionToolbar from './SectionToolbar'
 import SectionNavigation from './SectionNavigation'
 import SectionSidebar from './editor/SectionSidebar'
-import SimpleWysiwygEditor, { type SimpleWysiwygEditorRef } from './SimpleWysiwygEditor'
-import { parseSections, getSectionAtLine } from '../utils/sectionUtils'
+import LexicalLyricsEditor, { type LexicalLyricsEditorRef } from './LexicalLyricsEditor'
+import { parseSections, getSectionAtLine, renumberSections, generateSectionTag, wrapTextWithSection, insertSectionAtPosition, type SectionType } from '../utils/sectionUtils'
 import { getWordCount } from '../utils/textFormatting'
+import { type AutoSaveStatus } from './editor/AutoSaveIndicator'
 
 interface SongEditorProps {
   songId: string
@@ -15,18 +16,27 @@ interface SongEditorProps {
   onSettingsChange?: (settings: SongSettings) => void
   onClose?: () => void
   onSaveStatusChange?: (status: 'saved' | 'saving' | 'error') => void
-  onSaveHandler?: (saveFunction: () => Promise<void>) => void
+  onAutoSaveStatusChange?: (status: 'saved' | 'saving' | 'pending' | 'error') => void
+  onHasUnsavedChangesChange?: (hasChanges: boolean) => void
 }
 
-export const SongEditor: React.FC<SongEditorProps> = ({
-  songId,
-  onSongChange,
-  onSongLoaded,
-  onSettingsChange,
-  onClose,
-  onSaveStatusChange,
-  onSaveHandler
-}) => {
+export interface SongEditorRef {
+  triggerSave: () => Promise<void>
+}
+
+export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
+  {
+    songId,
+    onSongChange,
+    onSongLoaded,
+    onSettingsChange,
+    onClose,
+    onSaveStatusChange,
+    onAutoSaveStatusChange,
+    onHasUnsavedChangesChange
+  },
+  ref
+) => {
   const [song, setSong] = useState<Song | null>(null)
   const [settings, setSettings] = useState<SongSettings>(createDefaultSettings())
   const [lyrics, setLyrics] = useState('')
@@ -43,14 +53,18 @@ export const SongEditor: React.FC<SongEditorProps> = ({
   const [showSectionSidebar, setShowSectionSidebar] = useState(true)
   const [sections, setSections] = useState<ReturnType<typeof parseSections>>([])
   const [currentSection, setCurrentSection] = useState<string>('')
+  const [hasSelectedText, setHasSelectedText] = useState(false)
+  const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('saved')
   
-  
-  const wysiwygEditorRef = useRef<SimpleWysiwygEditorRef>(null)
+  const wysiwygEditorRef = useRef<LexicalLyricsEditorRef>(null)
   const isMountedRef = useRef(true)
   const handleSaveRef = useRef<(() => Promise<void>) | null>(null)
+  const lastAutoSaveRef = useRef<string>('')
+  const isInitialized = useRef(false)
 
-  // Clean up on unmount
+  // Set mounted state and clean up on unmount
   useEffect(() => {
+    isMountedRef.current = true
     return () => {
       isMountedRef.current = false
     }
@@ -64,6 +78,20 @@ export const SongEditor: React.FC<SongEditorProps> = ({
         const response = await apiClient.getSong(songId)
         const songData = response.song!
         
+        // Enhanced logging to debug newline issues on load
+        const loadedNewlineCount = (songData.lyrics.match(/\n/g) || []).length
+        const loadedDoubleNewlineCount = (songData.lyrics.match(/\n\n/g) || []).length
+        const loadedTripleNewlineCount = (songData.lyrics.match(/\n\n\n/g) || []).length
+        
+        console.log('📂 Song loaded from API:', {
+          lyricsLength: songData.lyrics.length,
+          newlineCount: loadedNewlineCount,
+          doubleNewlineCount: loadedDoubleNewlineCount,
+          tripleNewlineCount: loadedTripleNewlineCount,
+          firstChars: songData.lyrics.slice(0, 50),
+          rawNewlines: JSON.stringify(songData.lyrics.slice(0, 100))
+        })
+        
         setSong(songData)
         setTitle(songData.title)
         setArtist(songData.artist || '')
@@ -73,9 +101,18 @@ export const SongEditor: React.FC<SongEditorProps> = ({
         setSettings(songData.settings || createDefaultSettings())
         setError(null)
         
+        // Mark as initialized after data is loaded and UI has settled
+        setTimeout(() => {
+          isInitialized.current = true
+          // Set initial auto-save reference
+          lastAutoSaveRef.current = songData.lyrics
+        }, 500)
+        
         // Notify parent of song load
         if (onSongLoaded) {
-          onSongLoaded(songData)
+          setTimeout(() => {
+            onSongLoaded(songData)
+          }, 0)
         }
       } catch (err) {
         console.error('Failed to load song:', err)
@@ -92,6 +129,11 @@ export const SongEditor: React.FC<SongEditorProps> = ({
   useEffect(() => {
     if (!song) return
 
+    // Skip change detection during initial load
+    if (!isInitialized.current) {
+      return
+    }
+
     const hasChanges = (
       title !== song.title ||
       artist !== (song.artist || '') ||
@@ -102,34 +144,40 @@ export const SongEditor: React.FC<SongEditorProps> = ({
     )
 
     setHasUnsavedChanges(hasChanges)
-  }, [song, title, artist, lyrics, status, tags, settings])
+    
+    // Notify parent component of change status
+    if (onHasUnsavedChangesChange) {
+      onHasUnsavedChangesChange(hasChanges)
+    }
+  }, [song, title, artist, lyrics, status, tags, settings, onHasUnsavedChangesChange])
 
   // Save song
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (lyricsToSave?: string) => {
     if (!isMountedRef.current || !song || isSaving) {
-      console.log('Save skipped:', { mounted: isMountedRef.current, song: !!song, isSaving })
       return
     }
 
     // Double-check if there are actually changes before saving
+    const finalLyrics = lyricsToSave !== undefined ? lyricsToSave : lyrics
     const hasActualChanges = (
       title !== song.title ||
       artist !== (song.artist || '') ||
-      lyrics !== song.lyrics ||
+      finalLyrics !== song.lyrics ||
       status !== song.status ||
       JSON.stringify(tags) !== JSON.stringify(song.tags) ||
       JSON.stringify(settings) !== JSON.stringify(song.settings)
     )
 
     if (!hasActualChanges) {
-      console.log('Save skipped: no actual changes detected')
       if (isMountedRef.current) {
-        setHasUnsavedChanges(false)
+        // Defer state update to avoid updating during render
+        setTimeout(() => {
+          setHasUnsavedChanges(false)
+        }, 0)
       }
       return
     }
 
-    console.log('Saving song:', songId, 'changes:', { title, artist, lyrics: lyrics.length + ' chars' })
     if (!isMountedRef.current) return
     
     setIsSaving(true)
@@ -137,14 +185,32 @@ export const SongEditor: React.FC<SongEditorProps> = ({
     onSaveStatusChange?.('saving')
 
     try {
+      // Use the provided lyrics content or fall back to React state
+      const finalLyrics = lyricsToSave !== undefined ? lyricsToSave : lyrics
+      
       const updateData = {
         title,
         artist: artist || undefined,
-        lyrics,
+        lyrics: finalLyrics,
         status,
         tags,
         settings
       }
+
+      // Enhanced logging to debug newline issues
+      const newlineCount = (finalLyrics.match(/\n/g) || []).length
+      const doubleNewlineCount = (finalLyrics.match(/\n\n/g) || []).length
+      const tripleNewlineCount = (finalLyrics.match(/\n\n\n/g) || []).length
+      
+      console.log('🚀 Sending to API:', {
+        lyricsLength: finalLyrics.length,
+        newlineCount,
+        doubleNewlineCount,
+        tripleNewlineCount,
+        lastChars: finalLyrics.slice(-10),
+        firstChars: finalLyrics.slice(0, 50),
+        rawNewlines: JSON.stringify(finalLyrics.slice(0, 100))
+      })
 
       const response = await apiClient.updateSong(songId, updateData)
       
@@ -152,22 +218,50 @@ export const SongEditor: React.FC<SongEditorProps> = ({
       
       const updatedSong = response.song!
       
-      setSong(updatedSong)
-      setHasUnsavedChanges(false)
-      onSaveStatusChange?.('saved')
+      // Enhanced logging to debug newline issues
+      const receivedNewlineCount = (updatedSong.lyrics.match(/\n/g) || []).length
+      const receivedDoubleNewlineCount = (updatedSong.lyrics.match(/\n\n/g) || []).length
+      const receivedTripleNewlineCount = (updatedSong.lyrics.match(/\n\n\n/g) || []).length
       
-      if (onSongChange) {
-        onSongChange(updatedSong)
-      }
-      if (onSettingsChange) {
-        onSettingsChange(updatedSong.settings)
-      }
-      console.log('Save completed for song:', songId)
+      console.log('📨 Received from API:', {
+        lyricsLength: updatedSong.lyrics.length,
+        newlineCount: receivedNewlineCount,
+        doubleNewlineCount: receivedDoubleNewlineCount,
+        tripleNewlineCount: receivedTripleNewlineCount,
+        lastChars: updatedSong.lyrics.slice(-10),
+        firstChars: updatedSong.lyrics.slice(0, 50),
+        rawNewlines: JSON.stringify(updatedSong.lyrics.slice(0, 100)),
+        lengthChanged: finalLyrics.length !== updatedSong.lyrics.length,
+        contentChanged: finalLyrics !== updatedSong.lyrics
+      })
+      
+      setSong(updatedSong)
+      // Defer state update to avoid updating during render
+      setTimeout(() => {
+        setHasUnsavedChanges(false)
+        // Notify parent that changes have been saved
+        if (onHasUnsavedChangesChange) {
+          onHasUnsavedChangesChange(false)
+        }
+      }, 0)
+      
+      // Defer parent state updates to avoid render conflicts
+      setTimeout(() => {
+        onSaveStatusChange?.('saved')
+        if (onSongChange) {
+          onSongChange(updatedSong)
+        }
+        if (onSettingsChange) {
+          onSettingsChange(updatedSong.settings)
+        }
+      }, 0)
     } catch (err) {
       console.error('Failed to save song:', err)
       if (isMountedRef.current) {
         setError(err instanceof Error ? err.message : 'Failed to save song')
-        onSaveStatusChange?.('error')
+        setTimeout(() => {
+          onSaveStatusChange?.('error')
+        }, 0)
       }
     } finally {
       if (isMountedRef.current) {
@@ -181,36 +275,86 @@ export const SongEditor: React.FC<SongEditorProps> = ({
     handleSaveRef.current = handleSave
   }, [handleSave])
 
-  // Auto-save functionality (optional) - using ref to prevent infinite loops
+  // Expose triggerSave method via ref
+  useImperativeHandle(ref, () => ({
+    triggerSave: async () => {
+      console.log('🔧 SongEditor: triggerSave called, handleSaveRef.current available:', !!handleSaveRef.current)
+      if (handleSaveRef.current) {
+        return await handleSaveRef.current()
+      }
+      return Promise.resolve()
+    }
+  }), [])
+
+  // Enhanced auto-save with status tracking
+  const handleAutoSave = useCallback(async (currentContent?: string) => {
+    if (!isMountedRef.current || !song || isSaving || !isInitialized.current) {
+      return
+    }
+    
+    // Use the current content from Lexical if provided, otherwise fall back to React state
+    const contentToSave = currentContent || lyrics
+    
+    console.log('🔄 Auto-save starting:', {
+      usingLexicalContent: !!currentContent,
+      reactStateLength: lyrics.length,
+      contentToSaveLength: contentToSave.length,
+      lastChars: contentToSave.slice(-10),
+      fullContent: contentToSave
+    })
+    
+    // Check if there are actual changes to save (use the current content)
+    const hasActualChanges = (
+      title !== song.title ||
+      artist !== (song.artist || '') ||
+      contentToSave !== song.lyrics ||
+      status !== song.status ||
+      JSON.stringify(tags) !== JSON.stringify(song.tags) ||
+      JSON.stringify(settings) !== JSON.stringify(song.settings)
+    )
+
+    if (!hasActualChanges || contentToSave === lastAutoSaveRef.current) {
+      setAutoSaveStatus('saved')
+      return
+    }
+
+    try {
+      setAutoSaveStatus('saving')
+      lastAutoSaveRef.current = contentToSave
+      
+      // Update React state with the latest content before saving
+      if (currentContent && currentContent !== lyrics) {
+        setLyrics(currentContent)
+      }
+      
+      await handleSave(contentToSave)
+      
+      if (isMountedRef.current) {
+        setAutoSaveStatus('saved')
+      }
+    } catch (error) {
+      console.error('Auto-save failed:', error)
+      if (isMountedRef.current) {
+        setAutoSaveStatus('error')
+      }
+    }
+  }, [song, isSaving, title, artist, lyrics, status, tags, settings, handleSave])
+  
+  // Update auto-save status when changes occur
   useEffect(() => {
-    if (!hasUnsavedChanges || !song || isLoading || isSaving) return
-
-    console.log('Auto-save: Setting up timer for song:', songId, 'hasUnsavedChanges:', hasUnsavedChanges)
-    const autoSaveTimer = setTimeout(() => {
-      console.log('Auto-save: Timer triggered for song:', songId)
-      if (handleSaveRef.current && isMountedRef.current) {
-        handleSaveRef.current()
-      }
-    }, 5000) // Auto-save after 5 seconds of inactivity
-
-    return () => {
-      console.log('Auto-save: Clearing timer for song:', songId)
-      clearTimeout(autoSaveTimer)
+    if (hasUnsavedChanges && autoSaveStatus === 'saved') {
+      setAutoSaveStatus('pending')
     }
-  }, [hasUnsavedChanges, song, isLoading, isSaving, songId])
+  }, [hasUnsavedChanges, autoSaveStatus])
 
-  // Expose save handler to parent component for header integration
-  React.useEffect(() => {
-    if (onSaveHandler) {
-      onSaveHandler(handleSave)
+  // Sync auto-save status with parent component
+  useEffect(() => {
+    if (onAutoSaveStatusChange) {
+      onAutoSaveStatusChange(autoSaveStatus)
     }
-    // Clean up previous handler when component unmounts or handleSave changes
-    return () => {
-      if (onSaveHandler) {
-        onSaveHandler(() => Promise.resolve())
-      }
-    }
-  }, [onSaveHandler, handleSave])
+  }, [autoSaveStatus, onAutoSaveStatusChange])
+
+  // NOTE: Removed cleanup for now to debug the Promise issue
   
   // This component now works with AppLayout - settings are handled externally
   // The SongEditor focuses on lyrics editing, song metadata, and saving
@@ -227,9 +371,28 @@ export const SongEditor: React.FC<SongEditorProps> = ({
       setCurrentSection('')
     }
   }, [lyrics, currentSection])
+  
+  // Auto-renumber sections when lyrics change (after a delay to avoid conflicts)
+  // DISABLED: This was causing infinite loops with Lexical editor
+  // useEffect(() => {
+  //   const renumberTimer = setTimeout(() => {
+  //     const renumbered = renumberSections(lyrics)
+  //     if (renumbered !== lyrics) {
+  //       setLyrics(renumbered)
+  //     }
+  //   }, 1000) // 1 second delay to avoid rapid renumbering during typing
+  //   
+  //   return () => clearTimeout(renumberTimer)
+  // }, [lyrics])
 
-  // Update current section based on cursor position
-  const updateCurrentSection = useCallback(() => {    
+  // Update current section and selection state based on cursor position
+  const updateCurrentSection = useCallback(() => {
+    // Check if text is selected
+    const editorRef = wysiwygEditorRef.current
+    if (editorRef) {
+      const selectedText = editorRef.getSelectedText()
+      setHasSelectedText(selectedText.length > 0)
+    }    
     if (sections.length === 0) {
       if (currentSection !== '') {
         setCurrentSection('')
@@ -306,45 +469,87 @@ export const SongEditor: React.FC<SongEditorProps> = ({
     }
   }, [lyrics, sections, currentSection])
 
-  // Handle lyrics change with section parsing
+  // Handle lyrics change with section parsing (debounced to prevent infinite loops)
   const handleLyricsChange = useCallback((newLyrics: string) => {
+    // Prevent rapid updates that could cause infinite loops
+    if (newLyrics === lyrics) {
+      return
+    }
+    
     setLyrics(newLyrics)
+    
     // Update current section after a brief delay to account for cursor movement
-    setTimeout(updateCurrentSection, 0)
-  }, [updateCurrentSection])
+    const timer = setTimeout(updateCurrentSection, 100)
+    
+    // If this is a real change (not initial load), mark as having unsaved changes
+    // Don't set save status here - let auto-save handle the actual saving status
+    
+    return () => clearTimeout(timer)
+  }, [lyrics, updateCurrentSection, song, onSaveStatusChange])
 
-  // Insert section tag at cursor position
-  const handleInsertSection = useCallback((sectionTag: string) => {
-    // For WYSIWYG editor, we'll insert at the end for now
-    // This could be enhanced to insert at cursor position
-    const newLyrics = lyrics + (lyrics ? '\n\n' : '') + sectionTag + '\n'
-    setLyrics(newLyrics)
-    updateCurrentSection()
-  }, [lyrics, updateCurrentSection])
+  // Insert section tag (either wrap selection or insert at cursor)
+  const handleInsertSection = useCallback((sectionType: SectionType) => {
+    const editorRef = wysiwygEditorRef.current
+    if (!editorRef) {
+      // Fallback: append to end with smart numbering
+      const sectionTag = generateSectionTag(sections, sectionType)
+      const newLyrics = lyrics + (lyrics ? '\n\n' : '') + sectionTag + '\n'
+      const renumbered = renumberSections(newLyrics)
+      setLyrics(renumbered)
+      updateCurrentSection()
+      return
+    }
+
+    try {
+      const cursorPosition = editorRef.getCurrentCursorPosition()
+      const selectedText = editorRef.getSelectedText()
+      const sectionTag = generateSectionTag(sections, sectionType)
+      
+      let newLyrics: string
+      let newCursorPosition: number = cursorPosition || 0
+      
+      if (selectedText && selectedText.trim()) {
+        // Wrap selected text with section tag
+        const startPosition = cursorPosition || 0
+        const endPosition = startPosition + selectedText.length
+        
+        const result = wrapTextWithSection(lyrics, startPosition, endPosition, sectionTag)
+        newLyrics = result.newLyrics
+        newCursorPosition = result.newEndPosition
+      } else {
+        // Insert at cursor position
+        const result = insertSectionAtPosition(lyrics, cursorPosition || 0, sectionTag)
+        newLyrics = result.newLyrics
+        newCursorPosition = result.newPosition
+      }
+      
+      // Renumber sections to maintain order
+      const renumbered = renumberSections(newLyrics)
+      setLyrics(renumbered)
+      
+      // Restore cursor position after state update
+      setTimeout(() => {
+        editorRef.setCursorPosition(newCursorPosition)
+        updateCurrentSection()
+      }, 0)
+      
+    } catch (error) {
+      console.error('Error inserting section:', error)
+      // Fallback: append to end with smart numbering
+      const sectionTag = generateSectionTag(sections, sectionType)
+      const newLyrics = lyrics + (lyrics ? '\n\n' : '') + sectionTag + '\n'
+      const renumbered = renumberSections(newLyrics)
+      setLyrics(renumbered)
+      updateCurrentSection()
+    }
+  }, [lyrics, sections, updateCurrentSection])
 
   // Add new section at the end with smart naming
   const handleAddSection = useCallback(() => {
-    // Smart section naming based on existing sections
-    const verseCount = sections.filter(s => s.name.toLowerCase().includes('verse')).length
-    const chorusCount = sections.filter(s => s.name.toLowerCase().includes('chorus')).length
-    const bridgeCount = sections.filter(s => s.name.toLowerCase().includes('bridge')).length
-    
-    let defaultName: string
-    if (verseCount === 0) {
-      defaultName = 'Verse 1'
-    } else if (chorusCount === 0 && verseCount > 0) {
-      defaultName = 'Chorus'
-    } else if (bridgeCount === 0 && verseCount > 0 && chorusCount > 0) {
-      defaultName = 'Bridge'
-    } else {
-      defaultName = `Verse ${verseCount + 1}`
-    }
-    
-    const newSectionTag = `[${defaultName}]`
-    const newLyrics = lyrics + (lyrics ? '\n\n' : '') + newSectionTag + '\n'
-    setLyrics(newLyrics)
-    updateCurrentSection()
-  }, [lyrics, sections, updateCurrentSection])
+    // Default to Verse if no sections, otherwise Verse
+    const sectionType: SectionType = sections.length === 0 ? 'Verse' : 'Verse'
+    handleInsertSection(sectionType)
+  }, [sections, handleInsertSection])
 
   // Delete a section with improved regex escaping
   const handleDeleteSection = useCallback((sectionName: string) => {
@@ -592,18 +797,23 @@ export const SongEditor: React.FC<SongEditorProps> = ({
               hasExistingSections={sections.length > 0}
               showSidebar={showSectionSidebar}
               currentSection={currentSection}
+              hasSelectedText={hasSelectedText}
+              sections={sections}
             />
           </div>
           
           {/* Lyrics Editor - Fills Available Height */}
           <div className="flex-1 relative overflow-hidden">
-            <SimpleWysiwygEditor
+            <LexicalLyricsEditor
               ref={wysiwygEditorRef}
               value={lyrics}
               onChange={handleLyricsChange}
               onSelectionChange={updateCurrentSection}
               placeholder="Enter your lyrics here..."
               rows={24}
+              enableAutoSave={true}
+              autoSaveDelay={10000}
+              onAutoSave={handleAutoSave}
             />
             
             {showSectionNav && (
@@ -676,6 +886,8 @@ export const SongEditor: React.FC<SongEditorProps> = ({
       )}
     </div>
   )
-}
+})
+
+SongEditor.displayName = 'SongEditor'
 
 export default SongEditor

@@ -27,14 +27,14 @@ const getSectionIcon = (sectionName: string): string => {
 
 const getSectionColor = (sectionName: string): string => {
   const lowerName = sectionName.toLowerCase()
-  if (lowerName.includes('verse')) return 'from-blue-100 to-blue-200 text-blue-800 border-blue-300'
-  if (lowerName.includes('chorus') || lowerName.includes('hook')) return 'from-green-100 to-green-200 text-green-800 border-green-300'
-  if (lowerName.includes('bridge')) return 'from-amber-100 to-amber-200 text-amber-800 border-amber-300'
-  if (lowerName.includes('pre') || lowerName.includes('prechorus')) return 'from-purple-100 to-purple-200 text-purple-800 border-purple-300'
-  if (lowerName.includes('intro')) return 'from-cyan-100 to-cyan-200 text-cyan-800 border-cyan-300'
-  if (lowerName.includes('outro') || lowerName.includes('end')) return 'from-rose-100 to-rose-200 text-rose-800 border-rose-300'
-  if (lowerName.includes('breakdown') || lowerName.includes('break')) return 'from-orange-100 to-orange-200 text-orange-800 border-orange-300'
-  return 'from-neutral-100 to-neutral-200 text-neutral-800 border-neutral-300'
+  if (lowerName.includes('verse')) return 'from-blue-100 to-blue-200 text-blue-800 border-blue-400 shadow-blue-100'
+  if (lowerName.includes('chorus') || lowerName.includes('hook')) return 'from-green-100 to-green-200 text-green-800 border-green-400 shadow-green-100'
+  if (lowerName.includes('bridge')) return 'from-amber-100 to-amber-200 text-amber-800 border-amber-400 shadow-amber-100'
+  if (lowerName.includes('pre') || lowerName.includes('prechorus')) return 'from-purple-100 to-purple-200 text-purple-800 border-purple-400 shadow-purple-100'
+  if (lowerName.includes('intro')) return 'from-cyan-100 to-cyan-200 text-cyan-800 border-cyan-400 shadow-cyan-100'
+  if (lowerName.includes('outro') || lowerName.includes('end')) return 'from-rose-100 to-rose-200 text-rose-800 border-rose-400 shadow-rose-100'
+  if (lowerName.includes('breakdown') || lowerName.includes('break')) return 'from-orange-100 to-orange-200 text-orange-800 border-orange-400 shadow-orange-100'
+  return 'from-neutral-100 to-neutral-200 text-neutral-800 border-neutral-400 shadow-neutral-100'
 }
 
 export const SectionSidebar: React.FC<SectionSidebarProps> = ({
@@ -114,8 +114,8 @@ export const SectionSidebar: React.FC<SectionSidebarProps> = ({
                 key={`${section.name}-${index}`}
                 className={`group relative w-full p-3 rounded-lg text-sm transition-all duration-200 border backdrop-blur-sm ${
                   isActive
-                    ? `bg-gradient-to-r ${colorClasses} shadow-soft scale-105 border-l-4`
-                    : 'hover:bg-white/80 text-neutral-700 border-neutral-200/50 hover:border-neutral-300 hover:shadow-soft bg-white/40'
+                    ? `bg-gradient-to-r ${colorClasses} shadow-lg scale-105 border-l-4 ring-2 ring-white/50`
+                    : `hover:bg-white/80 text-neutral-700 border-neutral-200/50 hover:border-neutral-300 hover:shadow-soft bg-white/40 hover:scale-102`
                 }`}
               >
                 {/* Main section content - button or inline edit */}
@@ -250,25 +250,49 @@ export const SectionSidebar: React.FC<SectionSidebarProps> = ({
         </div>
       </div>
       
-      {/* Footer with Instructions */}
+      {/* Color Legend and Instructions */}
       <div className="p-4 border-t border-white/30">
-        <div className="text-xs text-neutral-500 space-y-1">
-          <div className="font-medium text-neutral-600 mb-2">Section Management:</div>
-          <div className="flex items-center gap-1">
-            <span className="w-1 h-1 bg-primary-400 rounded-full"></span>
-            <span>Click section to jump</span>
+        <div className="text-xs text-neutral-500 space-y-2">
+          <div className="font-medium text-neutral-600 mb-2">Color Guide:</div>
+          <div className="grid grid-cols-2 gap-1 text-xs">
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+              <span>Verse</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+              <span>Chorus</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
+              <span>Pre-Chorus</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 bg-amber-400 rounded-full"></span>
+              <span>Bridge</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 bg-cyan-400 rounded-full"></span>
+              <span>Intro</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 bg-rose-400 rounded-full"></span>
+              <span>Outro</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="w-1 h-1 bg-primary-400 rounded-full"></span>
-            <span>Hover for edit options</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-1 h-1 bg-primary-400 rounded-full"></span>
-            <span>Add new sections at bottom</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-1 h-1 bg-primary-400 rounded-full"></span>
-            <span>Current section highlighted</span>
+          
+          <div className="border-t border-white/20 pt-2 mt-3">
+            <div className="font-medium text-neutral-600 mb-1">Quick Actions:</div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1">
+                <span className="w-1 h-1 bg-primary-400 rounded-full"></span>
+                <span>Click to jump • Hover to edit</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-1 h-1 bg-primary-400 rounded-full"></span>
+                <span>Current section highlighted</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
