@@ -15,9 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # Need to fetch full history for commits
           fetch-depth: 0
-          # Use GitHub token to allow pushing fixes
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
@@ -25,30 +23,41 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
 
-      - name: Install frontend dependencies
-        working-directory: ./frontend
-        run: npm ci
+      - name: Install dependencies
+        run: |
+          if [ -f "frontend/package.json" ]; then
+            cd frontend && npm ci
+          elif [ -f "package.json" ]; then
+            npm ci
+          fi
 
       - name: Run ESLint and fix issues
-        working-directory: ./frontend
         run: |
           echo "📋 Running ESLint..."
           
-          # Run ESLint with --fix to automatically fix issues
+          if [ -f "frontend/package.json" ]; then
+            cd frontend
+          fi
+          
           if npm run lint -- --fix; then
             echo "✅ ESLint passed without issues"
           else
             echo "🔧 ESLint found issues, attempting to fix..."
-            # Try to fix what we can
             npm run lint -- --fix || true
           fi
 
       - name: Check for remaining lint issues
-        working-directory: ./frontend  
         run: |
           echo "🔍 Checking for remaining lint issues..."
+          
+          if [ -f "frontend/package.json" ]; then
+            cd frontend
+          fi
+          
           if npm run lint; then
             echo "✅ All linting issues resolved"
           else
@@ -56,7 +65,6 @@ jobs:
             echo ""
             echo "Please review and fix the remaining linting errors:"
             echo "Run 'npm run lint -- --fix' locally to auto-fix what's possible"
-            echo "Then manually fix any remaining issues"
             npm run lint
             exit 1
           fi
@@ -64,14 +72,12 @@ jobs:
       - name: Commit and push lint fixes
         if: github.event_name == 'pull_request'
         run: |
-          # Configure git for the action
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # Check if there are changes to commit
           if ! git diff --quiet; then
             echo "📝 Auto-fixing lint issues and committing changes"
-            git add frontend/
+            git add .
             git commit -m "Auto-fix lint issues
 
 Automatically applied ESLint fixes during PR workflow.
@@ -80,7 +86,6 @@ Automatically applied ESLint fixes during PR workflow.
 - Applied automatic ESLint rules
 - No manual intervention required"
             
-            # Push to the PR branch
             git push origin HEAD:${{ github.head_ref }}
             echo "✅ Lint fixes committed and pushed"
           else
@@ -100,16 +105,26 @@ Automatically applied ESLint fixes during PR workflow.
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
 
-      - name: Install frontend dependencies
-        working-directory: ./frontend
-        run: npm ci
+      - name: Install dependencies
+        run: |
+          if [ -f "frontend/package.json" ]; then
+            cd frontend && npm ci
+          elif [ -f "package.json" ]; then
+            npm ci
+          fi
 
       - name: Run TypeScript check
-        working-directory: ./frontend
         run: |
           echo "🔍 Running TypeScript compilation check..."
+          
+          if [ -f "frontend/tsconfig.json" ]; then
+            cd frontend
+          fi
+          
           if npx tsc --noEmit; then
             echo "✅ TypeScript compilation successful"
           else
