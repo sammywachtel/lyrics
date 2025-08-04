@@ -18,6 +18,8 @@
     "test:watch": "cd frontend && npm run test:watch",
     "test:coverage": "cd frontend && npm run test:coverage",
     "frontend:test": "cd frontend && npm test",
+    "lint": "cd frontend && npm run lint",
+    "lint:fix": "cd frontend && npm run lint:fix",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
     "docker:dev:build": "docker-compose -f docker-compose.dev.yml build",
     "docker:dev:up": "docker-compose -f docker-compose.dev.yml up",

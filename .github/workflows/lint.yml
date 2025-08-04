@@ -1,0 +1,120 @@
+name: Lint and Code Quality
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main, feature/* ]
+
+jobs:
+  lint:
+    name: Lint Frontend Code
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Need to fetch full history for commits
+          fetch-depth: 0
+          # Use GitHub token to allow pushing fixes
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run ESLint and fix issues
+        working-directory: ./frontend
+        run: |
+          echo "📋 Running ESLint..."
+          
+          # Run ESLint with --fix to automatically fix issues
+          if npm run lint -- --fix; then
+            echo "✅ ESLint passed without issues"
+          else
+            echo "🔧 ESLint found issues, attempting to fix..."
+            # Try to fix what we can
+            npm run lint -- --fix || true
+          fi
+
+      - name: Check for remaining lint issues
+        working-directory: ./frontend  
+        run: |
+          echo "🔍 Checking for remaining lint issues..."
+          if npm run lint; then
+            echo "✅ All linting issues resolved"
+          else
+            echo "❌ ESLint found issues that couldn't be auto-fixed"
+            echo ""
+            echo "Please review and fix the remaining linting errors:"
+            echo "Run 'npm run lint -- --fix' locally to auto-fix what's possible"
+            echo "Then manually fix any remaining issues"
+            npm run lint
+            exit 1
+          fi
+
+      - name: Commit and push lint fixes
+        if: github.event_name == 'pull_request'
+        run: |
+          # Configure git for the action
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Check if there are changes to commit
+          if ! git diff --quiet; then
+            echo "📝 Auto-fixing lint issues and committing changes"
+            git add frontend/
+            git commit -m "Auto-fix lint issues
+
+Automatically applied ESLint fixes during PR workflow.
+            
+- Fixed formatting and style issues
+- Applied automatic ESLint rules
+- No manual intervention required"
+            
+            # Push to the PR branch
+            git push origin HEAD:${{ github.head_ref }}
+            echo "✅ Lint fixes committed and pushed"
+          else
+            echo "✅ No lint fixes needed"
+          fi
+
+  typescript:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run TypeScript check
+        working-directory: ./frontend
+        run: |
+          echo "🔍 Running TypeScript compilation check..."
+          if npx tsc --noEmit; then
+            echo "✅ TypeScript compilation successful"
+          else
+            echo "❌ TypeScript compilation failed"
+            echo ""
+            echo "Please fix the TypeScript errors above"
+            exit 1
+          fi
