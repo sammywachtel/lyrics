@@ -268,7 +268,7 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         setIsSaving(false)
       }
     }
-  }, [song, songId, title, artist, lyrics, status, tags, settings, onSongChange, onSettingsChange, onSaveStatusChange, isSaving])
+  }, [song, songId, title, artist, lyrics, status, tags, settings, onSongChange, onSettingsChange, onSaveStatusChange, onHasUnsavedChangesChange, isSaving])
 
   // Update the ref whenever handleSave changes
   useEffect(() => {
@@ -485,7 +485,7 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
     // Don't set save status here - let auto-save handle the actual saving status
     
     return () => clearTimeout(timer)
-  }, [lyrics, updateCurrentSection, song, onSaveStatusChange])
+  }, [lyrics, updateCurrentSection])
 
   // Insert section tag (either wrap selection or insert at cursor)
   const handleInsertSection = useCallback((sectionType: SectionType) => {

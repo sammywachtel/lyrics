@@ -5,7 +5,7 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $getRoot, $createTextNode, $createParagraphNode, type EditorState } from 'lexical'
+import { $getRoot, $createTextNode, $createParagraphNode } from 'lexical'
 
 interface LexicalLyricsEditorProps {
   value: string
@@ -142,7 +142,7 @@ function ValueSyncPlugin({
   }, [editor, value])
   
   // Handle editor content changes
-  const handleEditorChange = useCallback((_editorState: EditorState) => {
+  const handleEditorChange = useCallback(() => {
     if (isUpdatingFromProps.current) {
       return
     }
@@ -253,7 +253,7 @@ const LexicalLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, LexicalLyri
   }, ref) => {
     const [isSourceMode, setIsSourceMode] = useState(false)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
-    const editorRef = useRef<any>(null)
+    const editorRef = useRef<LexicalEditor | null>(null)
     
     // Lexical configuration  
     const initialConfig = React.useMemo(() => ({

@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SongList } from '../SongList'
 import { apiClient, type Song } from '../../lib/api'
@@ -16,7 +16,7 @@ jest.mock('../../lib/api', () => ({
 
 // Mock child components to isolate SongList testing
 jest.mock('../SongCard', () => ({
-  SongCard: ({ song, onEdit, onDelete }: any) => (
+  SongCard: ({ song, onEdit, onDelete }: { song: Song; onEdit: () => void; onDelete: () => void }) => (
     <div data-testid={`song-card-${song.id}`}>
       <h3>{song.title}</h3>
       <p>{song.artist}</p>
@@ -28,7 +28,7 @@ jest.mock('../SongCard', () => ({
 }))
 
 jest.mock('../SongForm', () => ({
-  SongForm: ({ onSuccess, onCancel }: any) => (
+  SongForm: ({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) => (
     <div data-testid="song-form">
       <button onClick={onSuccess} data-testid="form-success">Create Song</button>
       <button onClick={onCancel} data-testid="form-cancel">Cancel</button>
@@ -37,7 +37,7 @@ jest.mock('../SongForm', () => ({
 }))
 
 jest.mock('../SearchBar', () => {
-  return function SearchBar({ songs, onSearch }: any) {
+  return function SearchBar({ onSearch }: { onSearch: (query: { query: string; status: string; tags: string[]; sortBy: string; sortOrder: string }) => void }) {
     return (
       <div data-testid="search-bar">
         <input 
@@ -57,10 +57,10 @@ jest.mock('../SearchBar', () => {
 })
 
 jest.mock('../SearchResults', () => {
-  return function SearchResults({ results, onEditSong, onDeleteSong }: any) {
+  return function SearchResults({ results, onEditSong, onDeleteSong }: { results: Song[]; onEditSong: (id: string) => void; onDeleteSong: (id: string) => void }) {
     return (
       <div data-testid="search-results">
-        {results.map((result: any) => (
+        {results.map((result: Song) => (
           <div key={result.song.id} data-testid={`search-result-${result.song.id}`}>
             <h3>{result.song.title}</h3>
             <button onClick={() => onEditSong(result.song.id)} data-testid={`search-edit-${result.song.id}`}>

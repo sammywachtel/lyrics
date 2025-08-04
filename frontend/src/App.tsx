@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AuthForm } from './components/AuthForm'
 import { AppLayout } from './components/layout/AppLayout'
