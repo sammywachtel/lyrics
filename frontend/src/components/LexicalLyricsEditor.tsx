@@ -1,11 +1,11 @@
-import React, { useRef, useCallback, useState, useEffect } from 'react'
+import React, { useRef, useCallback, useState, useEffect, useImperativeHandle } from 'react'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $getRoot, $createTextNode, $createParagraphNode } from 'lexical'
+import { $getRoot, $createTextNode, $createParagraphNode, type LexicalEditor } from 'lexical'
 
 interface LexicalLyricsEditorProps {
   value: string
@@ -275,9 +275,9 @@ const LexicalLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, LexicalLyri
     }, [isSourceMode])
     
     // Expose methods via ref
-    React.useImperativeHandle(ref, () => ({
+    useImperativeHandle(ref, () => ({
       getTextareaElement: () => textareaRef.current,
-      getWysiwygElement: () => editorRef.current?.getRootElement(),
+      getWysiwygElement: () => (editorRef.current?.getRootElement() || null) as HTMLDivElement | null,
       insertTextAtCursor: (text: string) => {
         if (isSourceMode && textareaRef.current) {
           const textarea = textareaRef.current

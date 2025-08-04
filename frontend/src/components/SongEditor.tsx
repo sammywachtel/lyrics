@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react'
+import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react'
 import type { Song, SongSettings } from '../lib/api'
 import { createDefaultSettings, apiClient } from '../lib/api'
 import SectionToolbar from './SectionToolbar'
