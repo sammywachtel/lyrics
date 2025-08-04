@@ -155,7 +155,7 @@ jobs:
             --allow-unauthenticated \
             --set-env-vars "VITE_API_URL=${{ steps.deploy-backend.outputs.BACKEND_URL }}" \
             --memory 256Mi \
-            --cpu 0.5 \
+            --cpu 1 \
             --min-instances 0 \
             --max-instances 2 \
             --port 80 \
