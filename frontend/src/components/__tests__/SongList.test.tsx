@@ -57,10 +57,10 @@ jest.mock('../SearchBar', () => {
 })
 
 jest.mock('../SearchResults', () => {
-  return function SearchResults({ results, onEditSong, onDeleteSong }: { results: Song[]; onEditSong: (id: string) => void; onDeleteSong: (id: string) => void }) {
+  return function SearchResults({ results, onEditSong, onDeleteSong }: { results: { song: Song; matches: string[] }[]; onEditSong: (id: string) => void; onDeleteSong: (id: string) => void }) {
     return (
       <div data-testid="search-results">
-        {results.map((result: Song) => (
+        {results.map((result: { song: Song; matches: string[] }) => (
           <div key={result.song.id} data-testid={`search-result-${result.song.id}`}>
             <h3>{result.song.title}</h3>
             <button onClick={() => onEditSong(result.song.id)} data-testid={`search-edit-${result.song.id}`}>
