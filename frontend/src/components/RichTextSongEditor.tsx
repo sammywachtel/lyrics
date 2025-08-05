@@ -335,7 +335,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
 
       // Simplified section detection for rich-text editor
       // In a full implementation, you'd traverse the Lexical editor state
-      let currentLineNumber = 0
+      const currentLineNumber = 0
       
       // Find which section contains this line
       const sectionAtCursor = getSectionAtLine(sections, currentLineNumber)
@@ -347,7 +347,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     } catch (error) {
       console.debug('Section detection error:', error)
     }
-  }, [lyrics, sections, currentSection])
+  }, [sections, currentSection])
 
   // Handle lyrics change
   const handleLyricsChange = useCallback((newLyrics: string) => {

@@ -3,11 +3,6 @@ import {
   NodeKey,
   LexicalNode,
   LexicalEditor,
-  EditorConfig,
-  $getSelection,
-  $isRangeSelection,
-  $createParagraphNode,
-  $createTextNode,
   SerializedLexicalNode,
   Spread,
 } from 'lexical'
@@ -17,7 +12,11 @@ export interface SerializedSectionTagNode extends Spread<{
   sectionName: string
   type: 'section-tag'
   version: 1
-}, SerializedLexicalNode> {}
+}, SerializedLexicalNode> {
+  sectionName: string
+  type: 'section-tag'
+  version: 1
+}
 
 export class SectionTagNode extends DecoratorNode<React.ReactElement> {
   __sectionName: string
@@ -44,7 +43,7 @@ export class SectionTagNode extends DecoratorNode<React.ReactElement> {
     writable.__sectionName = sectionName
   }
 
-  createDOM(config: EditorConfig): HTMLElement {
+  createDOM(): HTMLElement {
     const dom = document.createElement('div')
     dom.className = 'section-tag-wrapper'
     return dom
@@ -91,7 +90,7 @@ export class SectionTagNode extends DecoratorNode<React.ReactElement> {
     return false
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): React.ReactElement {
+  decorate(editor: LexicalEditor): React.ReactElement {
     return <SectionTagComponent sectionName={this.__sectionName} nodeKey={this.__key} editor={editor} />
   }
 }

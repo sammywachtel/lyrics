@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 import { type SongSection } from '../../utils/sectionUtils'
 
 interface RichTextSectionSidebarProps {
@@ -228,7 +228,7 @@ const RichTextSectionSidebar: React.FC<RichTextSectionSidebarProps> = ({
           </div>
         ) : (
           <div className="p-3 space-y-2">
-            {sections.map((section, index) => {
+            {sections.map((section) => {
               const isActive = currentSection === section.name
               const isEditing = editingSection === section.name
               

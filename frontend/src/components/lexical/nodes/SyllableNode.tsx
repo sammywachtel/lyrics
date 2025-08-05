@@ -14,7 +14,10 @@ export interface SerializedSyllableNode extends Spread<
     stress: 'stressed' | 'unstressed' | 'secondary'
   },
   SerializedTextNode
-> {}
+> {
+  type: 'syllable'
+  version: 1
+}
 
 export class SyllableNode extends TextNode {
   __syllableCount: number

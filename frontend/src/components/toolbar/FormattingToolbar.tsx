@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 
 interface FormattingToolbarProps {
   onFormat: (format: 'bold' | 'italic' | 'underline' | 'strikethrough') => void

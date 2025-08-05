@@ -71,10 +71,10 @@ export default function SectionLabelsPlugin(): null {
     )
 
     // Auto-detect and convert section tags in plain text
-    const removeTextTransform = editor.registerTextContentListener((textContent) => {
+    const removeTextTransform = editor.registerTextContentListener(() => {
       // Look for patterns like [Section Name] and convert them to section nodes
-      const sectionRegex = /^\[([^\]]+)\]$/gm
-      let match
+      // const sectionRegex = /^\[([^\]]+)\]$/gm
+      // let match
       
       editor.update(() => {
         const root = $getRoot()

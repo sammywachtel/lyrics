@@ -1,8 +1,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { 
   $getRoot, 
-  COMMAND_PRIORITY_EDITOR,
-  $isTextNode
+  COMMAND_PRIORITY_EDITOR
 } from 'lexical'
 import { useEffect, useCallback, useState } from 'react'
 import { 
@@ -11,7 +10,7 @@ import {
   detectRhymeSound,
   assignRhymeLetter
 } from '../nodes/RhymeSchemeNode'
-import { $isProsodyLineNode } from '../nodes/ProsodyLineNode'
+// import { $isProsodyLineNode } from '../nodes/ProsodyLineNode'
 
 // Command to analyze rhyme scheme for the entire document
 export const ANALYZE_RHYME_SCHEME_COMMAND = 'ANALYZE_RHYME_SCHEME_COMMAND'
@@ -26,7 +25,7 @@ interface LineEndingData {
   lineNumber: number
   word: string
   rhymeSound: string
-  paragraph: any
+  paragraph: import('lexical').ElementNode
 }
 
 export default function RhymeSchemePlugin(): null {
@@ -109,7 +108,7 @@ export default function RhymeSchemePlugin(): null {
         
         if (rhymeLetter) {
           // Check if this paragraph already has a rhyme scheme node
-          const hasRhymeNode = line.paragraph.getChildren().some((node: any) => $isRhymeSchemeNode(node))
+          const hasRhymeNode = line.paragraph.getChildren().some((node) => $isRhymeSchemeNode(node))
           
           if (!hasRhymeNode) {
             // Add rhyme scheme node to the end of the paragraph
@@ -128,8 +127,8 @@ export default function RhymeSchemePlugin(): null {
       
       children.forEach((child) => {
         if (child.getType() === 'paragraph') {
-          const rhymeNodes = child.getChildren().filter((node: any) => $isRhymeSchemeNode(node))
-          rhymeNodes.forEach((rhymeNode: any) => {
+          const rhymeNodes = child.getChildren().filter((node) => $isRhymeSchemeNode(node))
+          rhymeNodes.forEach((rhymeNode) => {
             rhymeNode.remove()
           })
         }
@@ -182,7 +181,7 @@ export default function RhymeSchemePlugin(): null {
     // Auto-analyze rhyme scheme when content changes (debounced)
     let rhymeAnalysisTimeout: NodeJS.Timeout | null = null
     
-    const removeContentListener = editor.registerTextContentListener((textContent) => {
+    const removeContentListener = editor.registerTextContentListener(() => {
       if (rhymeSchemeEnabled) {
         // Debounce analysis to avoid excessive computation
         if (rhymeAnalysisTimeout) {

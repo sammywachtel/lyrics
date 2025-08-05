@@ -21,8 +21,6 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
   onUnderline,
   onStrikethrough,
 }) => {
-
-
   const formatButtons = [
     {
       type: 'bold' as const,

@@ -2,8 +2,6 @@ import {
   DecoratorNode,
   NodeKey,
   LexicalNode,
-  LexicalEditor,
-  EditorConfig,
   SerializedLexicalNode,
   Spread,
 } from 'lexical'
@@ -14,7 +12,12 @@ export interface SerializedRhymeSchemeNode extends Spread<{
   rhymeSound: string
   type: 'rhyme-scheme'
   version: 1
-}, SerializedLexicalNode> {}
+}, SerializedLexicalNode> {
+  rhymeLetter: string
+  rhymeSound: string
+  type: 'rhyme-scheme'
+  version: 1
+}
 
 export class RhymeSchemeNode extends DecoratorNode<React.ReactElement> {
   __rhymeLetter: string
@@ -52,7 +55,7 @@ export class RhymeSchemeNode extends DecoratorNode<React.ReactElement> {
     writable.__rhymeSound = rhymeSound
   }
 
-  createDOM(config: EditorConfig): HTMLElement {
+  createDOM(): HTMLElement {
     const dom = document.createElement('span')
     dom.className = 'rhyme-scheme-wrapper'
     return dom
@@ -100,8 +103,8 @@ export class RhymeSchemeNode extends DecoratorNode<React.ReactElement> {
     return false
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): React.ReactElement {
-    return <RhymeSchemeComponent rhymeLetter={this.__rhymeLetter} rhymeSound={this.__rhymeSound} nodeKey={this.__key} editor={editor} />
+  decorate(): React.ReactElement {
+    return <RhymeSchemeComponent rhymeLetter={this.__rhymeLetter} rhymeSound={this.__rhymeSound} nodeKey={this.__key} />
   }
 }
 
@@ -109,10 +112,9 @@ interface RhymeSchemeComponentProps {
   rhymeLetter: string
   rhymeSound: string
   nodeKey: NodeKey
-  editor: LexicalEditor
 }
 
-function RhymeSchemeComponent({ rhymeLetter, rhymeSound, nodeKey, editor }: RhymeSchemeComponentProps): React.ReactElement {
+function RhymeSchemeComponent({ rhymeLetter, rhymeSound }: Omit<RhymeSchemeComponentProps, 'nodeKey'>): React.ReactElement {
   const [isHovered, setIsHovered] = React.useState(false)
 
   // Get color for rhyme letter

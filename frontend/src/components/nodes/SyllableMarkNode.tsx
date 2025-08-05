@@ -2,8 +2,6 @@ import {
   DecoratorNode,
   NodeKey,
   LexicalNode,
-  LexicalEditor,
-  EditorConfig,
   SerializedLexicalNode,
   Spread,
 } from 'lexical'
@@ -13,7 +11,11 @@ export interface SerializedSyllableMarkNode extends Spread<{
   syllables: string[]
   type: 'syllable-mark'
   version: 1
-}, SerializedLexicalNode> {}
+}, SerializedLexicalNode> {
+  syllables: string[]
+  type: 'syllable-mark'
+  version: 1
+}
 
 export class SyllableMarkNode extends DecoratorNode<React.ReactElement> {
   __syllables: string[]
@@ -40,7 +42,7 @@ export class SyllableMarkNode extends DecoratorNode<React.ReactElement> {
     writable.__syllables = syllables
   }
 
-  createDOM(config: EditorConfig): HTMLElement {
+  createDOM(): HTMLElement {
     const dom = document.createElement('span')
     dom.className = 'syllable-mark-wrapper'
     return dom
@@ -87,15 +89,13 @@ export class SyllableMarkNode extends DecoratorNode<React.ReactElement> {
     return true
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): React.ReactElement {
-    return <SyllableMarkComponent syllables={this.__syllables} nodeKey={this.__key} editor={editor} />
+  decorate(): React.ReactElement {
+    return <SyllableMarkComponent syllables={this.__syllables} />
   }
 }
 
 interface SyllableMarkComponentProps {
   syllables: string[]
-  nodeKey: NodeKey
-  editor: LexicalEditor
 }
 
 function SyllableMarkComponent({ syllables, nodeKey, editor }: SyllableMarkComponentProps): React.ReactElement {

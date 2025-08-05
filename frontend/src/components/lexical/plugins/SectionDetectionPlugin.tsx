@@ -2,9 +2,6 @@ import { useEffect } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
   $getRoot,
-  $createParagraphNode,
-  $createTextNode,
-  TextNode,
   ParagraphNode,
 } from 'lexical'
 import { $createSectionNode, SectionNode } from '../nodes/SectionNode'
@@ -18,8 +15,6 @@ export function SectionDetectionPlugin(): null {
       editorState.read(() => {
         const root = $getRoot()
         const children = root.getChildren()
-        let hasChanges = false
-
         for (let i = 0; i < children.length; i++) {
           const child = children[i]
           
@@ -40,7 +35,6 @@ export function SectionDetectionPlugin(): null {
                 editor.update(() => {
                   const sectionNode = $createSectionNode(sectionName, sectionType)
                   child.replace(sectionNode)
-                  hasChanges = true
                 })
                 break // Exit loop and let the next update cycle handle more changes
               }

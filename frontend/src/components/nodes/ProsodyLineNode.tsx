@@ -3,7 +3,6 @@ import {
   NodeKey,
   LexicalNode,
   LexicalEditor,
-  EditorConfig,
   SerializedLexicalNode,
   Spread,
 } from 'lexical'
@@ -22,7 +21,13 @@ export interface SerializedProsodyLineNode extends Spread<{
   prosodyData: ProsodyData
   type: 'prosody-line'
   version: 1
-}, SerializedLexicalNode> {}
+}, SerializedLexicalNode> {
+  lineText: string
+  lineNumber: number
+  prosodyData: ProsodyData
+  type: 'prosody-line'
+  version: 1
+}
 
 export class ProsodyLineNode extends DecoratorNode<React.ReactElement> {
   __lineText: string
@@ -66,7 +71,7 @@ export class ProsodyLineNode extends DecoratorNode<React.ReactElement> {
     writable.__prosodyData = prosodyData
   }
 
-  createDOM(config: EditorConfig): HTMLElement {
+  createDOM(): HTMLElement {
     const dom = document.createElement('div')
     dom.className = 'prosody-line-wrapper'
     dom.setAttribute('data-line', this.__lineNumber.toString())
@@ -116,7 +121,7 @@ export class ProsodyLineNode extends DecoratorNode<React.ReactElement> {
     return true
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): React.ReactElement {
+  decorate(editor: LexicalEditor): React.ReactElement {
     return (
       <ProsodyLineComponent 
         lineText={this.__lineText}
@@ -140,10 +145,8 @@ interface ProsodyLineComponentProps {
 function ProsodyLineComponent({ 
   lineText, 
   lineNumber, 
-  prosodyData, 
-  nodeKey, 
-  editor 
-}: ProsodyLineComponentProps): React.ReactElement {
+  prosodyData 
+}: Omit<ProsodyLineComponentProps, 'nodeKey' | 'editor'>): React.ReactElement {
   const [isHovered, setIsHovered] = React.useState(false)
   const [showDetailedAnalysis, setShowDetailedAnalysis] = React.useState(false)
 

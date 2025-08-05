@@ -1,16 +1,13 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { 
   $getRoot, 
-  $createParagraphNode,
-  COMMAND_PRIORITY_EDITOR,
-  $isTextNode
+  COMMAND_PRIORITY_EDITOR
 } from 'lexical'
 import { useEffect, useCallback } from 'react'
 import { 
   $createProsodyLineNode, 
   $isProsodyLineNode, 
-  analyzeProsody,
-  type ProsodyData
+  analyzeProsody
 } from '../nodes/ProsodyLineNode'
 
 // Command to analyze prosody for the entire document
@@ -138,7 +135,7 @@ export default function ProsodyAnalysisPlugin(): null {
     // Auto-analyze prosody when content changes (debounced)
     let analysisTimeout: NodeJS.Timeout | null = null
     
-    const removeContentListener = editor.registerTextContentListener((textContent) => {
+    const removeContentListener = editor.registerTextContentListener(() => {
       if (prosodyAnalysisEnabled) {
         // Debounce analysis to avoid excessive computation
         if (analysisTimeout) {

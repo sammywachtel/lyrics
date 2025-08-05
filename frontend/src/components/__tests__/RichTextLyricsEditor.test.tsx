@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import RichTextLyricsEditor from '../RichTextLyricsEditor'
 
@@ -11,7 +11,7 @@ jest.mock('@lexical/react/LexicalComposer', () => ({
 }))
 
 jest.mock('@lexical/react/LexicalRichTextPlugin', () => ({
-  RichTextPlugin: ({ contentEditable, placeholder }: any) => (
+  RichTextPlugin: ({ contentEditable, placeholder }: { contentEditable: React.ReactNode; placeholder?: React.ReactNode }) => (
     <div data-testid="rich-text-plugin">
       {contentEditable}
       {placeholder}
@@ -20,7 +20,7 @@ jest.mock('@lexical/react/LexicalRichTextPlugin', () => ({
 }))
 
 jest.mock('@lexical/react/LexicalContentEditable', () => ({
-  ContentEditable: ({ className, placeholder, ...props }: any) => (
+  ContentEditable: ({ className, ...props }: { className?: string; placeholder?: string; [key: string]: unknown }) => (
     <div 
       data-testid="content-editable"
       className={className}
@@ -47,7 +47,7 @@ jest.mock('@lexical/react/LexicalComposerContext', () => ({
       focus: jest.fn(),
       dispatchCommand: jest.fn(),
       getEditorState: () => ({
-        read: (fn: () => any) => fn(),
+        read: (fn: () => unknown) => fn(),
       }),
       getRootElement: () => document.createElement('div'),
     },

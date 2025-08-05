@@ -14,7 +14,10 @@ export interface SerializedRhymeNode extends Spread<
     rhymeGroup: string
   },
   SerializedTextNode
-> {}
+> {
+  type: 'rhyme'
+  version: 1
+}
 
 export class RhymeNode extends TextNode {
   __rhymeScheme: string

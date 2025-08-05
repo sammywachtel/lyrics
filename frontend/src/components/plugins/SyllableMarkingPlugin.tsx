@@ -1,11 +1,8 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { 
-  $getRoot, 
-  $createTextNode,
   $getSelection,
   $isRangeSelection,
-  COMMAND_PRIORITY_EDITOR,
-  $isTextNode
+  COMMAND_PRIORITY_EDITOR
 } from 'lexical'
 import { useEffect } from 'react'
 import { 
@@ -48,7 +45,7 @@ export default function SyllableMarkingPlugin(): null {
             } else {
               // Add syllable marking
               const words = selectedText.split(/(\s+)/)
-              const syllableNodes: any[] = []
+              const syllableNodes: import('lexical').LexicalNode[] = []
               
               words.forEach(word => {
                 if (word.trim()) {
@@ -58,7 +55,7 @@ export default function SyllableMarkingPlugin(): null {
                   syllableNodes.push(syllableNode)
                 } else {
                   // Preserve whitespace
-                  syllableNodes.push($createTextNode(word))
+                  syllableNodes.push($createSyllableMarkNode([word]))
                 }
               })
               
@@ -92,7 +89,7 @@ export default function SyllableMarkingPlugin(): null {
     )
 
     // Auto-detect words that could benefit from syllable marking
-    const removeAutoDetect = editor.registerTextContentListener((textContent) => {
+    const removeAutoDetect = editor.registerTextContentListener(() => {
       // This could be enhanced to automatically suggest syllable marking
       // for complex words or when the user enables auto-syllable mode
     })

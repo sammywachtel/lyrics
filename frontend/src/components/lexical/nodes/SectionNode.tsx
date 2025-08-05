@@ -5,7 +5,6 @@ import {
   LexicalNode,
   SerializedLexicalNode,
   Spread,
-  type LexicalEditor,
 } from 'lexical'
 
 export interface SerializedSectionNode extends Spread<
@@ -14,7 +13,10 @@ export interface SerializedSectionNode extends Spread<
     sectionType: string
   },
   SerializedLexicalNode
-> {}
+> {
+  type: 'section'
+  version: 1
+}
 
 export class SectionNode extends DecoratorNode<React.JSX.Element> {
   __sectionName: string
