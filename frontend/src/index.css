@@ -427,3 +427,140 @@ mark {
     width: 45px;
   }
 }
+
+/* Rich Text Editor Styles */
+.rich-text-editor {
+  font-family: var(--font-mono);
+}
+
+.rich-text-content {
+  font-family: var(--font-mono) !important;
+}
+
+/* Custom Lexical Node Styles */
+.section-node {
+  display: block;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.syllable-node {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.syllable-node:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 2px;
+}
+
+.syllable-stressed {
+  font-weight: 600;
+  color: var(--color-primary-700);
+}
+
+.syllable-secondary {
+  font-weight: 500;
+  color: var(--color-primary-600);
+}
+
+.syllable-unstressed {
+  color: var(--color-neutral-600);
+}
+
+.rhyme-node {
+  position: relative;
+  font-weight: 600;
+  border-radius: 3px;
+  padding: 1px 2px;
+  transition: all 0.2s ease;
+}
+
+.rhyme-node:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Rhyme scheme colors for RhymeNode */
+.rhyme-a {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-bottom: 2px solid var(--color-primary-500);
+}
+
+.rhyme-b {
+  background-color: rgba(16, 185, 129, 0.2);
+  border-bottom: 2px solid var(--color-success-500);
+}
+
+.rhyme-c {
+  background-color: rgba(168, 85, 247, 0.2);
+  border-bottom: 2px solid var(--color-creative-500);
+}
+
+.rhyme-d {
+  background-color: rgba(245, 158, 11, 0.2);
+  border-bottom: 2px solid var(--color-warm-500);
+}
+
+.rhyme-e {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-bottom: 2px solid #ef4444;
+}
+
+.rhyme-f {
+  background-color: rgba(236, 72, 153, 0.2);
+  border-bottom: 2px solid #ec4899;
+}
+
+.rhyme-g {
+  background-color: rgba(20, 184, 166, 0.2);
+  border-bottom: 2px solid #14b8a6;
+}
+
+.rhyme-h {
+  background-color: rgba(249, 115, 22, 0.2);
+  border-bottom: 2px solid #f97316;
+}
+
+/* Formatting Toolbar Styles */
+.formatting-toolbar {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Rich Text Content Styles */
+.rich-text-content .lexical-paragraph {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.rich-text-content .lexical-paragraph:first-child {
+  margin-top: 0;
+}
+
+.rich-text-content .lexical-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Text formatting styles */
+.rich-text-content .font-bold {
+  font-weight: 700;
+}
+
+.rich-text-content .italic {
+  font-style: italic;
+}
+
+.rich-text-content .underline {
+  text-decoration: underline;
+}
+
+.rich-text-content .line-through {
+  text-decoration: line-through;
+}
+
+/* Ensure monospace font is applied consistently */
+.rich-text-content * {
+  font-family: var(--font-mono) !important;
+}

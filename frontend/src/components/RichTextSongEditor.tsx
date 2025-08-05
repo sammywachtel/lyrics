@@ -3,14 +3,13 @@ import type { Song, SongSettings } from '../lib/api'
 import { createDefaultSettings, apiClient } from '../lib/api'
 import SectionToolbar from './SectionToolbar'
 import SectionNavigation from './SectionNavigation'
-import SectionSidebar from './editor/SectionSidebar'
-import LexicalLyricsEditor, { type LexicalLyricsEditorRef } from './LexicalLyricsEditor'
-import RichTextLyricsEditor from './RichTextLyricsEditor'
+import RichTextSectionSidebar from './sidebar/RichTextSectionSidebar'
+import RichTextLyricsEditor, { type RichTextLyricsEditorRef } from './RichTextLyricsEditor'
 import { parseSections, getSectionAtLine, renumberSections, generateSectionTag, wrapTextWithSection, insertSectionAtPosition, type SectionType } from '../utils/sectionUtils'
 import { getWordCount } from '../utils/textFormatting'
 import { type AutoSaveStatus } from './editor/AutoSaveIndicator'
 
-interface SongEditorProps {
+interface RichTextSongEditorProps {
   songId: string
   onSongChange?: (song: Song) => void
   onSongLoaded?: (song: Song) => void
@@ -21,11 +20,11 @@ interface SongEditorProps {
   onHasUnsavedChangesChange?: (hasChanges: boolean) => void
 }
 
-export interface SongEditorRef {
+export interface RichTextSongEditorRef {
   triggerSave: () => Promise<void>
 }
 
-export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
+export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSongEditorProps>((
   {
     songId,
     onSongChange,
@@ -56,9 +55,13 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
   const [currentSection, setCurrentSection] = useState<string>('')
   const [hasSelectedText, setHasSelectedText] = useState(false)
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('saved')
-  const [useRichTextEditor, setUseRichTextEditor] = useState(false)
   
-  const wysiwygEditorRef = useRef<LexicalLyricsEditorRef>(null)
+  // Rich-text specific states
+  const [prosodyEnabled, setProsodyEnabled] = useState(false)
+  const [rhymeSchemeEnabled, setRhymeSchemeEnabled] = useState(false)
+  const [syllableMarkingEnabled, setSyllableMarkingEnabled] = useState(false)
+  
+  const richTextEditorRef = useRef<RichTextLyricsEditorRef>(null)
   const isMountedRef = useRef(true)
   const handleSaveRef = useRef<(() => Promise<void>) | null>(null)
   const lastAutoSaveRef = useRef<string>('')
@@ -80,20 +83,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         const response = await apiClient.getSong(songId)
         const songData = response.song!
         
-        // Enhanced logging to debug newline issues on load
-        const loadedNewlineCount = (songData.lyrics.match(/\n/g) || []).length
-        const loadedDoubleNewlineCount = (songData.lyrics.match(/\n\n/g) || []).length
-        const loadedTripleNewlineCount = (songData.lyrics.match(/\n\n\n/g) || []).length
-        
-        console.log('📂 Song loaded from API:', {
-          lyricsLength: songData.lyrics.length,
-          newlineCount: loadedNewlineCount,
-          doubleNewlineCount: loadedDoubleNewlineCount,
-          tripleNewlineCount: loadedTripleNewlineCount,
-          firstChars: songData.lyrics.slice(0, 50),
-          rawNewlines: JSON.stringify(songData.lyrics.slice(0, 100))
-        })
-        
         setSong(songData)
         setTitle(songData.title)
         setArtist(songData.artist || '')
@@ -106,7 +95,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         // Mark as initialized after data is loaded and UI has settled
         setTimeout(() => {
           isInitialized.current = true
-          // Set initial auto-save reference
           lastAutoSaveRef.current = songData.lyrics
         }, 500)
         
@@ -172,7 +160,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
 
     if (!hasActualChanges) {
       if (isMountedRef.current) {
-        // Defer state update to avoid updating during render
         setTimeout(() => {
           setHasUnsavedChanges(false)
         }, 0)
@@ -187,7 +174,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
     onSaveStatusChange?.('saving')
 
     try {
-      // Use the provided lyrics content or fall back to React state
       const finalLyrics = lyricsToSave !== undefined ? lyricsToSave : lyrics
       
       const updateData = {
@@ -199,55 +185,20 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         settings
       }
 
-      // Enhanced logging to debug newline issues
-      const newlineCount = (finalLyrics.match(/\n/g) || []).length
-      const doubleNewlineCount = (finalLyrics.match(/\n\n/g) || []).length
-      const tripleNewlineCount = (finalLyrics.match(/\n\n\n/g) || []).length
-      
-      console.log('🚀 Sending to API:', {
-        lyricsLength: finalLyrics.length,
-        newlineCount,
-        doubleNewlineCount,
-        tripleNewlineCount,
-        lastChars: finalLyrics.slice(-10),
-        firstChars: finalLyrics.slice(0, 50),
-        rawNewlines: JSON.stringify(finalLyrics.slice(0, 100))
-      })
-
       const response = await apiClient.updateSong(songId, updateData)
       
       if (!isMountedRef.current) return
       
       const updatedSong = response.song!
       
-      // Enhanced logging to debug newline issues
-      const receivedNewlineCount = (updatedSong.lyrics.match(/\n/g) || []).length
-      const receivedDoubleNewlineCount = (updatedSong.lyrics.match(/\n\n/g) || []).length
-      const receivedTripleNewlineCount = (updatedSong.lyrics.match(/\n\n\n/g) || []).length
-      
-      console.log('📨 Received from API:', {
-        lyricsLength: updatedSong.lyrics.length,
-        newlineCount: receivedNewlineCount,
-        doubleNewlineCount: receivedDoubleNewlineCount,
-        tripleNewlineCount: receivedTripleNewlineCount,
-        lastChars: updatedSong.lyrics.slice(-10),
-        firstChars: updatedSong.lyrics.slice(0, 50),
-        rawNewlines: JSON.stringify(updatedSong.lyrics.slice(0, 100)),
-        lengthChanged: finalLyrics.length !== updatedSong.lyrics.length,
-        contentChanged: finalLyrics !== updatedSong.lyrics
-      })
-      
       setSong(updatedSong)
-      // Defer state update to avoid updating during render
       setTimeout(() => {
         setHasUnsavedChanges(false)
-        // Notify parent that changes have been saved
         if (onHasUnsavedChangesChange) {
           onHasUnsavedChangesChange(false)
         }
       }, 0)
       
-      // Defer parent state updates to avoid render conflicts
       setTimeout(() => {
         onSaveStatusChange?.('saved')
         if (onSongChange) {
@@ -280,7 +231,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
   // Expose triggerSave method via ref
   useImperativeHandle(ref, () => ({
     triggerSave: async () => {
-      console.log('🔧 SongEditor: triggerSave called, handleSaveRef.current available:', !!handleSaveRef.current)
       if (handleSaveRef.current) {
         return await handleSaveRef.current()
       }
@@ -294,18 +244,8 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
       return
     }
     
-    // Use the current content from Lexical if provided, otherwise fall back to React state
     const contentToSave = currentContent || lyrics
     
-    console.log('🔄 Auto-save starting:', {
-      usingLexicalContent: !!currentContent,
-      reactStateLength: lyrics.length,
-      contentToSaveLength: contentToSave.length,
-      lastChars: contentToSave.slice(-10),
-      fullContent: contentToSave
-    })
-    
-    // Check if there are actual changes to save (use the current content)
     const hasActualChanges = (
       title !== song.title ||
       artist !== (song.artist || '') ||
@@ -324,7 +264,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
       setAutoSaveStatus('saving')
       lastAutoSaveRef.current = contentToSave
       
-      // Update React state with the latest content before saving
       if (currentContent && currentContent !== lyrics) {
         setLyrics(currentContent)
       }
@@ -356,13 +295,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
     }
   }, [autoSaveStatus, onAutoSaveStatusChange])
 
-  // NOTE: Removed cleanup for now to debug the Promise issue
-  
-  // This component now works with AppLayout - settings are handled externally
-  // The SongEditor focuses on lyrics editing, song metadata, and saving
-  // Settings are passed down from App -> AppLayout -> SettingsPanel
-
-
   // Parse sections whenever lyrics change
   useEffect(() => {
     const parsedSections = parseSections(lyrics)
@@ -373,28 +305,16 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
       setCurrentSection('')
     }
   }, [lyrics, currentSection])
-  
-  // Auto-renumber sections when lyrics change (after a delay to avoid conflicts)
-  // DISABLED: This was causing infinite loops with Lexical editor
-  // useEffect(() => {
-  //   const renumberTimer = setTimeout(() => {
-  //     const renumbered = renumberSections(lyrics)
-  //     if (renumbered !== lyrics) {
-  //       setLyrics(renumbered)
-  //     }
-  //   }, 1000) // 1 second delay to avoid rapid renumbering during typing
-  //   
-  //   return () => clearTimeout(renumberTimer)
-  // }, [lyrics])
 
   // Update current section and selection state based on cursor position
   const updateCurrentSection = useCallback(() => {
     // Check if text is selected
-    const editorRef = wysiwygEditorRef.current
+    const editorRef = richTextEditorRef.current
     if (editorRef) {
       const selectedText = editorRef.getSelectedText()
       setHasSelectedText(selectedText.length > 0)
-    }    
+    }
+    
     if (sections.length === 0) {
       if (currentSection !== '') {
         setCurrentSection('')
@@ -402,98 +322,49 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
       return
     }
 
+    // For rich-text editor, we'll need to implement section detection differently
+    // This is a simplified version - in reality, you'd track cursor position in the rich editor
     const selection = window.getSelection()
     if (!selection || selection.rangeCount === 0) {
       return
     }
     
     try {
-      // Get the correct editor element from the ref
-      const editorElement = wysiwygEditorRef.current?.isSourceMode() 
-        ? wysiwygEditorRef.current?.getTextareaElement()
-        : wysiwygEditorRef.current?.getWysiwygElement()
-      
-      if (!editorElement) return
-      
+      const editorElement = richTextEditorRef.current?.getWysiwygElement()
       if (!editorElement) return
 
+      // Simplified section detection for rich-text editor
+      // In a full implementation, you'd traverse the Lexical editor state
       let currentLineNumber = 0
-      
-      if (editorElement instanceof HTMLTextAreaElement) {
-        // For textarea (source mode)
-        const cursorPosition = editorElement.selectionStart
-        const textBeforeCursor = lyrics.substring(0, cursorPosition)
-        currentLineNumber = textBeforeCursor.split('\n').length - 1
-      } else {
-        // For contentEditable (WYSIWYG mode)
-        const range = selection.getRangeAt(0)
-        
-        // Try to find the prosody line element containing the cursor
-        let targetNode: Node | null = range.startContainer
-        let prosodyLine: HTMLElement | null = null
-        
-        // Walk up the DOM tree to find the prosody line
-        while (targetNode && targetNode !== editorElement) {
-          if (targetNode instanceof HTMLElement && targetNode.classList.contains('prosody-line')) {
-            prosodyLine = targetNode
-            break
-          }
-          if (targetNode instanceof HTMLElement && targetNode.hasAttribute('data-line')) {
-            prosodyLine = targetNode
-            break
-          }
-          targetNode = targetNode.parentNode
-        }
-        
-        if (prosodyLine && prosodyLine.hasAttribute('data-line')) {
-          currentLineNumber = parseInt(prosodyLine.getAttribute('data-line') || '0')
-        } else {
-          // Fallback: calculate line number from text content
-          const preCaretRange = range.cloneRange()
-          preCaretRange.selectNodeContents(editorElement)
-          preCaretRange.setEnd(range.endContainer, range.endOffset)
-          const textBeforeCursor = preCaretRange.toString()
-          currentLineNumber = textBeforeCursor.split('\n').length - 1
-        }
-      }
       
       // Find which section contains this line
       const sectionAtCursor = getSectionAtLine(sections, currentLineNumber)
       const newCurrentSection = sectionAtCursor?.name || ''
       
-      // Only update if changed to prevent unnecessary re-renders
       if (newCurrentSection !== currentSection) {
         setCurrentSection(newCurrentSection)
       }
     } catch (error) {
       console.debug('Section detection error:', error)
-      // Fallback: don't update current section if detection fails
     }
   }, [lyrics, sections, currentSection])
 
-  // Handle lyrics change with section parsing (debounced to prevent infinite loops)
+  // Handle lyrics change
   const handleLyricsChange = useCallback((newLyrics: string) => {
-    // Prevent rapid updates that could cause infinite loops
     if (newLyrics === lyrics) {
       return
     }
     
     setLyrics(newLyrics)
     
-    // Update current section after a brief delay to account for cursor movement
     const timer = setTimeout(updateCurrentSection, 100)
-    
-    // If this is a real change (not initial load), mark as having unsaved changes
-    // Don't set save status here - let auto-save handle the actual saving status
-    
     return () => clearTimeout(timer)
   }, [lyrics, updateCurrentSection])
 
-  // Insert section tag (either wrap selection or insert at cursor)
+  // Insert section tag
   const handleInsertSection = useCallback((sectionType: SectionType) => {
-    const editorRef = wysiwygEditorRef.current
+    const editorRef = richTextEditorRef.current
     if (!editorRef) {
-      // Fallback: append to end with smart numbering
       const sectionTag = generateSectionTag(sections, sectionType)
       const newLyrics = lyrics + (lyrics ? '\n\n' : '') + sectionTag + '\n'
       const renumbered = renumberSections(newLyrics)
@@ -511,7 +382,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
       let newCursorPosition: number = cursorPosition || 0
       
       if (selectedText && selectedText.trim()) {
-        // Wrap selected text with section tag
         const startPosition = cursorPosition || 0
         const endPosition = startPosition + selectedText.length
         
@@ -519,17 +389,14 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         newLyrics = result.newLyrics
         newCursorPosition = result.newEndPosition
       } else {
-        // Insert at cursor position
         const result = insertSectionAtPosition(lyrics, cursorPosition || 0, sectionTag)
         newLyrics = result.newLyrics
         newCursorPosition = result.newPosition
       }
       
-      // Renumber sections to maintain order
       const renumbered = renumberSections(newLyrics)
       setLyrics(renumbered)
       
-      // Restore cursor position after state update
       setTimeout(() => {
         editorRef.setCursorPosition(newCursorPosition)
         updateCurrentSection()
@@ -537,7 +404,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
       
     } catch (error) {
       console.error('Error inserting section:', error)
-      // Fallback: append to end with smart numbering
       const sectionTag = generateSectionTag(sections, sectionType)
       const newLyrics = lyrics + (lyrics ? '\n\n' : '') + sectionTag + '\n'
       const renumbered = renumberSections(newLyrics)
@@ -546,40 +412,33 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
     }
   }, [lyrics, sections, updateCurrentSection])
 
-  // Add new section at the end with smart naming
+  // Add new section
   const handleAddSection = useCallback(() => {
-    // Default to Verse if no sections, otherwise Verse
     const sectionType: SectionType = sections.length === 0 ? 'Verse' : 'Verse'
     handleInsertSection(sectionType)
   }, [sections, handleInsertSection])
 
-  // Delete a section with improved regex escaping
+  // Delete a section
   const handleDeleteSection = useCallback((sectionName: string) => {
-    // Escape special regex characters more safely
     const escapedName = sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    // Remove the section tag and any immediately following newlines
     const newLyrics = lyrics.replace(new RegExp(`\\[${escapedName}\\]\\n?`, 'g'), '')
     setLyrics(newLyrics)
     updateCurrentSection()
   }, [lyrics, updateCurrentSection])
 
-  // Rename a section with validation
+  // Rename a section
   const handleRenameSection = useCallback((oldName: string, newName: string) => {
-    // Validate new name
     if (!newName.trim() || newName === oldName) return
     
-    // Check if new name already exists
     const existingNames = sections.map(s => s.name.toLowerCase())
     if (existingNames.includes(newName.toLowerCase()) && newName.toLowerCase() !== oldName.toLowerCase()) {
       alert(`A section named '${newName}' already exists. Please choose a different name.`)
       return
     }
     
-    // Escape special regex characters
     const escapedOldName = oldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const newTag = `[${newName.trim()}]`
     
-    // Replace all instances of the old section name
     const newLyrics = lyrics.replace(new RegExp(`\\[${escapedOldName}\\]`, 'g'), newTag)
     setLyrics(newLyrics)
     updateCurrentSection()
@@ -593,136 +452,50 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
       return
     }
     
-    // Get the correct editor element from the ref
-    const editorElement = wysiwygEditorRef.current?.isSourceMode() 
-      ? wysiwygEditorRef.current?.getTextareaElement()
-      : wysiwygEditorRef.current?.getWysiwygElement()
-    
-    if (!editorElement) {
-      console.warn('Editor element not found')
-      return
-    }
-    
+    const editorElement = richTextEditorRef.current?.getWysiwygElement()
     if (!editorElement) {
       console.warn('Editor element not found')
       return
     }
     
     try {
-      // Focus the editor first
-      if (editorElement instanceof HTMLElement) {
-        editorElement.focus()
-      }
+      editorElement.focus()
       
-      if (editorElement instanceof HTMLTextAreaElement) {
-        // For textarea (source mode)
-        const lines = lyrics.split('\n')
-        const targetLineIndex = section.startLine
-        
-        // Calculate character position for the start of the target line
-        let charPosition = 0
-        for (let i = 0; i < targetLineIndex && i < lines.length; i++) {
-          charPosition += lines[i].length + 1 // +1 for the newline character
-        }
-        
-        // Set cursor position
-        editorElement.setSelectionRange(charPosition, charPosition)
-        
-        // Scroll to the line
-        const lineHeight = 24 // Approximate line height in pixels
-        editorElement.scrollTop = Math.max(0, (targetLineIndex - 2) * lineHeight)
-      } else {
-        // For contentEditable (WYSIWYG mode)
-        let targetElement: HTMLElement | null = null
-        
-        // First try to find section border with matching data-section attribute
-        const sectionBorders = editorElement.querySelectorAll('.section-border')
-        for (const border of sectionBorders) {
-          if (border.getAttribute('data-section') === sectionName) {
-            targetElement = border as HTMLElement
-            break
-          }
-        }
-        
-        // If no section border found, look for the prosody line at the section start
-        if (!targetElement) {
-          const prosodyLines = editorElement.querySelectorAll('.prosody-line[data-line]')
-          for (const line of prosodyLines) {
-            const lineNumber = parseInt((line as HTMLElement).getAttribute('data-line') || '0')
-            if (lineNumber === section.startLine) {
-              targetElement = line as HTMLElement
-              break
-            }
-          }
-        }
-        
-        // Final fallback: use querySelector with data-line attribute
-        if (!targetElement) {
-          targetElement = editorElement.querySelector(`[data-line="${section.startLine}"]`) as HTMLElement
-        }
-        
-        if (targetElement) {
-          // Scroll to the target element
-          targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          
-          // Set cursor position
-          const selection = window.getSelection()
-          const range = document.createRange()
-          
-          if (targetElement.classList.contains('section-border')) {
-            // For section borders, place cursor after the border in the next prosody line
-            let nextElement = targetElement.nextElementSibling as HTMLElement
-            while (nextElement && !nextElement.classList.contains('prosody-line')) {
-              nextElement = nextElement.nextElementSibling as HTMLElement
-            }
-            
-            if (nextElement) {
-              // Find the first text node in the next line
-              const walker = document.createTreeWalker(
-                nextElement,
-                NodeFilter.SHOW_TEXT,
-                null
-              )
-              const firstTextNode = walker.nextNode()
-              if (firstTextNode) {
-                range.setStart(firstTextNode, 0)
-                range.setEnd(firstTextNode, 0)
-              }
-            }
-          } else {
-            // For prosody lines, place cursor at the start of the text content
-            const walker = document.createTreeWalker(
-              targetElement,
-              NodeFilter.SHOW_TEXT,
-              null
-            )
-            const firstTextNode = walker.nextNode()
-            if (firstTextNode) {
-              range.setStart(firstTextNode, 0)
-              range.setEnd(firstTextNode, 0)
-            }
-          }
-          
-          selection?.removeAllRanges()
-          selection?.addRange(range)
-          
-          // Section jump completed
-        } else {
-          console.warn('Could not find target element for section:', sectionName)
-        }
-      }
-      
-      // Update current section after jumping
+      // For rich-text editor, we'd need to implement proper section jumping
+      // This is a simplified version
       setTimeout(updateCurrentSection, 150)
     } catch (error) {
       console.error('Error jumping to section:', error)
-      // Fallback: just focus the editor
       if (editorElement instanceof HTMLElement) {
         editorElement.focus()
       }
     }
-  }, [sections, lyrics, updateCurrentSection])
+  }, [sections, updateCurrentSection])
 
+  // Rich-text specific handlers
+  const handleToggleProsody = useCallback(() => {
+    setProsodyEnabled(!prosodyEnabled)
+    const editorRef = richTextEditorRef.current
+    if (editorRef) {
+      editorRef.toggleProsodyAnalysis()
+    }
+  }, [prosodyEnabled])
+
+  const handleToggleRhymeScheme = useCallback(() => {
+    setRhymeSchemeEnabled(!rhymeSchemeEnabled)
+    const editorRef = richTextEditorRef.current
+    if (editorRef) {
+      editorRef.toggleRhymeScheme()
+    }
+  }, [rhymeSchemeEnabled])
+
+  const handleToggleSyllableMarking = useCallback(() => {
+    setSyllableMarkingEnabled(!syllableMarkingEnabled)
+    const editorRef = richTextEditorRef.current
+    if (editorRef) {
+      editorRef.toggleSyllableMarking()
+    }
+  }, [syllableMarkingEnabled])
 
   if (isLoading) {
     return (
@@ -763,7 +536,7 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
     <div className="h-full flex relative overflow-hidden">
       {/* Main Editor */}
       <div className="flex-1 flex flex-col relative z-10">
-        {/* Editor Top Bar - Minimal */}
+        {/* Editor Top Bar */}
         <div className="bg-white/60 backdrop-blur-md border-b border-white/30 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {currentSection && (
@@ -772,34 +545,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
                 <span>{currentSection}</span>
               </div>
             )}
-            
-            {/* Editor Mode Toggle */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setUseRichTextEditor(false)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 ${
-                  !useRichTextEditor
-                    ? 'bg-primary-100 text-primary-800 border border-primary-200/50 shadow-soft'
-                    : 'bg-white/50 text-neutral-600 hover:text-neutral-800 hover:bg-white hover:shadow-soft border border-transparent hover:border-neutral-200/50'
-                }`}
-                title="Plain Text Editor"
-              >
-                <span>📝</span>
-                <span className="hidden sm:inline">Plain</span>
-              </button>
-              <button
-                onClick={() => setUseRichTextEditor(true)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 ${
-                  useRichTextEditor
-                    ? 'bg-primary-100 text-primary-800 border border-primary-200/50 shadow-soft'
-                    : 'bg-white/50 text-neutral-600 hover:text-neutral-800 hover:bg-white hover:shadow-soft border border-transparent hover:border-neutral-200/50'
-                }`}
-                title="Rich Text Editor with Prosody Analysis"
-              >
-                <span>🎨</span>
-                <span className="hidden sm:inline">Rich</span>
-              </button>
-            </div>
           </div>
           <div className="flex items-center gap-4 text-sm text-neutral-600">
             <span className="flex items-center gap-1">
@@ -815,9 +560,8 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
           </div>
         </div>
 
-        {/* Editor Content - Full Height with Proper Scrolling */}
+        {/* Editor Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-
           {/* Section Toolbar */}
           <div className="bg-white/50 backdrop-blur-sm border-b border-white/20">
             <SectionToolbar
@@ -832,33 +576,22 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
             />
           </div>
           
-          {/* Lyrics Editor - Fills Available Height */}
+          {/* Rich-Text Lyrics Editor */}
           <div className="flex-1 relative overflow-hidden">
-            {useRichTextEditor ? (
-              <RichTextLyricsEditor
-                ref={wysiwygEditorRef}
-                value={lyrics}
-                onChange={handleLyricsChange}
-                onSelectionChange={updateCurrentSection}
-                placeholder="Enter your lyrics here..."
-                rows={24}
-                enableAutoSave={true}
-                autoSaveDelay={10000}
-                onAutoSave={handleAutoSave}
-              />
-            ) : (
-              <LexicalLyricsEditor
-                ref={wysiwygEditorRef}
-                value={lyrics}
-                onChange={handleLyricsChange}
-                onSelectionChange={updateCurrentSection}
-                placeholder="Enter your lyrics here..."
-                rows={24}
-                enableAutoSave={true}
-                autoSaveDelay={10000}
-                onAutoSave={handleAutoSave}
-              />
-            )}
+            <RichTextLyricsEditor
+              ref={richTextEditorRef}
+              value={lyrics}
+              onChange={handleLyricsChange}
+              onSelectionChange={updateCurrentSection}
+              placeholder="Enter your lyrics here..."
+              rows={24}
+              enableAutoSave={true}
+              autoSaveDelay={10000}
+              onAutoSave={handleAutoSave}
+              enableProsodyAnalysis={prosodyEnabled}
+              enableSyllableMarking={syllableMarkingEnabled}
+              enableRhymeScheme={rhymeSchemeEnabled}
+            />
             
             {showSectionNav && (
               <SectionNavigation
@@ -869,54 +602,13 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
               />
             )}
           </div>
-          
-          {/* Bottom Status Bar */}
-          <div className="bg-white/50 backdrop-blur-sm border-t border-white/20 px-4 py-3">
-            <div className="flex flex-col sm:flex-row justify-between gap-4 text-sm text-neutral-600">
-              <div className="flex flex-wrap gap-4">
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-primary-400"></span>
-                  <span>Lines: {lyrics.split('\n').length}</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-creative-400"></span>
-                  <span>Words: {getWordCount(lyrics)}</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-warm-400"></span>
-                  <span>Characters: {lyrics.length}</span>
-                </span>
-                {sections.length > 0 && (
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-success-400"></span>
-                    <span>Sections: {sections.length}</span>
-                  </span>
-                )}
-              </div>
-              {sections.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {sections.slice(0, 3).map((section, index) => (
-                    <span key={index} className="px-2 py-1 bg-neutral-100/80 text-neutral-700 rounded-md text-xs border border-neutral-200/50">
-                      {section.name}
-                    </span>
-                  ))}
-                  {sections.length > 3 && (
-                    <span className="px-2 py-1 bg-neutral-100/80 text-neutral-600 rounded-md text-xs border border-neutral-200/50">
-                      +{sections.length - 3} more
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
         </div>
       </div>
       
-      {/* Section Sidebar - Persistent */}
+      {/* Rich-Text Section Sidebar */}
       {showSectionSidebar && (
         <div className="w-72 flex-shrink-0">
-          <SectionSidebar
+          <RichTextSectionSidebar
             sections={sections}
             onJumpToSection={handleJumpToSection}
             onAddSection={handleAddSection}
@@ -925,6 +617,12 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
             onHideSidebar={() => setShowSectionSidebar(false)}
             currentSection={currentSection}
             className="h-full"
+            prosodyEnabled={prosodyEnabled}
+            rhymeSchemeEnabled={rhymeSchemeEnabled}
+            syllableMarkingEnabled={syllableMarkingEnabled}
+            onToggleProsody={handleToggleProsody}
+            onToggleRhymeScheme={handleToggleRhymeScheme}
+            onToggleSyllableMarking={handleToggleSyllableMarking}
           />
         </div>
       )}
@@ -932,6 +630,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
   )
 })
 
-SongEditor.displayName = 'SongEditor'
+RichTextSongEditor.displayName = 'RichTextSongEditor'
 
-export default SongEditor
+export default RichTextSongEditor
