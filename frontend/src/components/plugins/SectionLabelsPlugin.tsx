@@ -6,13 +6,16 @@ import {
   KEY_ENTER_COMMAND,
   $getSelection,
   $isRangeSelection,
-  $createTextNode
+  $createTextNode,
+  createCommand,
+  type LexicalCommand,
+  type LexicalNode
 } from 'lexical'
 import { useEffect } from 'react'
 import { $createSectionTagNode, $isSectionTagNode } from '../nodes/SectionTagNode'
 
 // Command to insert a section tag
-export const INSERT_SECTION_TAG_COMMAND = 'INSERT_SECTION_TAG_COMMAND'
+export const INSERT_SECTION_TAG_COMMAND: LexicalCommand<string> = createCommand('INSERT_SECTION_TAG_COMMAND')
 
 export default function SectionLabelsPlugin(): null {
   const [editor] = useLexicalComposerContext()
@@ -85,13 +88,17 @@ export default function SectionLabelsPlugin(): null {
             const textContent = child.getTextContent()
             const sectionMatch = textContent.match(/^\[([^\]]+)\]$/)
             
-            if (sectionMatch && !child.getChildren().some(node => $isSectionTagNode(node))) {
+            if (sectionMatch && !child.getChildren().some((node: LexicalNode) => $isSectionTagNode(node))) {
               // Replace text with section tag node
               const sectionName = sectionMatch[1]
               const sectionNode = $createSectionTagNode(sectionName)
               
-              child.clear()
-              child.append(sectionNode)
+              if ('clear' in child && 'append' in child) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ;(child as any).clear()
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ;(child as any).append(sectionNode)
+              }
             }
           }
         })

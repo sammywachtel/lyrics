@@ -1,9 +1,9 @@
 import {
   DecoratorNode,
-  NodeKey,
-  LexicalNode,
-  SerializedLexicalNode,
-  Spread,
+  type NodeKey,
+  type SerializedLexicalNode,
+  type Spread,
+  type LexicalNode,
 } from 'lexical'
 import React from 'react'
 
@@ -98,23 +98,17 @@ interface SyllableMarkComponentProps {
   syllables: string[]
 }
 
-function SyllableMarkComponent({ syllables, nodeKey, editor }: SyllableMarkComponentProps): React.ReactElement {
+function SyllableMarkComponent({ syllables }: SyllableMarkComponentProps): React.ReactElement {
   const [isHovered, setIsHovered] = React.useState(false)
 
   const handleClick = () => {
     // Toggle syllable visibility or edit mode
-    editor.update(() => {
-      const node = editor.getEditorState()._nodeMap.get(nodeKey) as SyllableMarkNode
-      if (node) {
-        // Could implement syllable editing here
-        console.log('Syllable node clicked:', syllables)
-      }
-    })
+    console.log('Syllable node clicked:', syllables)
   }
 
   // Calculate syllable stress pattern (simplified)
   const getStressPattern = (syllables: string[]) => {
-    return syllables.map((syllable, index) => {
+    return syllables.map((_syllable, index) => {
       // Simple heuristic: alternating stress pattern starting with unstressed
       // In a real implementation, this would use phonetic analysis
       return index % 2 === 1 ? 'stressed' : 'unstressed'

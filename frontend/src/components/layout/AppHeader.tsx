@@ -158,7 +158,7 @@ export function AppHeader({
               <PencilIcon className="w-4 h-4 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg font-semibold text-neutral-900">Songcraft</h1>
+              <h1 className="text-lg font-semibold text-neutral-900">Versifai</h1>
               <p className="text-xs text-neutral-500 -mt-1">AI-Assisted Writing</p>
             </div>
           </div>

@@ -1,9 +1,9 @@
 import {
   DecoratorNode,
-  NodeKey,
-  LexicalNode,
-  SerializedLexicalNode,
-  Spread,
+  type NodeKey,
+  type SerializedLexicalNode,
+  type Spread,
+  type LexicalNode,
 } from 'lexical'
 import React from 'react'
 
@@ -104,17 +104,13 @@ export class RhymeSchemeNode extends DecoratorNode<React.ReactElement> {
   }
 
   decorate(): React.ReactElement {
-    return <RhymeSchemeComponent rhymeLetter={this.__rhymeLetter} rhymeSound={this.__rhymeSound} nodeKey={this.__key} />
+    return <RhymeSchemeComponent rhymeLetter={this.__rhymeLetter} rhymeSound={this.__rhymeSound} />
   }
 }
 
-interface RhymeSchemeComponentProps {
-  rhymeLetter: string
-  rhymeSound: string
-  nodeKey: NodeKey
-}
+// Removed unused interface
 
-function RhymeSchemeComponent({ rhymeLetter, rhymeSound }: Omit<RhymeSchemeComponentProps, 'nodeKey'>): React.ReactElement {
+function RhymeSchemeComponent({ rhymeLetter, rhymeSound }: { rhymeLetter: string; rhymeSound: string }): React.ReactElement {
   const [isHovered, setIsHovered] = React.useState(false)
 
   // Get color for rhyme letter
@@ -134,10 +130,8 @@ function RhymeSchemeComponent({ rhymeLetter, rhymeSound }: Omit<RhymeSchemeCompo
 
   const handleClick = () => {
     // Show rhyme connections or edit rhyme assignment
-    editor.update(() => {
-      console.log('Rhyme scheme clicked:', rhymeLetter, rhymeSound)
-      // Could implement rhyme editing or highlighting of connected rhymes
-    })
+    console.log('Rhyme scheme clicked:', rhymeLetter, rhymeSound)
+    // Could implement rhyme editing or highlighting of connected rhymes
   }
 
   return (

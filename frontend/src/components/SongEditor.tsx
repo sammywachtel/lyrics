@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react'
 import type { Song, SongSettings } from '../lib/api'
 import { createDefaultSettings, apiClient } from '../lib/api'
-import SectionToolbar from './SectionToolbar'
 import SectionNavigation from './SectionNavigation'
 import SectionSidebar from './editor/SectionSidebar'
-import LexicalLyricsEditor, { type LexicalLyricsEditorRef } from './LexicalLyricsEditor'
-import RichTextLyricsEditor from './RichTextLyricsEditor'
+import RichTextLyricsEditor, { type RichTextLyricsEditorRef } from './RichTextLyricsEditor'
 import { parseSections, getSectionAtLine, renumberSections, generateSectionTag, wrapTextWithSection, insertSectionAtPosition, type SectionType } from '../utils/sectionUtils'
 import { getWordCount } from '../utils/textFormatting'
 import { type AutoSaveStatus } from './editor/AutoSaveIndicator'
@@ -54,11 +52,10 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
   const [showSectionSidebar, setShowSectionSidebar] = useState(true)
   const [sections, setSections] = useState<ReturnType<typeof parseSections>>([])
   const [currentSection, setCurrentSection] = useState<string>('')
-  const [hasSelectedText, setHasSelectedText] = useState(false)
+  // Remove hasSelectedText state since SectionToolbar is no longer used
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('saved')
-  const [useRichTextEditor, setUseRichTextEditor] = useState(false)
   
-  const wysiwygEditorRef = useRef<LexicalLyricsEditorRef>(null)
+  const wysiwygEditorRef = useRef<RichTextLyricsEditorRef>(null)
   const isMountedRef = useRef(true)
   const handleSaveRef = useRef<(() => Promise<void>) | null>(null)
   const lastAutoSaveRef = useRef<string>('')
@@ -389,12 +386,7 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
 
   // Update current section and selection state based on cursor position
   const updateCurrentSection = useCallback(() => {
-    // Check if text is selected
-    const editorRef = wysiwygEditorRef.current
-    if (editorRef) {
-      const selectedText = editorRef.getSelectedText()
-      setHasSelectedText(selectedText.length > 0)
-    }    
+    // No longer checking for selected text since SectionToolbar is removed    
     if (sections.length === 0) {
       if (currentSection !== '') {
         setCurrentSection('')
@@ -773,33 +765,6 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
               </div>
             )}
             
-            {/* Editor Mode Toggle */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setUseRichTextEditor(false)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 ${
-                  !useRichTextEditor
-                    ? 'bg-primary-100 text-primary-800 border border-primary-200/50 shadow-soft'
-                    : 'bg-white/50 text-neutral-600 hover:text-neutral-800 hover:bg-white hover:shadow-soft border border-transparent hover:border-neutral-200/50'
-                }`}
-                title="Plain Text Editor"
-              >
-                <span>📝</span>
-                <span className="hidden sm:inline">Plain</span>
-              </button>
-              <button
-                onClick={() => setUseRichTextEditor(true)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 ${
-                  useRichTextEditor
-                    ? 'bg-primary-100 text-primary-800 border border-primary-200/50 shadow-soft'
-                    : 'bg-white/50 text-neutral-600 hover:text-neutral-800 hover:bg-white hover:shadow-soft border border-transparent hover:border-neutral-200/50'
-                }`}
-                title="Rich Text Editor with Prosody Analysis"
-              >
-                <span>🎨</span>
-                <span className="hidden sm:inline">Rich</span>
-              </button>
-            </div>
           </div>
           <div className="flex items-center gap-4 text-sm text-neutral-600">
             <span className="flex items-center gap-1">
@@ -817,48 +782,20 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
 
         {/* Editor Content - Full Height with Proper Scrolling */}
         <div className="flex-1 flex flex-col overflow-hidden">
-
-          {/* Section Toolbar */}
-          <div className="bg-white/50 backdrop-blur-sm border-b border-white/20">
-            <SectionToolbar
-              onInsertSection={handleInsertSection}
-              onShowSectionNav={() => setShowSectionNav(!showSectionNav)}
-              onToggleSidebar={() => setShowSectionSidebar(!showSectionSidebar)}
-              hasExistingSections={sections.length > 0}
-              showSidebar={showSectionSidebar}
-              currentSection={currentSection}
-              hasSelectedText={hasSelectedText}
-              sections={sections}
-            />
-          </div>
           
-          {/* Lyrics Editor - Fills Available Height */}
+          {/* Rich Text Lyrics Editor - Always Active */}
           <div className="flex-1 relative overflow-hidden">
-            {useRichTextEditor ? (
-              <RichTextLyricsEditor
-                ref={wysiwygEditorRef}
-                value={lyrics}
-                onChange={handleLyricsChange}
-                onSelectionChange={updateCurrentSection}
-                placeholder="Enter your lyrics here..."
-                rows={24}
-                enableAutoSave={true}
-                autoSaveDelay={10000}
-                onAutoSave={handleAutoSave}
-              />
-            ) : (
-              <LexicalLyricsEditor
-                ref={wysiwygEditorRef}
-                value={lyrics}
-                onChange={handleLyricsChange}
-                onSelectionChange={updateCurrentSection}
-                placeholder="Enter your lyrics here..."
-                rows={24}
-                enableAutoSave={true}
-                autoSaveDelay={10000}
-                onAutoSave={handleAutoSave}
-              />
-            )}
+            <RichTextLyricsEditor
+              ref={wysiwygEditorRef}
+              value={lyrics}
+              onChange={handleLyricsChange}
+              onSelectionChange={updateCurrentSection}
+              placeholder="Enter your lyrics here..."
+              rows={24}
+              enableAutoSave={true}
+              autoSaveDelay={10000}
+              onAutoSave={handleAutoSave}
+            />
             
             {showSectionNav && (
               <SectionNavigation

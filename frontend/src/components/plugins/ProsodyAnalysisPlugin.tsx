@@ -1,7 +1,11 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { 
   $getRoot, 
-  COMMAND_PRIORITY_EDITOR
+  $createTextNode,
+  COMMAND_PRIORITY_EDITOR,
+  createCommand,
+  type LexicalCommand,
+  // type ElementNode removed - unused
 } from 'lexical'
 import { useEffect, useCallback } from 'react'
 import { 
@@ -11,13 +15,13 @@ import {
 } from '../nodes/ProsodyLineNode'
 
 // Command to analyze prosody for the entire document
-export const ANALYZE_PROSODY_COMMAND = 'ANALYZE_PROSODY_COMMAND'
+export const ANALYZE_PROSODY_COMMAND: LexicalCommand<void> = createCommand('ANALYZE_PROSODY_COMMAND')
 
 // Command to analyze prosody for a specific line
-export const ANALYZE_LINE_PROSODY_COMMAND = 'ANALYZE_LINE_PROSODY_COMMAND'
+export const ANALYZE_LINE_PROSODY_COMMAND: LexicalCommand<string> = createCommand('ANALYZE_LINE_PROSODY_COMMAND')
 
 // Command to toggle prosody analysis mode
-export const TOGGLE_PROSODY_ANALYSIS_COMMAND = 'TOGGLE_PROSODY_ANALYSIS_COMMAND'
+export const TOGGLE_PROSODY_ANALYSIS_COMMAND: LexicalCommand<void> = createCommand('TOGGLE_PROSODY_ANALYSIS_COMMAND')
 
 export default function ProsodyAnalysisPlugin(): null {
   const [editor] = useLexicalComposerContext()

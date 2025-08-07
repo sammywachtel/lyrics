@@ -1,11 +1,11 @@
 import {
   TextNode,
-  NodeKey,
-  LexicalNode,
-  SerializedTextNode,
-  Spread,
-  EditorConfig,
+  type NodeKey,
+  type SerializedTextNode,
+  type Spread,
+  type EditorConfig,
   type LexicalEditor,
+  type LexicalNode,
 } from 'lexical'
 
 export interface SerializedSyllableNode extends Spread<

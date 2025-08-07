@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react'
 import type { Song, SongSettings } from '../lib/api'
 import { createDefaultSettings, apiClient } from '../lib/api'
-import SectionToolbar from './SectionToolbar'
 import SectionNavigation from './SectionNavigation'
 import RichTextSectionSidebar from './sidebar/RichTextSectionSidebar'
 import RichTextLyricsEditor, { type RichTextLyricsEditorRef } from './RichTextLyricsEditor'
@@ -475,26 +474,17 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
   // Rich-text specific handlers
   const handleToggleProsody = useCallback(() => {
     setProsodyEnabled(!prosodyEnabled)
-    const editorRef = richTextEditorRef.current
-    if (editorRef) {
-      editorRef.toggleProsodyAnalysis()
-    }
+    // TODO: Add prosody analysis toggle when implemented
   }, [prosodyEnabled])
 
   const handleToggleRhymeScheme = useCallback(() => {
     setRhymeSchemeEnabled(!rhymeSchemeEnabled)
-    const editorRef = richTextEditorRef.current
-    if (editorRef) {
-      editorRef.toggleRhymeScheme()
-    }
+    // TODO: Add rhyme scheme toggle when implemented
   }, [rhymeSchemeEnabled])
 
   const handleToggleSyllableMarking = useCallback(() => {
     setSyllableMarkingEnabled(!syllableMarkingEnabled)
-    const editorRef = richTextEditorRef.current
-    if (editorRef) {
-      editorRef.toggleSyllableMarking()
-    }
+    // TODO: Add syllable marking toggle when implemented
   }, [syllableMarkingEnabled])
 
   if (isLoading) {
@@ -562,18 +552,40 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
 
         {/* Editor Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Section Toolbar */}
-          <div className="bg-white/50 backdrop-blur-sm border-b border-white/20">
-            <SectionToolbar
-              onInsertSection={handleInsertSection}
-              onShowSectionNav={() => setShowSectionNav(!showSectionNav)}
-              onToggleSidebar={() => setShowSectionSidebar(!showSectionSidebar)}
-              hasExistingSections={sections.length > 0}
-              showSidebar={showSectionSidebar}
-              currentSection={currentSection}
-              hasSelectedText={hasSelectedText}
-              sections={sections}
-            />
+          {/* Section Navigation Controls */}
+          <div className="bg-white/50 backdrop-blur-sm border-b border-white/20 px-4 py-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-neutral-600">Rich Text Editor</span>
+                {hasSelectedText && (
+                  <span className="text-xs text-neutral-500 bg-neutral-100 px-2 py-1 rounded-md">Text selected - use toolbar above to format</span>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {sections.length > 0 && (
+                  <>
+                    <button
+                      onClick={() => setShowSectionNav(!showSectionNav)}
+                      className="px-3 py-2 text-sm font-medium text-primary-700 bg-primary-100/80 hover:bg-primary-200/80 border border-primary-200/50 hover:border-primary-300 rounded-lg hover:shadow-soft transition-all duration-200"
+                      title="Navigate between sections"
+                    >
+                      📋 Quick Nav
+                    </button>
+                    
+                    {!showSectionSidebar && (
+                      <button
+                        onClick={() => setShowSectionSidebar(!showSectionSidebar)}
+                        className="px-3 py-2 text-sm font-medium text-primary-700 bg-primary-100/80 hover:bg-primary-200/80 border border-primary-200/50 hover:border-primary-300 rounded-lg hover:shadow-soft transition-all duration-200"
+                        title={currentSection ? `Currently in: ${currentSection} - Show sidebar` : 'Show section sidebar'}
+                      >
+                        📂 {currentSection ? currentSection + ' • ' : ''}Show Sidebar
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
           </div>
           
           {/* Rich-Text Lyrics Editor */}

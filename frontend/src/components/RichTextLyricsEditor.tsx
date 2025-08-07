@@ -8,21 +8,26 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { 
   $getRoot, 
   $createTextNode, 
-  $createParagraphNode, 
   type LexicalEditor,
   $getSelection,
   $isRangeSelection,
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
-  COMMAND_PRIORITY_CRITICAL
+  COMMAND_PRIORITY_CRITICAL,
+  COMMAND_PRIORITY_LOW
 } from 'lexical'
 import FormattingToolbar from './FormattingToolbar'
 import { type LexicalLyricsEditorRef } from './LexicalLyricsEditor'
 import { SectionNode } from './lexical/nodes/SectionNode'
 import { SyllableNode } from './lexical/nodes/SyllableNode'
 import { RhymeNode } from './lexical/nodes/RhymeNode'
-import { SectionDetectionPlugin } from './lexical/plugins/SectionDetectionPlugin'
-import { ProsodyAnalysisPlugin } from './lexical/plugins/ProsodyAnalysisPlugin'
+import { SectionParagraphNode, $createSectionParagraphNode } from './lexical/nodes/SectionParagraphNode'
+// TODO: Re-enable when plugins are fully TypeScript compliant
+// import { SectionDetectionPlugin } from './lexical/plugins/SectionDetectionPlugin'
+// import { ProsodyAnalysisPlugin } from './lexical/plugins/ProsodyAnalysisPlugin'
+
+// Import the section formatting commands and utilities
+import { SECTION_FORMAT_COMMAND, $getCurrentSectionType, $applySectionFormatting, $clearSectionFormatting } from './lexical/commands/SectionFormattingCommands'
 
 interface RichTextLyricsEditorProps {
   value: string
@@ -34,26 +39,40 @@ interface RichTextLyricsEditorProps {
   enableAutoSave?: boolean
   autoSaveDelay?: number
   onAutoSave?: (currentContent?: string) => Promise<void>
+  enableProsodyAnalysis?: boolean
+  enableSyllableMarking?: boolean
+  enableRhymeScheme?: boolean
 }
 
 // Enhanced Lexical theme configuration for rich text
 const theme = {
   root: 'lexical-editor rich-text-editor',
+  ltr: 'ltr',
+  rtl: 'rtl',
   text: {
-    bold: 'font-bold',
-    italic: 'italic',
-    underline: 'underline',
-    strikethrough: 'line-through',
+    bold: 'lexical-text-bold',
+    italic: 'lexical-text-italic',
+    underline: 'lexical-text-underline',
+    strikethrough: 'lexical-text-strikethrough',
+    // Section formatting
+    verse: 'lexical-text-verse',
+    chorus: 'lexical-text-chorus',
+    'pre-chorus': 'lexical-text-pre-chorus',
+    bridge: 'lexical-text-bridge',
+    intro: 'lexical-text-intro',
+    outro: 'lexical-text-outro',
+    hook: 'lexical-text-hook',
   },
   paragraph: 'lexical-paragraph',
   // Custom node themes
   sectionNode: 'section-node',
+  sectionParagraph: 'lexical-paragraph',
   syllableNode: 'syllable-node',
   prosodyNode: 'prosody-node',
   rhymeNode: 'rhyme-node',
 }
 
-// Plugin to handle initial content and external value changes
+// Plugin to handle initial content and external value changes with Lexical serialization
 function ValueSyncPlugin({ 
   value, 
   onChange,
@@ -75,7 +94,17 @@ function ValueSyncPlugin({
   const initialValueRef = useRef(value)
   const lastSavedContentRef = useRef('')
   
-  // Initialize editor with value
+  // Helper function to check if content is Lexical JSON
+  const isLexicalJSON = (content: string): boolean => {
+    try {
+      const parsed = JSON.parse(content)
+      return parsed && typeof parsed === 'object' && 'root' in parsed
+    } catch {
+      return false
+    }
+  }
+  
+  // Initialize editor with value (supports both plain text and Lexical JSON)
   useEffect(() => {
     if (!isInitialized.current) {
       isUpdatingFromProps.current = true
@@ -87,10 +116,21 @@ function ValueSyncPlugin({
         root.clear()
         
         if (value) {
-          // Split by lines and create paragraph nodes
+          if (isLexicalJSON(value)) {
+            // If it's Lexical JSON, parse and set the editor state
+            try {
+              const editorState = editor.parseEditorState(value)
+              editor.setEditorState(editorState)
+              return
+            } catch (error) {
+              console.warn('Failed to parse Lexical JSON, falling back to plain text:', error)
+            }
+          }
+          
+          // Fallback: treat as plain text and create section paragraph nodes
           const lines = value.split('\n')
           lines.forEach((line) => {
-            const paragraph = $createParagraphNode()
+            const paragraph = $createSectionParagraphNode()
             if (line.trim()) {
               const textNode = $createTextNode(line)
               paragraph.append(textNode)
@@ -98,11 +138,11 @@ function ValueSyncPlugin({
             root.append(paragraph)
           })
         } else {
-          // Create empty paragraph
-          const emptyParagraph = $createParagraphNode()
+          // Create empty section paragraph
+          const emptyParagraph = $createSectionParagraphNode()
           root.append(emptyParagraph)
         }
-      })
+      }, { tag: 'history-merge' })
       
       isInitialized.current = true
       // Wait longer before allowing changes to be detected
@@ -115,18 +155,11 @@ function ValueSyncPlugin({
   // Update editor when external value changes (but not during initialization)
   useEffect(() => {
     if (isInitialized.current && !isUpdatingFromProps.current && value !== initialValueRef.current) {
-      const currentText = editor.getEditorState().read(() => {
-        const root = $getRoot()
-        const children = root.getChildren()
-        return children.map(child => {
-          if (child.getType() === 'paragraph') {
-            return child.getTextContent()
-          }
-          return child.getTextContent()
-        }).join('\n')
-      })
+      // Get current editor content as JSON for comparison
+      const currentContent = JSON.stringify(editor.getEditorState().toJSON())
       
-      if (currentText !== value) {
+      if (currentContent !== value && !isLexicalJSON(value)) {
+        // Only update if value is different and not already Lexical JSON
         isUpdatingFromProps.current = true
         lastSavedContentRef.current = value
         
@@ -135,9 +168,20 @@ function ValueSyncPlugin({
           root.clear()
           
           if (value) {
+            if (isLexicalJSON(value)) {
+              try {
+                const editorState = editor.parseEditorState(value)
+                editor.setEditorState(editorState)
+                return
+              } catch (error) {
+                console.warn('Failed to parse Lexical JSON during update:', error)
+              }
+            }
+            
+            // Fallback to plain text parsing
             const lines = value.split('\n')
             lines.forEach((line) => {
-              const paragraph = $createParagraphNode()
+              const paragraph = $createSectionParagraphNode()
               if (line.trim()) {
                 const textNode = $createTextNode(line)
                 paragraph.append(textNode)
@@ -145,10 +189,10 @@ function ValueSyncPlugin({
               root.append(paragraph)
             })
           } else {
-            const emptyParagraph = $createParagraphNode()
+            const emptyParagraph = $createSectionParagraphNode()
             root.append(emptyParagraph)
           }
-        })
+        }, { tag: 'history-merge' })
         
         setTimeout(() => {
           isUpdatingFromProps.current = false
@@ -157,70 +201,56 @@ function ValueSyncPlugin({
     }
   }, [editor, value])
   
-  // Handle editor content changes
+  // Handle editor content changes - now using Lexical JSON serialization
   const handleEditorChange = useCallback(() => {
     if (isUpdatingFromProps.current) {
       return
     }
     
-    editor.update(() => {
-      const root = $getRoot()
-      const children = root.getChildren()
-      const textContent = children.map(child => {
-        if (child.getType() === 'paragraph') {
-          return child.getTextContent()
-        }
-        return child.getTextContent()
-      }).join('\n')
-      
-      // Only process if content actually changed from the last saved version
-      if (textContent === lastSavedContentRef.current) {
-        return
+    // Get the current editor state as JSON (preserves all formatting)
+    const editorState = editor.getEditorState()
+    const jsonContent = JSON.stringify(editorState.toJSON())
+    
+    // Only process if content actually changed from the last saved version
+    if (jsonContent === lastSavedContentRef.current) {
+      return
+    }
+    
+    // Update parent component with new content (as Lexical JSON)
+    onChange(jsonContent)
+    lastChangeTimeRef.current = Date.now()
+    
+    // Setup debounced auto-save
+    if (enableAutoSave && onAutoSave) {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current)
       }
       
-      // Update parent component with new content
-      onChange(textContent)
-      lastChangeTimeRef.current = Date.now()
-      
-      // Setup debounced auto-save
-      if (enableAutoSave && onAutoSave) {
-        if (autoSaveTimeoutRef.current) {
-          clearTimeout(autoSaveTimeoutRef.current)
-        }
-        
-        autoSaveTimeoutRef.current = setTimeout(() => {
-          const timeSinceLastChange = Date.now() - lastChangeTimeRef.current
-          if (timeSinceLastChange >= autoSaveDelay - 100) {
-            editor.update(() => {
-              const currentRoot = $getRoot()
-              const children = currentRoot.getChildren()
-              const currentContent = children.map(child => {
-                if (child.getType() === 'paragraph') {
-                  return child.getTextContent()
-                }
-                return child.getTextContent()
-              }).join('\n')
-              
-              console.log('📝 Auto-save content check:', {
-                capturedAtChange: textContent.length,
-                currentAtSave: currentContent.length,
-                content: currentContent.slice(-10)
-              })
-              
-              if (currentContent !== textContent) {
-                console.log('🔧 React state behind Lexical - updating immediately')
-                onChange(currentContent)
-              }
-              
-              lastSavedContentRef.current = currentContent
-              onAutoSave(currentContent).catch(error => {
-                console.error('Auto-save failed:', error)
-              })
-            })
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        const timeSinceLastChange = Date.now() - lastChangeTimeRef.current
+        if (timeSinceLastChange >= autoSaveDelay - 100) {
+          // Get current state for auto-save
+          const currentEditorState = editor.getEditorState()
+          const currentContent = JSON.stringify(currentEditorState.toJSON())
+          
+          console.log('📝 Auto-save content check:', {
+            capturedAtChange: jsonContent.length,
+            currentAtSave: currentContent.length,
+            hasFormatting: currentContent.includes('"format"')
+          })
+          
+          if (currentContent !== jsonContent) {
+            console.log('🔧 React state behind Lexical - updating immediately')
+            onChange(currentContent)
           }
-        }, autoSaveDelay)
-      }
-    })
+          
+          lastSavedContentRef.current = currentContent
+          onAutoSave(currentContent).catch(error => {
+            console.error('Auto-save failed:', error)
+          })
+        }
+      }, autoSaveDelay)
+    }
   }, [editor, onChange, onAutoSave, enableAutoSave, autoSaveDelay])
   
   // Cleanup auto-save timeout on unmount
@@ -281,6 +311,97 @@ function EditorRefPlugin({ onEditorRef }: { onEditorRef: (editor: LexicalEditor)
   return null
 }
 
+// Plugin to handle section formatting commands using Lexical state management
+function SectionFormattingPlugin() {
+  const [editor] = useLexicalComposerContext()
+  
+  useEffect(() => {
+    return editor.registerCommand(
+      SECTION_FORMAT_COMMAND,
+      (sectionType: string | null) => {
+        editor.update(() => {
+          $applySectionFormatting(sectionType)
+        })
+        return true
+      },
+      COMMAND_PRIORITY_CRITICAL
+    )
+  }, [editor])
+  
+  // Register keyboard shortcut for clearing section formatting
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'X') {
+        event.preventDefault()
+        editor.update(() => {
+          $clearSectionFormatting()
+        })
+        return true
+      }
+      return false
+    }
+
+    const rootElement = editor.getRootElement()
+    if (rootElement) {
+      rootElement.addEventListener('keydown', handleKeyDown)
+      return () => {
+        rootElement.removeEventListener('keydown', handleKeyDown)
+      }
+    }
+  }, [editor])
+  
+  return null
+}
+
+// Plugin to handle paste operations and clean up formatting
+function PastePlugin() {
+  const [editor] = useLexicalComposerContext()
+
+  useEffect(() => {
+    return editor.registerCommand(
+      'PASTE_COMMAND' as any,
+      (event: ClipboardEvent) => {
+        const clipboardData = event.clipboardData
+        if (!clipboardData) return false
+
+        // Get plain text without formatting
+        const plainText = clipboardData.getData('text/plain')
+        if (!plainText) return false
+
+        // Prevent default paste behavior
+        event.preventDefault()
+
+        editor.update(() => {
+          const selection = $getSelection()
+          if ($isRangeSelection(selection)) {
+            // Work WITH Lexical's paragraph model - each line becomes a paragraph
+            const lines = plainText.split(/\r?\n/)
+            
+            // Create section paragraph nodes for each line (Lexical's natural behavior)
+            const paragraphNodes = lines.map(line => {
+              const paragraph = $createSectionParagraphNode()
+              if (line.trim()) {
+                const textNode = $createTextNode(line)
+                paragraph.append(textNode)
+              }
+              return paragraph
+            })
+            
+            // Insert the paragraph nodes
+            selection.insertNodes(paragraphNodes)
+          }
+        })
+
+        return true
+      },
+      COMMAND_PRIORITY_LOW
+    )
+  }, [editor])
+
+  return null
+}
+
+
 const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLyricsEditorProps>(
   ({
     value,
@@ -293,13 +414,15 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
     autoSaveDelay = 10000,
     onAutoSave,
   }, ref) => {
-    const [isSourceMode, setIsSourceMode] = useState(false)
-    const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const [showSourceDebug, setShowSourceDebug] = useState(false)
     const editorRef = useRef<LexicalEditor | null>(null)
     const [isBold, setIsBold] = useState(false)
     const [isItalic, setIsItalic] = useState(false)
     const [isUnderline, setIsUnderline] = useState(false)
     const [isStrikethrough, setIsStrikethrough] = useState(false)
+    
+    // Section formatting state
+    const [activeSection, setActiveSection] = useState<string | null>(null)
     
     // Lexical configuration with custom nodes  
     const initialConfig = React.useMemo(() => ({
@@ -309,34 +432,48 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
         SectionNode,
         SyllableNode,
         RhymeNode,
+        SectionParagraphNode,
       ],
       onError: (error: Error) => {
         console.error('Lexical error:', error)
       },
     }), [])
     
-    // Handle source mode changes
-    const handleSourceChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onChange(e.target.value)
-    }, [onChange])
+    // Get debug content (Lexical JSON)
+    const getDebugContent = useCallback(() => {
+      if (editorRef.current) {
+        const editorState = editorRef.current.getEditorState()
+        return JSON.stringify(editorState.toJSON(), null, 2)
+      }
+      return value
+    }, [value])
     
-    // Toggle between modes
-    const toggleMode = useCallback(() => {
-      setIsSourceMode(!isSourceMode)
-    }, [isSourceMode])
+    // Toggle debug view
+    const toggleDebugView = useCallback(() => {
+      setShowSourceDebug(!showSourceDebug)
+    }, [showSourceDebug])
     
     // Update formatting state based on selection
     const updateFormattingState = useCallback(() => {
       if (editorRef.current) {
-        editorRef.current.getEditorState().read(() => {
-          const selection = $getSelection()
-          if ($isRangeSelection(selection)) {
-            setIsBold(selection.hasFormat('bold'))
-            setIsItalic(selection.hasFormat('italic'))
-            setIsUnderline(selection.hasFormat('underline'))
-            setIsStrikethrough(selection.hasFormat('strikethrough'))
+        // Use setTimeout to ensure we read the state AFTER the selection change is committed
+        setTimeout(() => {
+          if (editorRef.current) {
+            editorRef.current.getEditorState().read(() => {
+              const selection = $getSelection()
+              if ($isRangeSelection(selection)) {
+                setIsBold(selection.hasFormat('bold'))
+                setIsItalic(selection.hasFormat('italic'))
+                setIsUnderline(selection.hasFormat('underline'))
+                setIsStrikethrough(selection.hasFormat('strikethrough'))
+                
+                // Get current section formatting from Lexical state
+                const currentSection = $getCurrentSectionType()
+                setActiveSection(currentSection)
+              }
+            })
           }
-        })
+        }, 0)
       }
     }, [])
     
@@ -373,21 +510,36 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
       }
     }, [])
     
-    // Expose methods via ref
+    // Section formatting commands using custom command
+    const formatSection = useCallback((sectionType: string) => {
+      if (editorRef.current) {
+        editorRef.current.dispatchCommand(SECTION_FORMAT_COMMAND, sectionType)
+      }
+    }, [])
+    
+    const formatVerse = useCallback(() => formatSection('verse'), [formatSection])
+    const formatChorus = useCallback(() => formatSection('chorus'), [formatSection])
+    const formatPreChorus = useCallback(() => formatSection('pre-chorus'), [formatSection])
+    const formatBridge = useCallback(() => formatSection('bridge'), [formatSection])
+    const formatIntro = useCallback(() => formatSection('intro'), [formatSection])
+    const formatOutro = useCallback(() => formatSection('outro'), [formatSection])
+    const formatHook = useCallback(() => formatSection('hook'), [formatSection])
+    
+    // Clear section formatting command
+    const clearSectionFormatting = useCallback(() => {
+      if (editorRef.current) {
+        editorRef.current.update(() => {
+          $clearSectionFormatting()
+        })
+      }
+    }, [])
+    
+    // Expose methods via ref (updated for rich-text only mode)
     useImperativeHandle(ref, () => ({
-      getTextareaElement: () => textareaRef.current,
+      getTextareaElement: () => null, // No longer used
       getWysiwygElement: () => (editorRef.current?.getRootElement() || null) as HTMLDivElement | null,
       insertTextAtCursor: (text: string) => {
-        if (isSourceMode && textareaRef.current) {
-          const textarea = textareaRef.current
-          const start = textarea.selectionStart
-          const end = textarea.selectionEnd
-          const newValue = value.substring(0, start) + text + value.substring(end)
-          onChange(newValue)
-          setTimeout(() => {
-            textarea.setSelectionRange(start + text.length, start + text.length)
-          }, 0)
-        } else if (editorRef.current) {
+        if (editorRef.current) {
           editorRef.current.update(() => {
             const selection = $getSelection()
             if ($isRangeSelection(selection)) {
@@ -397,28 +549,20 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
         }
       },
       getCurrentCursorPosition: () => {
-        if (isSourceMode && textareaRef.current) {
-          return textareaRef.current.selectionStart
-        }
+        // Rich text position is more complex, return 0 for now
         return 0
       },
-      setCursorPosition: (position: number) => {
-        if (isSourceMode && textareaRef.current) {
-          textareaRef.current.setSelectionRange(position, position)
-        }
+      setCursorPosition: (_position: number) => {
+        // Rich text positioning requires different approach
+        // TODO: Implement if needed
       },
       focus: () => {
-        if (isSourceMode && textareaRef.current) {
-          textareaRef.current.focus()
-        } else if (editorRef.current) {
+        if (editorRef.current) {
           editorRef.current.focus()
         }
       },
       getSelectedText: () => {
-        if (isSourceMode && textareaRef.current) {
-          const textarea = textareaRef.current
-          return value.substring(textarea.selectionStart, textarea.selectionEnd)
-        } else if (editorRef.current) {
+        if (editorRef.current) {
           return editorRef.current.getEditorState().read(() => {
             const selection = $getSelection()
             if ($isRangeSelection(selection)) {
@@ -429,18 +573,11 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
         }
         return ''
       },
-      wrapSelectedText: (before: string, after: string) => {
-        if (isSourceMode && textareaRef.current) {
-          const textarea = textareaRef.current
-          const start = textarea.selectionStart
-          const end = textarea.selectionEnd
-          const selectedText = value.substring(start, end)
-          const newValue = value.substring(0, start) + before + selectedText + after + value.substring(end)
-          onChange(newValue)
-        }
+      wrapSelectedText: (_before: string, _after: string) => {
+        // TODO: Implement rich text wrapping if needed
       },
-      isSourceMode: () => isSourceMode,
-    }), [isSourceMode, value, onChange])
+      isSourceMode: () => false, // Always false now
+    }), [value, onChange])
     
     // Store editor reference
     const storeEditorRef = useCallback((editor: LexicalEditor) => {
@@ -451,102 +588,113 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
     
     return (
       <div className={`rich-text-lyrics-editor h-full flex flex-col relative ${className}`}>
-        {/* Editor Content - Full Height with Internal Scrolling */}
+        {/* Rich Text Editor - Always Active */}
         <div className="flex-1 relative overflow-hidden rounded-lg border border-neutral-200/50 bg-white/80 backdrop-blur-sm">
-          {isSourceMode ? (
-            <div className="h-full overflow-y-auto scroll-smooth">
-              <textarea
-                ref={textareaRef}
-                value={value}
-                onChange={handleSourceChange}
-                placeholder={placeholder}
-                className={`w-full h-full border-0 px-6 py-6 text-lyrics focus:outline-none font-mono resize-none transition-all duration-200 text-neutral-900 bg-transparent leading-relaxed ${className}`}
-                style={{ 
-                  minHeight,
-                  fontFamily: 'JetBrains Mono, Fira Code, Monaco, Cascadia Code, Roboto Mono, monospace'
-                }}
+          <LexicalComposer initialConfig={initialConfig}>
+            <div className="h-full flex flex-col">
+              {/* Store editor reference */}
+              <EditorRefPlugin onEditorRef={storeEditorRef} />
+              
+              {/* Formatting Toolbar */}
+              <FormattingToolbar
+                isBold={isBold}
+                isItalic={isItalic}
+                isUnderline={isUnderline}
+                isStrikethrough={isStrikethrough}
+                onBold={formatBold}
+                onItalic={formatItalic}
+                onUnderline={formatUnderline}
+                onStrikethrough={formatStrikethrough}
+                activeSection={activeSection}
+                onVerse={formatVerse}
+                onChorus={formatChorus}
+                onPreChorus={formatPreChorus}
+                onBridge={formatBridge}
+                onIntro={formatIntro}
+                onOutro={formatOutro}
+                onHook={formatHook}
+                onClearSection={clearSectionFormatting}
               />
-            </div>
-          ) : (
-            <LexicalComposer initialConfig={initialConfig}>
-              <div className="h-full flex flex-col">
-                {/* Store editor reference */}
-                <EditorRefPlugin onEditorRef={storeEditorRef} />
-                
-                {/* Formatting Toolbar */}
-                <FormattingToolbar
-                  isBold={isBold}
-                  isItalic={isItalic}
-                  isUnderline={isUnderline}
-                  isStrikethrough={isStrikethrough}
-                  onBold={formatBold}
-                  onItalic={formatItalic}
-                  onUnderline={formatUnderline}
-                  onStrikethrough={formatStrikethrough}
+              
+              <div className="flex-1 overflow-y-auto scroll-smooth relative">
+                <RichTextPlugin
+                  contentEditable={
+                    <ContentEditable
+                      className={`lexical-editor rich-text-content w-full min-h-full border-0 px-6 py-6 text-lyrics focus:outline-none resize-none transition-all duration-200 text-neutral-900 bg-transparent leading-relaxed ${className}`}
+                      style={{ 
+                        minHeight,
+                        fontFamily: 'JetBrains Mono, Fira Code, Monaco, Cascadia Code, Roboto Mono, monospace',
+                        whiteSpace: 'pre-wrap'
+                      }}
+                      aria-placeholder={placeholder}
+                      placeholder={
+                        <div 
+                          className="absolute top-6 left-6 text-neutral-400 pointer-events-none select-none font-mono"
+                          style={{
+                            fontFamily: 'JetBrains Mono, Fira Code, Monaco, Cascadia Code, Roboto Mono, monospace'
+                          }}
+                        >
+                          {placeholder}
+                        </div>
+                      }
+                    />
+                  }
+                  ErrorBoundary={({ children }) => <div>{children}</div>}
                 />
-                
-                <div className="flex-1 overflow-y-auto scroll-smooth">
-                  <RichTextPlugin
-                    contentEditable={
-                      <ContentEditable
-                        className={`lexical-editor rich-text-content w-full min-h-full border-0 px-6 py-6 text-lyrics focus:outline-none resize-none transition-all duration-200 text-neutral-900 bg-transparent leading-relaxed ${className}`}
-                        style={{ 
-                          minHeight,
-                          fontFamily: 'JetBrains Mono, Fira Code, Monaco, Cascadia Code, Roboto Mono, monospace',
-                          whiteSpace: 'pre-wrap'
-                        }}
-                        aria-placeholder={placeholder}
-                        placeholder={
-                          <div 
-                            className="absolute top-6 left-6 text-neutral-400 pointer-events-none select-none font-mono"
-                            style={{
-                              fontFamily: 'JetBrains Mono, Fira Code, Monaco, Cascadia Code, Roboto Mono, monospace'
-                            }}
-                          >
-                            {placeholder}
-                          </div>
-                        }
-                      />
-                    }
-                    ErrorBoundary={({ children }) => <div>{children}</div>}
-                  />
-                </div>
-                
-                <HistoryPlugin />
-                <ValueSyncPlugin 
-                  value={value} 
-                  onChange={onChange} 
-                  onAutoSave={onAutoSave}
-                  autoSaveDelay={autoSaveDelay}
-                  enableAutoSave={enableAutoSave}
-                />
-                <AutoFocusPlugin />
-                <SelectionPlugin onSelectionChange={handleSelectionChange} />
-                <SectionDetectionPlugin />
-                <ProsodyAnalysisPlugin />
               </div>
-            </LexicalComposer>
-          )}
+              
+              <HistoryPlugin />
+              <ValueSyncPlugin 
+                value={value} 
+                onChange={onChange} 
+                onAutoSave={onAutoSave}
+                autoSaveDelay={autoSaveDelay}
+                enableAutoSave={enableAutoSave}
+              />
+              <AutoFocusPlugin />
+              <SelectionPlugin onSelectionChange={handleSelectionChange} />
+              <SectionFormattingPlugin />
+              <PastePlugin />
+              {/* TODO: Re-enable when plugins are fully TypeScript compliant */}
+              {/* <SectionDetectionPlugin /> */}
+              {/* <ProsodyAnalysisPlugin /> */}
+            </div>
+          </LexicalComposer>
         </div>
         
-        {/* Mode Toggle - Floating Button */}
+        {/* View Source Debug - Subtle Button */}
         <button
-          onClick={toggleMode}
-          className="absolute top-4 right-4 z-10 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-white/90 text-neutral-600 hover:text-neutral-800 hover:bg-white hover:shadow-soft border border-neutral-200/50 hover:border-neutral-300 backdrop-blur-sm"
-          title={isSourceMode ? 'Switch to Rich Text Mode' : 'Switch to Source Mode'}
+          onClick={toggleDebugView}
+          className="absolute top-4 right-4 z-10 px-2 py-1 text-xs font-mono rounded-md transition-all duration-200 bg-white/80 text-neutral-500 hover:text-neutral-700 hover:bg-white/95 border border-neutral-200/50 hover:border-neutral-300/70 backdrop-blur-sm opacity-60 hover:opacity-100"
+          title="View Lexical JSON (Debug)"
         >
-          {isSourceMode ? (
-            <>
-              <span className="mr-2">🎨</span>
-              Rich Text
-            </>
-          ) : (
-            <>
-              <span className="mr-2">⚡</span>
-              Source
-            </>
-          )}
+          {showSourceDebug ? '🔍 Hide' : '🔍'}
         </button>
+        
+        {/* Debug Modal */}
+        {showSourceDebug && (
+          <div className="absolute inset-0 z-20 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-strong border border-neutral-200 max-w-4xl max-h-[80vh] w-full flex flex-col">
+              <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-neutral-800">Lexical Editor State (Debug)</h3>
+                <button
+                  onClick={() => setShowSourceDebug(false)}
+                  className="text-neutral-400 hover:text-neutral-600 text-lg"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto p-4">
+                <pre className="text-xs font-mono text-neutral-700 whitespace-pre-wrap break-all">
+                  {getDebugContent()}
+                </pre>
+              </div>
+              <div className="p-4 border-t border-neutral-200 text-sm text-neutral-600">
+                💡 This shows the internal Lexical JSON format that preserves all formatting
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -554,4 +702,5 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
 
 RichTextLyricsEditor.displayName = 'RichTextLyricsEditor'
 
+export type { LexicalLyricsEditorRef as RichTextLyricsEditorRef }
 export default RichTextLyricsEditor

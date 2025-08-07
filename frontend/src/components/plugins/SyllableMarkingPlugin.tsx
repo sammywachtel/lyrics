@@ -2,7 +2,10 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { 
   $getSelection,
   $isRangeSelection,
-  COMMAND_PRIORITY_EDITOR
+  $createTextNode,
+  COMMAND_PRIORITY_EDITOR,
+  createCommand,
+  type LexicalCommand
 } from 'lexical'
 import { useEffect } from 'react'
 import { 
@@ -12,10 +15,10 @@ import {
 } from '../nodes/SyllableMarkNode'
 
 // Command to toggle syllable marking for selected text
-export const TOGGLE_SYLLABLE_MARKING_COMMAND = 'TOGGLE_SYLLABLE_MARKING_COMMAND'
+export const TOGGLE_SYLLABLE_MARKING_COMMAND: LexicalCommand<void> = createCommand('TOGGLE_SYLLABLE_MARKING_COMMAND')
 
 // Command to mark syllables for a specific word
-export const MARK_WORD_SYLLABLES_COMMAND = 'MARK_WORD_SYLLABLES_COMMAND'
+export const MARK_WORD_SYLLABLES_COMMAND: LexicalCommand<string> = createCommand('MARK_WORD_SYLLABLES_COMMAND')
 
 export default function SyllableMarkingPlugin(): null {
   const [editor] = useLexicalComposerContext()

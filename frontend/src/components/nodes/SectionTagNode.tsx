@@ -1,10 +1,10 @@
 import {
   DecoratorNode,
-  NodeKey,
-  LexicalNode,
-  LexicalEditor,
-  SerializedLexicalNode,
-  Spread,
+  type NodeKey,
+  type SerializedLexicalNode,
+  type Spread,
+  type LexicalEditor,
+  type LexicalNode,
 } from 'lexical'
 import React from 'react'
 

@@ -1,10 +1,10 @@
 import {
   DecoratorNode,
-  NodeKey,
-  LexicalNode,
-  LexicalEditor,
-  SerializedLexicalNode,
-  Spread,
+  type NodeKey,
+  type SerializedLexicalNode,
+  type Spread,
+  // type LexicalEditor unused,
+  type LexicalNode,
 } from 'lexical'
 import React from 'react'
 
@@ -121,32 +121,24 @@ export class ProsodyLineNode extends DecoratorNode<React.ReactElement> {
     return true
   }
 
-  decorate(editor: LexicalEditor): React.ReactElement {
+  decorate(): React.ReactElement {
     return (
       <ProsodyLineComponent 
         lineText={this.__lineText}
         lineNumber={this.__lineNumber}
         prosodyData={this.__prosodyData}
-        nodeKey={this.__key}
-        editor={editor}
       />
     )
   }
 }
 
-interface ProsodyLineComponentProps {
-  lineText: string
-  lineNumber: number
-  prosodyData: ProsodyData
-  nodeKey: NodeKey
-  editor: LexicalEditor
-}
+// Removed unused interface
 
 function ProsodyLineComponent({ 
   lineText, 
   lineNumber, 
   prosodyData 
-}: Omit<ProsodyLineComponentProps, 'nodeKey' | 'editor'>): React.ReactElement {
+}: { lineText: string; lineNumber: number; prosodyData: ProsodyData }): React.ReactElement {
   const [isHovered, setIsHovered] = React.useState(false)
   const [showDetailedAnalysis, setShowDetailedAnalysis] = React.useState(false)
 

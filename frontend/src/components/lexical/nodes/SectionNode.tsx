@@ -1,10 +1,10 @@
 import React from 'react'
 import {
   DecoratorNode,
-  NodeKey,
-  LexicalNode,
-  SerializedLexicalNode,
-  Spread,
+  type NodeKey,
+  type SerializedLexicalNode,
+  type Spread,
+  type LexicalNode,
 } from 'lexical'
 
 export interface SerializedSectionNode extends Spread<

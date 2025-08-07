@@ -1,7 +1,11 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { 
   $getRoot, 
-  COMMAND_PRIORITY_EDITOR
+  COMMAND_PRIORITY_EDITOR,
+  createCommand,
+  type LexicalCommand,
+  type ElementNode,
+  // type LexicalNode unused
 } from 'lexical'
 import { useEffect, useCallback, useState } from 'react'
 import { 
@@ -13,19 +17,19 @@ import {
 // import { $isProsodyLineNode } from '../nodes/ProsodyLineNode'
 
 // Command to analyze rhyme scheme for the entire document
-export const ANALYZE_RHYME_SCHEME_COMMAND = 'ANALYZE_RHYME_SCHEME_COMMAND'
+export const ANALYZE_RHYME_SCHEME_COMMAND: LexicalCommand<void> = createCommand('ANALYZE_RHYME_SCHEME_COMMAND')
 
 // Command to toggle rhyme scheme analysis
-export const TOGGLE_RHYME_SCHEME_COMMAND = 'TOGGLE_RHYME_SCHEME_COMMAND'
+export const TOGGLE_RHYME_SCHEME_COMMAND: LexicalCommand<void> = createCommand('TOGGLE_RHYME_SCHEME_COMMAND')
 
 // Command to manually assign rhyme letter to a line
-export const ASSIGN_RHYME_LETTER_COMMAND = 'ASSIGN_RHYME_LETTER_COMMAND'
+export const ASSIGN_RHYME_LETTER_COMMAND: LexicalCommand<{ lineNumber: number; rhymeLetter: string }> = createCommand('ASSIGN_RHYME_LETTER_COMMAND')
 
 interface LineEndingData {
   lineNumber: number
   word: string
   rhymeSound: string
-  paragraph: import('lexical').ElementNode
+  paragraph: ElementNode
 }
 
 export default function RhymeSchemePlugin(): null {
@@ -60,7 +64,7 @@ export default function RhymeSchemePlugin(): null {
               lineNumber,
               word: lastWord,
               rhymeSound,
-              paragraph: child
+              paragraph: child as ElementNode
             })
           }
           
