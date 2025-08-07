@@ -1,5 +1,33 @@
 # Songwriting Web App Requirements
 
+## ⚠️ CRITICAL DEVELOPMENT DRIFT WARNINGS
+
+**This section identifies areas where current development has diverged from the master specifications in `.private_docs/songwriting_with_tools.md`. Address these immediately to prevent architectural drift.**
+
+### 🔴 **AI Implementation Priority Critical Error**
+- **Current Status**: AI integration listed as item #4 (not yet implemented)
+- **Specification Requirement**: AI constraints and behavior must be established BEFORE implementation
+- **Risk**: Implementing AI without proper guardrails violates core philosophy
+- **Action Required**: Implement AI constraints framework first, then AI features
+
+### 🟡 **Rich-Text Editor Development Misalignment**
+- **Current Status**: WYSIWYG editor in development with basic formatting
+- **Specification Requirement**: WYSIWYG must include integrated prosody visualization
+- **Gap**: Missing prosody color-coding, stability indicators, rhyme scheme visualization
+- **Action Required**: Integrate prosody system into current rich-text implementation
+
+### 🟡 **Section Tagging Progress vs. Core Features**
+- **Current Status**: Section tagging marked as "Active development"
+- **Missing Dependencies**: Boxes system validation, prosody analysis, AI box-mismatch detection
+- **Risk**: Section system without narrative validation framework
+- **Action Required**: Implement Boxes system alongside section tagging
+
+### 🔴 **Testing Infrastructure Gaps**
+- **Current Status**: Some test files skipped (.skip extension)
+- **CLAUDE.md Requirement**: Mandatory testing for all development
+- **Risk**: Technical debt accumulation, feature regression
+- **Action Required**: Fix skipped tests, maintain 100% test coverage for new features
+
 ## Implementation Status
 
 ### ✅ COMPLETED
@@ -25,11 +53,13 @@
 1. **Basic Song Editor** - PARTIALLY IMPLEMENTED  
    - ✅ Basic song title and lyrics editing
    - ✅ Song metadata storage (artist, tags, status)
-   - 🔄 Rich-text editor with formatting (bold, italics, underline) - Simple textarea currently
-   - ❌ Section tagging with user-defined labels (Verse, Chorus, Bridge)
+   - 🔄 Rich-text editor with formatting (bold, italics, underline) - WYSIWYG editor in development
+   - 🔄 Section tagging with user-defined labels (Verse, Chorus, Bridge) - Active development
    - ❌ Inline keyword/category tagging
    - ❌ Real-time diff highlighting
    - ❌ AI suggestion acceptance/rejection interface
+   - ❌ Prosody visualization system
+   - ❌ WYSIWYG prosody indicators (stability, line length, rhyme scheme)
 
 ### ❌ NOT YET IMPLEMENTED
 
@@ -53,6 +83,18 @@
    - AI suggestions respect current song settings: tone, rhythm, rhyme type, narrative POV, genre, artist emulation
    - AI can generate line-level edits, section rewrites, or full-song drafts
    - AI suggests setting changes when mismatches are detected (e.g., uneven line lengths indicating instability), with explanations
+   - **CRITICAL AI CONSTRAINTS**:
+     - AI MUST NOT volunteer to write entire lyrics for the user
+     - AI MUST NOT take over the entire lyric writing process
+     - AI MUST always hunt for clichés in its own suggestions and user lyrics
+     - AI activity log panel for transparency and user approval of all changes
+   - **Cliché Detection System**:
+     - Toggle to highlight clichés in editor with explanations
+     - Alternative phrasing suggestions for detected clichés
+   - **Flexible Workflow Support**:. 
+     - Support users starting with nothing, just a title, or complete lyrics
+     - Auto-fill song settings from existing lyrics (with user approval)
+     - Optional AI-guided question system for song development
    - AI persona defined by system prompt:  
      > "You are a songwriting expert, capable of writing in any style the user requests. You use the user's configuration and compositional rules to produce lyrical drafts, suggestions, and commentary."
 
@@ -110,6 +152,46 @@
      - Helps prevent forgotten ideas and increases idea utilization
      - Subtle integration to avoid interrupting creative flow
    - Idea management features: categorization, search, archive, and delete unused ideas
+
+11. **WYSIWYG Prosody Visualization System** ⚠️ CRITICAL MISSING FEATURE
+   - **Stability Gradient Indicator**: Visual color coding (green/red gradient) showing stable/unstable prosody elements
+   - **Automatic Stability Detection**: System updates stability settings based on writing patterns
+   - **Line-by-Line Analysis**:
+     - Line numbering within each section (only lines with text)
+     - Line length stability visualization in context of surrounding lines
+     - Visual rhyme scheme indicators on the interface
+     - Rhyme type identification and tagging (perfect, family, additive, assonance, consonance)
+   - **Interactive Prosody Controls**:
+     - Users can mark words for rhyming with visual connections
+     - AI tags rhyme types automatically with user approval
+     - Toggle visual prosody aids on/off for experienced users
+     - Contextual tooltips explaining prosody principles
+
+12. **Development Engine - "Boxes" System** ⚠️ CRITICAL MISSING FEATURE
+   - **Configurable Story Boxes**: 1-5 boxes (default 3) for narrative progression
+   - **Box Content Management**:
+     - Box 1 (smallest): Foundational idea/question
+     - Box 2 (adds weight): Complexity/context expansion  
+     - Box 3+ (biggest/climax): Core "Why" delivery
+   - **Box Validation & Highlighting**:
+     - Visual indicators when lyrics don't match established boxes
+     - AI suggests box updates when lyrics change significantly
+     - User approval required for all box modifications
+   - **Auto-Fill from Lyrics**: AI can suggest boxes based on existing lyrics with user confirmation
+
+13. **Worksheet Development System** ⚠️ CRITICAL MISSING FEATURE
+   - **Sound Audition Feature**: Hear rhymed words spoken/sung before insertion
+   - **Rhyme Columns Organization**: Keyword-based columns with different rhyme types
+   - **Dynamic Column Generation**: AI proposes new rhyme columns based on evolving lyrics
+   - **Neighbor Ideas Exploration**: Roget's Thesaurus-style category browsing for concept expansion
+   - **Rhyme Type Exploration**: Systematic exploration of perfect, family, additive, assonance, consonance rhymes
+
+14. **Advanced User Control Features** ⚠️ CRITICAL MISSING FEATURE
+   - **Line Freezing**: Mark specific lines to prevent AI suggestions
+   - **Revision History Panel**: Track all changes with rollback and comparison capabilities
+   - **User Control Toggles**: Disable automatic AI setting updates, prosody indicators, or other features
+   - **Contextual Learning**: Tooltips and legends explaining prosody and songwriting principles
+   - **AI Suggestion Freeze**: Prevent AI from modifying specific elements during drafting
 
 ## Subscription & Billing Provisioning
 
@@ -322,7 +404,7 @@ The application is designed with a "responsive-first" philosophy, ensuring seaml
    - Acceptance: “New Song” button; clicking opens blank editor or loaded content.
 
 4. **Edit Lyrics with Section Tagging**  
-   - As a user, I want to type and structure lyrics into sections (Verse, Chorus, Bridge) so I can organize my song.  
+   - As a user, I want to type and structure lyrics into sections (Verse, Chorus, Bridge, etc) so I can organize my song.  
    - Acceptance: Section labels added/edited; content persists; diff highlighting active on changes.
 
 5. **Manage Keywords & Metaphors**  
@@ -334,7 +416,7 @@ The application is designed with a "responsive-first" philosophy, ensuring seaml
    - Acceptance: Settings form saves configs; changes versioned and auto-bookmarked.
 
 7. **AI-Driven Iteration**  
-   - As a user, I want to request AI edits for lines, sections, or full drafts so I can iterate creatively.  
+   - As a user, I want to request AI suggestions based on the song settings, including prosody. I do not want the AI to try to write for me.  
    - Acceptance: Prompt input accepted; AI returns suggestions; user can accept/reject; new version created.
 
 8. **Auto & Manual Versioning**  

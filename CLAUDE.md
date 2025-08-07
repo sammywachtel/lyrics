@@ -2,6 +2,27 @@
 
 This document provides a comprehensive guide for Claude instances working with the AI-assisted songwriting web application codebase.
 
+## 📋 MASTER REQUIREMENTS DOCUMENT
+
+**CRITICAL: Always consult `requirements.md` as the authoritative source for:**
+- Complete feature specifications and implementation status
+- Development priorities and critical warnings
+- AI behavior constraints and philosophy
+- Technical architecture decisions
+
+**Requirements Document Maintenance:**
+- **MANDATORY**: Update implementation status in requirements.md when completing features
+- **MANDATORY**: Add new features to requirements.md before implementation
+- **MANDATORY**: Mark drift warnings when deviating from specifications
+- **MANDATORY**: Update development status from "❌ NOT YET IMPLEMENTED" to "🚧 IN PROGRESS" to "✅ COMPLETED"
+
+The requirements.md file contains:
+- ⚠️ Critical development drift warnings
+- 🔴 High-priority missing features
+- 🟡 Medium-priority implementation gaps
+- ✅ Completed feature tracking
+- Comprehensive AI constraints and behavior requirements
+
 ## Project Overview
 
 This is a full-stack web application for AI-assisted songwriting with the following architecture:
@@ -12,6 +33,7 @@ This is a full-stack web application for AI-assisted songwriting with the follow
 - **Authentication**: Supabase GoTrue (email/password + OAuth)
 - **Deployment**: Docker containers on Google Cloud Run
 - **AI Integration**: Planned integration with OpenAI/Gemini APIs
+- **Rich Text Editor**: Lexical-based WYSIWYG editor with structured section tagging
 
 ## Project Structure
 
@@ -364,6 +386,7 @@ Based on requirements.md, the full API will include:
 - **Songs**: `/songs/*` - CRUD operations for songs
 - **Versions**: `/songs/{id}/versions/*` - Version control
 - **AI**: `/ai/*` - AI-assisted editing and generation
+- **Export**: `/songs/{id}/export/*` - Export songs in LLM-friendly formats
 - **Billing**: `/billing/*` - Subscription management (future)
 
 ## Database Schema
@@ -400,12 +423,21 @@ The app is configured for Google Cloud Run deployment:
 
 **CRITICAL: Always follow this testing workflow for any changes:**
 
-1. **Plan Implementation**: Consider test cases and edge scenarios during design
-2. **Make Changes**: Edit files in appropriate directories
-3. **Write/Update Tests**: Create or modify tests for your changes
-4. **Run Tests**: Execute `npm test` to ensure all tests pass
-5. **Manual Testing**: Verify functionality in browser if needed
-6. **Code Review**: Check that tests cover the implemented functionality
+1. **Consult Requirements**: Check `requirements.md` for specifications and current status
+2. **Update Implementation Status**: Change status from "❌ NOT YET IMPLEMENTED" to "🚧 IN PROGRESS" 
+3. **Plan Implementation**: Consider test cases and edge scenarios during design
+4. **Make Changes**: Edit files in appropriate directories
+5. **Write/Update Tests**: Create or modify tests for your changes
+6. **Run Tests**: Execute `npm test` to ensure all tests pass
+7. **Manual Testing**: Verify functionality in browser if needed
+8. **Update Requirements**: Mark feature as "✅ COMPLETED" in requirements.md
+9. **Code Review**: Check that tests cover the implemented functionality
+
+**Requirements Document Updates:**
+- **Before starting**: Update status to "🚧 IN PROGRESS"
+- **During development**: Add drift warnings if deviating from specifications
+- **After completion**: Update to "✅ COMPLETED" with implementation notes
+- **For new features**: Add complete specification to requirements.md first
 
 ### Making Changes
 
@@ -480,18 +512,20 @@ Based on `/Users/samwachtel/PycharmProjects/lyrics/requirements.md`:
 
 ## Important Notes for Claude Instances
 
-1. **Testing is Mandatory**: Always write comprehensive tests for any new features, modifications, or bug fixes. Run `npm test` before considering any development task complete. Testing prevents technical debt and ensures code quality.
-2. **Database Access**: Always use Supabase client through the FastAPI backend, never direct database connections
-3. **Authentication**: Implement auth using Supabase GoTrue, not custom JWT handling
-4. **Environment Variables**: All secrets should go in backend/.env, never commit these files
-5. **CORS**: Already configured for development ports (3000, 5173), update for production
-6. **File Paths**: All paths in this document are absolute paths starting from `/Users/samwachtel/PycharmProjects/lyrics/`
-7. **API Design**: Follow REST conventions, use Pydantic models for request/response validation
-8. **Frontend State**: Plan for Redux Toolkit or Zustand for state management as the app grows
-9. **Mobile Support**: Design with responsive-first approach using TailwindCSS breakpoints
-10. **Modern Python**: Code uses latest stable versions - datetime.now(timezone.utc) instead of datetime.utcnow(), SettingsConfigDict for Pydantic settings
-11. **Supabase Keys**: Use publishable key (not legacy anon key) for SUPABASE_KEY environment variable
-12. **Test-Driven Development**: When implementing new features, consider test cases during design phase and write tests alongside implementation, not as an afterthought
+1. **Requirements Document is Master**: ALWAYS consult `requirements.md` before starting any work. It contains critical development warnings, AI constraints, and complete feature specifications.
+2. **Update Requirements Continuously**: Mark implementation status changes in requirements.md throughout development. This prevents drift and ensures accurate project tracking.
+3. **Testing is Mandatory**: Always write comprehensive tests for any new features, modifications, or bug fixes. Run `npm test` before considering any development task complete. Testing prevents technical debt and ensures code quality.
+4. **AI Implementation Constraints**: Follow the critical AI behavior requirements in requirements.md - AI MUST NOT write entire lyrics or take over the writing process.
+5. **Database Access**: Always use Supabase client through the FastAPI backend, never direct database connections
+6. **Authentication**: Implement auth using Supabase GoTrue, not custom JWT handling
+7. **Environment Variables**: All secrets should go in backend/.env, never commit these files
+8. **CORS**: Already configured for development ports (3000, 5173), update for production
+9. **API Design**: Follow REST conventions, use Pydantic models for request/response validation
+10. **Frontend State**: Plan for Redux Toolkit or Zustand for state management as the app grows
+11. **Mobile Support**: Design with responsive-first approach using TailwindCSS breakpoints
+12. **Modern Python**: Code uses latest stable versions - datetime.now(timezone.utc) instead of datetime.utcnow(), SettingsConfigDict for Pydantic settings
+13. **Supabase Keys**: Use publishable key (not legacy anon key) for SUPABASE_KEY environment variable
+14. **Test-Driven Development**: When implementing new features, consider test cases during design phase and write tests alongside implementation, not as an afterthought
 
 ## Getting Help
 
@@ -502,3 +536,81 @@ Based on `/Users/samwachtel/PycharmProjects/lyrics/requirements.md`:
 - **Deployment**: Docker and Google Cloud Run documentation
 
 This codebase is set up for rapid development of a comprehensive AI-assisted songwriting application with proper separation of concerns, scalable architecture, and modern development practices.
+
+## AI Integration Architecture
+
+### Rich Text Editor Structure
+
+The application uses **Lexical.js** as the rich text editor framework, which stores content in a structured JSON format that enables seamless AI integration:
+
+#### Lexical Data Structure
+```json
+{
+  "root": {
+    "children": [
+      {
+        "children": [{"text": "Lyric line content", "type": "text"}],
+        "type": "section-paragraph",
+        "sectionType": "verse",  // Key identifier for AI processing
+        "direction": "ltr",
+        "format": "",
+        "indent": 0
+      }
+    ]
+  }
+}
+```
+
+#### Section Type Identification
+Songs are structured using `sectionType` fields that identify different parts:
+- `"verse"` - Song verses
+- `"chorus"` - Chorus/refrain sections  
+- `"bridge"` - Bridge sections
+- `"hook"` - Hook/catchy phrases
+- `"outro"` - Ending sections
+- `"intro"` - Opening sections
+
+### LLM Integration Strategy
+
+#### Data Conversion for AI Processing
+When sending content to LLMs for feedback, analysis, or generation, the Lexical JSON is converted to a structured text format:
+
+```
+[Verse]
+Would you mind if I stayed over tonight?
+Don't worry, I'm fine, just don't wanna be alone
+No, I don't think there's anything wrong with me
+But maybe I'm wrong
+
+[Chorus]
+What if there's no cure?
+My fear erodes a fragile peace
+That's what denial's for 
+It's a way to bring uneasy sleep
+
+[Verse]
+My eyes can't see enough to find their way back home
+Faith is blind, it wants to see me through
+```
+
+#### Conversion Process
+1. **Extract Text Content**: Parse Lexical JSON to extract text from nested text nodes
+2. **Group by Section**: Consecutive paragraphs with the same `sectionType` are grouped together
+3. **Apply Section Labels**: Convert `sectionType` values to readable labels (e.g., `"verse"` → `[Verse]`)
+4. **Preserve Order**: Maintain the original sequence of sections and lines
+5. **Add Context**: Include section numbering logic for repeated sections (Verse 1, Verse 2, etc.)
+
+#### Implementation Requirements
+- **Section Grouping Function**: Utility to group consecutive paragraphs by `sectionType`
+- **Text Extraction**: Function to extract plain text from Lexical text nodes
+- **Format Conversion**: Transform structured sections into LLM-friendly format
+- **Reverse Conversion**: Parse LLM responses back into Lexical structure (for AI suggestions)
+
+#### AI Response Processing
+When receiving responses from LLMs:
+1. **Parse Section Headers**: Identify `[Verse]`, `[Chorus]` patterns
+2. **Map to sectionType**: Convert labels back to internal `sectionType` values
+3. **Create Lexical Nodes**: Generate appropriate section-paragraph nodes
+4. **Preserve Formatting**: Maintain line breaks and text structure
+
+This architecture ensures that AI interactions maintain the song's structural integrity while providing clear context for meaningful feedback and suggestions.

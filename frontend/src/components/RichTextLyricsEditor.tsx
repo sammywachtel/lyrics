@@ -11,6 +11,7 @@ import {
   type LexicalEditor,
   $getSelection,
   $isRangeSelection,
+  $getNodeByKey,
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
   COMMAND_PRIORITY_CRITICAL,
@@ -21,7 +22,9 @@ import { type LexicalLyricsEditorRef } from './LexicalLyricsEditor'
 import { SectionNode } from './lexical/nodes/SectionNode'
 import { SyllableNode } from './lexical/nodes/SyllableNode'
 import { RhymeNode } from './lexical/nodes/RhymeNode'
-import { SectionParagraphNode, $createSectionParagraphNode } from './lexical/nodes/SectionParagraphNode'
+import { SectionParagraphNode, $createSectionParagraphNode, $isSectionParagraphNode } from './lexical/nodes/SectionParagraphNode'
+import { SectionTagNode } from './nodes/SectionTagNode'
+// import SectionHeaderPlugin from './plugins/SectionHeaderPlugin' // TODO: Re-enable when test environment supports full Lexical
 // TODO: Re-enable when plugins are fully TypeScript compliant
 // import { SectionDetectionPlugin } from './lexical/plugins/SectionDetectionPlugin'
 // import { ProsodyAnalysisPlugin } from './lexical/plugins/ProsodyAnalysisPlugin'
@@ -433,6 +436,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
         SyllableNode,
         RhymeNode,
         SectionParagraphNode,
+        SectionTagNode,
       ],
       onError: (error: Error) => {
         console.error('Lexical error:', error)
@@ -534,6 +538,163 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
       }
     }, [])
     
+    // Jump to section functionality for Rich Text Editor
+    const jumpToSection = useCallback((sectionName: string) => {
+      if (!editorRef.current) {
+        console.warn('Editor not available for section navigation')
+        return
+      }
+
+      try {
+        // Multi-strategy approach to find the target section
+        let targetElement: HTMLElement | null = null
+        let targetNodeKey: string | null = null
+
+        // Strategy 1: Search by section text content (works with existing [Section Name] format)
+        editorRef.current.getEditorState().read(() => {
+          const root = $getRoot()
+          const children = root.getChildren()
+          
+          // Look for text content matching [sectionName] format
+          const targetTag = `[${sectionName}]`
+          
+          for (let i = 0; i < children.length; i++) {
+            const child = children[i]
+            const textContent = child.getTextContent()
+            
+            // Check if this paragraph contains the section tag
+            if (textContent.trim() === targetTag || textContent.includes(targetTag)) {
+              targetNodeKey = child.getKey()
+              const domElement = editorRef.current?.getElementByKey(child.getKey())
+              if (domElement) {
+                targetElement = domElement as HTMLElement
+                break
+              }
+            }
+          }
+        })
+
+        // Strategy 2: If no tag found, try matching by section type (for formatted sections)
+        if (!targetElement) {
+          const getSectionTypeFromName = (name: string): string | null => {
+            const lowerName = name.toLowerCase()
+            if (lowerName.includes('verse')) return 'verse'
+            if (lowerName.includes('chorus') && !lowerName.includes('pre-chorus')) return 'chorus'
+            if (lowerName.includes('pre-chorus') || lowerName.includes('prechorus')) return 'pre-chorus'
+            if (lowerName.includes('bridge')) return 'bridge'
+            if (lowerName.includes('intro')) return 'intro'
+            if (lowerName.includes('outro')) return 'outro'
+            if (lowerName.includes('hook')) return 'hook'
+            return null
+          }
+
+          const targetSectionType = getSectionTypeFromName(sectionName)
+          
+          if (targetSectionType) {
+            editorRef.current.getEditorState().read(() => {
+              const root = $getRoot()
+              const children = root.getChildren()
+              
+              // Find the first SectionParagraphNode with matching section type
+              for (let i = 0; i < children.length; i++) {
+                const child = children[i]
+                if ($isSectionParagraphNode(child)) {
+                  const childSectionType = child.getSectionType()
+                  if (childSectionType === targetSectionType) {
+                    targetNodeKey = child.getKey()
+                    const domElement = editorRef.current?.getElementByKey(child.getKey())
+                    if (domElement) {
+                      targetElement = domElement as HTMLElement
+                      break
+                    }
+                  }
+                }
+              }
+            })
+          }
+        }
+
+        // Strategy 3: Fuzzy text matching if exact matches failed
+        if (!targetElement) {
+          editorRef.current.getEditorState().read(() => {
+            const root = $getRoot()
+            const children = root.getChildren()
+            
+            for (let i = 0; i < children.length; i++) {
+              const child = children[i]
+              const textContent = child.getTextContent().toLowerCase()
+              const sectionNameLower = sectionName.toLowerCase()
+              
+              // Check for partial matches (e.g., "Verse 1" matches "verse")
+              if (textContent.includes(sectionNameLower) || 
+                  textContent.includes(`[${sectionNameLower}`) ||
+                  (sectionNameLower.includes('verse') && textContent.includes('verse')) ||
+                  (sectionNameLower.includes('chorus') && textContent.includes('chorus'))) {
+                targetNodeKey = child.getKey()
+                const domElement = editorRef.current?.getElementByKey(child.getKey())
+                if (domElement) {
+                  targetElement = domElement as HTMLElement
+                  break
+                }
+              }
+            }
+          })
+        }
+
+        if (targetElement && targetNodeKey) {
+          // Focus the editor first
+          editorRef.current.focus()
+          
+          // Position cursor at the beginning of the target element
+          editorRef.current.update(() => {
+            const targetNode = $getNodeByKey(targetNodeKey!)
+            if (targetNode) {
+              const selection = $getSelection()
+              if ($isRangeSelection(selection)) {
+                // Position cursor at the start of the target node
+                selection.anchor.set(targetNodeKey!, 0, 'element')
+                selection.focus.set(targetNodeKey!, 0, 'element')
+              }
+            }
+          })
+
+          // Scroll the target element into view with smooth animation
+          setTimeout(() => {
+            targetElement!.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+              inline: 'nearest'
+            })
+            
+            // Add a subtle highlight effect to show the navigated section
+            targetElement!.classList.add('section-navigation-highlight')
+            setTimeout(() => {
+              targetElement!.classList.remove('section-navigation-highlight')
+            }, 2000)
+          }, 100)
+
+          console.log(`Successfully navigated to section: ${sectionName}`)
+        } else {
+          console.warn(`Could not find section: ${sectionName}`)
+          // Fallback: focus the editor and scroll to top
+          editorRef.current.focus()
+          const rootElement = editorRef.current.getRootElement()
+          if (rootElement) {
+            rootElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error during section navigation:', error)
+        // Fallback: just focus the editor
+        if (editorRef.current) {
+          editorRef.current.focus()
+        }
+      }
+    }, [])
+    
     // Expose methods via ref (updated for rich-text only mode)
     useImperativeHandle(ref, () => ({
       getTextareaElement: () => null, // No longer used
@@ -577,6 +738,11 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
         // TODO: Implement rich text wrapping if needed
       },
       isSourceMode: () => false, // Always false now
+      jumpToSection: (sectionName: string) => {
+        if (editorRef.current) {
+          jumpToSection(sectionName)
+        }
+      },
     }), [value, onChange])
     
     // Store editor reference
@@ -654,6 +820,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
               <AutoFocusPlugin />
               <SelectionPlugin onSelectionChange={handleSelectionChange} />
               <SectionFormattingPlugin />
+              {/* <SectionHeaderPlugin /> */} {/* TODO: Re-enable when test environment supports full Lexical */}
               <PastePlugin />
               {/* TODO: Re-enable when plugins are fully TypeScript compliant */}
               {/* <SectionDetectionPlugin /> */}

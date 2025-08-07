@@ -121,15 +121,39 @@ Automatically applied ESLint fixes during PR workflow.
         run: |
           echo "🔍 Running TypeScript compilation check..."
           
-          if [ -f "frontend/tsconfig.json" ]; then
+          if [ -f "frontend/tsconfig.app.json" ]; then
             cd frontend
-          fi
-          
-          if npx tsc --noEmit; then
-            echo "✅ TypeScript compilation successful"
+            echo "Found frontend/tsconfig.app.json, running TypeScript check..."
+            if npx tsc --noEmit --project tsconfig.app.json; then
+              echo "✅ TypeScript compilation successful"
+            else
+              echo "❌ TypeScript compilation failed"
+              echo ""
+              echo "Please fix the TypeScript errors above"
+              exit 1
+            fi
+          elif [ -f "frontend/tsconfig.json" ]; then
+            cd frontend
+            echo "Found frontend/tsconfig.json, running TypeScript check..."
+            if npx tsc --noEmit; then
+              echo "✅ TypeScript compilation successful"
+            else
+              echo "❌ TypeScript compilation failed"
+              echo ""
+              echo "Please fix the TypeScript errors above"
+              exit 1
+            fi
+          elif [ -f "tsconfig.json" ]; then
+            echo "Found root tsconfig.json, running TypeScript check..."
+            if npx tsc --noEmit; then
+              echo "✅ TypeScript compilation successful"
+            else
+              echo "❌ TypeScript compilation failed"
+              echo ""
+              echo "Please fix the TypeScript errors above"
+              exit 1
+            fi
           else
-            echo "❌ TypeScript compilation failed"
-            echo ""
-            echo "Please fix the TypeScript errors above"
+            echo "❌ No TypeScript config file found"
             exit 1
           fi

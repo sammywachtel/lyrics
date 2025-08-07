@@ -4,7 +4,7 @@ import { createDefaultSettings, apiClient } from '../lib/api'
 import SectionNavigation from './SectionNavigation'
 import RichTextSectionSidebar from './sidebar/RichTextSectionSidebar'
 import RichTextLyricsEditor, { type RichTextLyricsEditorRef } from './RichTextLyricsEditor'
-import { parseSections, getSectionAtLine, renumberSections, generateSectionTag, wrapTextWithSection, insertSectionAtPosition, type SectionType } from '../utils/sectionUtils'
+import { parseSections, getSectionAtLine, renumberSections, generateSectionTag, type SectionType } from '../utils/sectionUtils'
 import { getWordCount } from '../utils/textFormatting'
 import { type AutoSaveStatus } from './editor/AutoSaveIndicator'
 
@@ -360,10 +360,11 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     return () => clearTimeout(timer)
   }, [lyrics, updateCurrentSection])
 
-  // Insert section tag
+  // Insert section tag using Lexical editor's native insertion capabilities
   const handleInsertSection = useCallback((sectionType: SectionType) => {
     const editorRef = richTextEditorRef.current
     if (!editorRef) {
+      // Fallback for when editor is not available
       const sectionTag = generateSectionTag(sections, sectionType)
       const newLyrics = lyrics + (lyrics ? '\n\n' : '') + sectionTag + '\n'
       const renumbered = renumberSections(newLyrics)
@@ -373,36 +374,29 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     }
 
     try {
-      const cursorPosition = editorRef.getCurrentCursorPosition()
       const selectedText = editorRef.getSelectedText()
       const sectionTag = generateSectionTag(sections, sectionType)
       
-      let newLyrics: string
-      let newCursorPosition: number = cursorPosition || 0
-      
       if (selectedText && selectedText.trim()) {
-        const startPosition = cursorPosition || 0
-        const endPosition = startPosition + selectedText.length
-        
-        const result = wrapTextWithSection(lyrics, startPosition, endPosition, sectionTag)
-        newLyrics = result.newLyrics
-        newCursorPosition = result.newEndPosition
+        // If there's selected text, wrap it with the section tag
+        // Insert section tag above the selection
+        const sectionTagWithNewlines = `\n${sectionTag}\n`
+        editorRef.insertTextAtCursor(sectionTagWithNewlines)
       } else {
-        const result = insertSectionAtPosition(lyrics, cursorPosition || 0, sectionTag)
-        newLyrics = result.newLyrics
-        newCursorPosition = result.newPosition
+        // No selection - insert section tag at cursor position
+        // Add appropriate spacing around the section tag
+        const sectionTagWithNewlines = `\n${sectionTag}\n`
+        editorRef.insertTextAtCursor(sectionTagWithNewlines)
       }
       
-      const renumbered = renumberSections(newLyrics)
-      setLyrics(renumbered)
-      
+      // Update the current section detection
       setTimeout(() => {
-        editorRef.setCursorPosition(newCursorPosition)
         updateCurrentSection()
-      }, 0)
+      }, 100)
       
     } catch (error) {
       console.error('Error inserting section:', error)
+      // Fallback to append at end
       const sectionTag = generateSectionTag(sections, sectionType)
       const newLyrics = lyrics + (lyrics ? '\n\n' : '') + sectionTag + '\n'
       const renumbered = renumberSections(newLyrics)
@@ -411,7 +405,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     }
   }, [lyrics, sections, updateCurrentSection])
 
-  // Add new section
+  // Add new section (used by + button)
   const handleAddSection = useCallback(() => {
     const sectionType: SectionType = sections.length === 0 ? 'Verse' : 'Verse'
     handleInsertSection(sectionType)
@@ -451,22 +445,32 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
       return
     }
     
-    const editorElement = richTextEditorRef.current?.getWysiwygElement()
-    if (!editorElement) {
-      console.warn('Editor element not found')
+    const editorRef = richTextEditorRef.current
+    if (!editorRef) {
+      console.warn('Editor reference not found')
       return
     }
-    
-    try {
-      editorElement.focus()
-      
-      // For rich-text editor, we'd need to implement proper section jumping
-      // This is a simplified version
-      setTimeout(updateCurrentSection, 150)
-    } catch (error) {
-      console.error('Error jumping to section:', error)
-      if (editorElement instanceof HTMLElement) {
+
+    // Use the jumpToSection method from RichTextLyricsEditor
+    if (typeof (editorRef as any).jumpToSection === 'function') {
+      try {
+        (editorRef as any).jumpToSection(sectionName)
+        // Update current section after navigation
+        setTimeout(updateCurrentSection, 100)
+      } catch (error) {
+        console.error('Error jumping to section via editor method:', error)
+        // Fallback to simple focus
+        const editorElement = editorRef.getWysiwygElement()
+        if (editorElement) {
+          editorElement.focus()
+        }
+      }
+    } else {
+      // Fallback: just focus the editor
+      const editorElement = editorRef.getWysiwygElement()
+      if (editorElement) {
         editorElement.focus()
+        setTimeout(updateCurrentSection, 100)
       }
     }
   }, [sections, updateCurrentSection])

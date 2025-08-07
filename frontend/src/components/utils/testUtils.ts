@@ -1,5 +1,5 @@
 import { createEditor, type LexicalEditor } from 'lexical'
-import { createEmptyHistoryState } from '@lexical/history'
+// import { createEmptyHistoryState } from '@lexical/history'
 import { SectionParagraphNode } from '../lexical/nodes/SectionParagraphNode'
 import { SectionNode } from '../lexical/nodes/SectionNode'
 import { SyllableNode } from '../lexical/nodes/SyllableNode'

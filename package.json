@@ -21,6 +21,7 @@
     "lint": "cd frontend && npm run lint",
     "lint:fix": "cd frontend && npm run lint:fix",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "dev:pw": "playwright codegen --save-storage=storage.json http://localhost:3000",
     "docker:dev:build": "docker-compose -f docker-compose.dev.yml build",
     "docker:dev:up": "docker-compose -f docker-compose.dev.yml up",
     "docker:dev:down": "docker-compose -f docker-compose.dev.yml down",
@@ -51,6 +52,6 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
-    "lint": "^0.8.19"
+    "lint": "^1.1.2"
   }
 }

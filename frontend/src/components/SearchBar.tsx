@@ -28,14 +28,41 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const [availableTags] = useState(() => extractUniqueTags(songs))
   const searchInputRef = useRef<HTMLInputElement>(null)
   const filtersPanelRef = useRef<HTMLDivElement>(null)
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Handle search input changes
+  // Debounced search function
+  const debouncedSearch = useCallback((searchFilters: SearchFilters) => {
+    // Clear any existing timeout
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current)
+    }
+
+    // Set a new timeout for the search
+    debounceTimeoutRef.current = setTimeout(() => {
+      onSearch(searchFilters)
+      debounceTimeoutRef.current = null
+    }, 400) // 400ms debounce delay
+  }, [onSearch])
+
+  // Handle search input changes with debouncing
   const handleQueryChange = useCallback((newQuery: string) => {
+    // Update UI immediately for responsive feel
     setQuery(newQuery)
     const newFilters = { ...filters, query: newQuery }
     setFilters(newFilters)
-    onSearch(newFilters)
-  }, [filters, onSearch])
+    
+    // Debounce the actual search call
+    debouncedSearch(newFilters)
+  }, [filters, debouncedSearch])
+
+  // Cleanup debounce timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Handle filter changes
   const handleFilterChange = useCallback((key: keyof SearchFilters, value: string | boolean | string[]) => {
@@ -54,8 +81,29 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     handleFilterChange('tags', newTags)
   }, [filters.tags, handleFilterChange])
 
+  // Handle immediate clear (no debouncing needed for clear actions)
+  const handleImmediateClear = useCallback(() => {
+    // Cancel any pending search
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current)
+      debounceTimeoutRef.current = null
+    }
+    
+    // Clear query immediately
+    setQuery('')
+    const clearedFilters = { ...filters, query: '' }
+    setFilters(clearedFilters)
+    onSearch(clearedFilters)
+  }, [filters, onSearch])
+
   // Clear all filters
   const handleClearFilters = useCallback(() => {
+    // Cancel any pending search
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current)
+      debounceTimeoutRef.current = null
+    }
+    
     const clearedFilters: SearchFilters = {
       query: '',
       status: 'all',
@@ -113,7 +161,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <div className="absolute inset-y-0 right-0 flex items-center space-x-2 pr-4">
           {query && (
             <button
-              onClick={() => handleQueryChange('')}
+              onClick={handleImmediateClear}
               className="text-neutral-400 hover:text-neutral-600 transition-colors duration-200"
               title="Clear search"
             >

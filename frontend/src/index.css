@@ -383,50 +383,6 @@ mark {
   to { transform: rotate(360deg); }
 }
 
-/* Enhanced Section Border Styles for Clean Unlabeled Separators */
-.section-border {
-  position: relative;
-  margin: 24px 0 16px 0;
-  padding: 0;
-  height: 1px;
-  border-top: 1px solid rgba(148, 163, 184, 0.3);
-}
-
-.section-border::after {
-  content: '';
-  position: absolute;
-  top: -1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #3B82F6, transparent);
-  transition: width 0.2s ease;
-}
-
-.section-border:hover::after {
-  width: 60px;
-}
-
-/* Accessibility: Ensure section borders are announced to screen readers */
-.section-border[aria-label] {
-  position: relative;
-}
-
-/* Mobile responsive section borders */
-@media (max-width: 768px) {
-  .section-border {
-    margin: 20px 0 12px 0;
-  }
-  
-  .section-border::after {
-    width: 30px;
-  }
-  
-  .section-border:hover::after {
-    width: 45px;
-  }
-}
 
 /* Rich Text Editor Styles */
 .rich-text-editor {
@@ -722,6 +678,56 @@ p.lexical-text-hook:not(.lexical-text-hook + p):not(:has(+ p.lexical-text-hook))
   text-decoration: underline;
 }
 
+/* Section Navigation Highlight Effect */
+.section-navigation-highlight {
+  position: relative;
+  animation: sectionNavigationHighlight 2s ease-out;
+  box-shadow: 0 0 0 2px var(--color-primary-400) !important;
+  border-radius: 6px !important;
+  z-index: 10;
+}
+
+@keyframes sectionNavigationHighlight {
+  0% {
+    box-shadow: 0 0 0 0px var(--color-primary-400),
+                0 0 20px var(--color-primary-300) !important;
+    background-color: var(--color-primary-100) !important;
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--color-primary-400),
+                0 0 25px var(--color-primary-300) !important;
+    background-color: var(--color-primary-150) !important;
+  }
+  100% {
+    box-shadow: 0 0 0 2px var(--color-primary-400) !important;
+  }
+}
+
+/* Add a subtle glow effect during navigation */
+.section-navigation-highlight::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, 
+    var(--color-primary-300), 
+    var(--color-creative-300), 
+    var(--color-primary-300)
+  );
+  border-radius: 8px;
+  opacity: 0.3;
+  z-index: -1;
+  animation: sectionGlow 2s ease-out;
+}
+
+@keyframes sectionGlow {
+  0% { opacity: 0.6; transform: scale(1.05); }
+  50% { opacity: 0.4; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
 .rich-text-content .line-through {
   text-decoration: line-through;
 }
@@ -729,4 +735,133 @@ p.lexical-text-hook:not(.lexical-text-hook + p):not(:has(+ p.lexical-text-hook))
 /* Ensure monospace font is applied consistently */
 .rich-text-content * {
   font-family: var(--font-mono) !important;
+}
+
+/* Section Header Styles for Visual Section Labels in Rich Mode */
+.section-tag-wrapper {
+  margin: 1.5rem 0 0.75rem 0;
+  position: relative;
+}
+
+.section-tag-wrapper:first-child {
+  margin-top: 0.5rem;
+}
+
+.section-tag-node {
+  position: relative;
+}
+
+.section-tag-node .section-tag-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  border: 1px solid;
+  backdrop-filter: blur(8px);
+  font-family: var(--font-mono);
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+/* Section-specific styling for labels */
+.section-tag-node[data-section*="VERSE"] .section-tag-label {
+  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-50));
+  border-color: var(--color-primary-300);
+  color: var(--color-primary-800);
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.1);
+}
+
+.section-tag-node[data-section*="CHORUS"] .section-tag-label {
+  background: linear-gradient(135deg, var(--color-creative-100), var(--color-creative-50));
+  border-color: var(--color-creative-300);
+  color: var(--color-creative-800);
+  box-shadow: 0 1px 3px rgba(168, 85, 247, 0.1);
+}
+
+.section-tag-node[data-section*="PRE-CHORUS"] .section-tag-label {
+  background: linear-gradient(135deg, var(--color-warm-100), var(--color-warm-50));
+  border-color: var(--color-warm-300);
+  color: var(--color-warm-800);
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.1);
+}
+
+.section-tag-node[data-section*="BRIDGE"] .section-tag-label {
+  background: linear-gradient(135deg, var(--color-success-100), var(--color-success-50));
+  border-color: var(--color-success-300);
+  color: var(--color-success-800);
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1);
+}
+
+.section-tag-node[data-section*="INTRO"] .section-tag-label,
+.section-tag-node[data-section*="OUTRO"] .section-tag-label {
+  background: linear-gradient(135deg, var(--color-neutral-100), var(--color-neutral-50));
+  border-color: var(--color-neutral-300);
+  color: var(--color-neutral-700);
+  box-shadow: 0 1px 3px rgba(115, 113, 108, 0.1);
+}
+
+.section-tag-node[data-section*="HOOK"] .section-tag-label {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(236, 72, 153, 0.05));
+  border-color: rgba(236, 72, 153, 0.3);
+  color: #be185d;
+  box-shadow: 0 1px 3px rgba(236, 72, 153, 0.1);
+}
+
+/* Hover effects for section labels */
+.section-tag-node:hover .section-tag-label {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Section decorative line */
+.section-tag-node .section-decorative-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+  z-index: -1;
+}
+
+/* Compact section headers for better text flow */
+.section-tag-wrapper + .lexical-paragraph {
+  margin-top: 0.25rem;
+}
+
+/* Enhanced section border for visual separation */
+.section-border {
+  position: relative;
+  margin: 1rem 0 0.5rem 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+}
+
+.section-border::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--color-primary-400), transparent);
+  border-radius: 2px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .section-tag-node .section-tag-label {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+  }
+  
+  .section-tag-wrapper {
+    margin: 1rem 0 0.5rem 0;
+  }
 }

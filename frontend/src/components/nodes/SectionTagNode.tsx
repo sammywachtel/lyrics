@@ -160,17 +160,17 @@ function SectionTagComponent({ sectionName, nodeKey, editor }: SectionTagCompone
   }
 
   return (
-    <div className="section-tag-node my-6 first:mt-0" data-section={sectionName}>
-      {/* Visual Section Separator */}
-      <div className="section-border" data-section={sectionName} aria-label={`Section: ${sectionName}`}></div>
-      
-      {/* Section Tag */}
-      <div className="flex items-center justify-between group">
-        <div className="flex items-center gap-3">
-          {/* Section Label */}
-          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-100 to-creative-100 text-primary-800 rounded-lg border border-primary-200/50 shadow-soft backdrop-blur-sm">
-            <span className="text-lg">{getSectionIcon(sectionName)}</span>
-            {isEditing ? (
+    <div className="section-tag-node" data-section={sectionName}>
+      {/* Visual Section Separator Line */}
+      <div className="section-border" aria-label={`Section: ${sectionName}`}></div>
+
+      {/* Section Header */}
+      <div className="flex items-center justify-between group mb-2">
+        <div className="flex items-center gap-3 flex-1">
+          {/* Section Label Badge */}
+          {isEditing ? (
+            <div className="section-tag-label">
+              <span className="text-base">{getSectionIcon(sectionName)}</span>
               <input
                 ref={inputRef}
                 type="text"
@@ -178,39 +178,40 @@ function SectionTagComponent({ sectionName, nodeKey, editor }: SectionTagCompone
                 onChange={(e) => setEditValue(e.target.value)}
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
-                className="bg-transparent border-none outline-none font-semibold text-sm min-w-20 max-w-40"
-                placeholder="Section name"
+                className="bg-transparent border-none outline-none font-bold text-xs min-w-16 max-w-32 uppercase tracking-wider"
+                placeholder="Section"
               />
-            ) : (
-              <span 
-                className="font-semibold text-sm cursor-pointer hover:text-primary-900 transition-colors"
-                onClick={handleEdit}
-                title="Click to edit section name"
-              >
-                {sectionName}
-              </span>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div 
+              className="section-tag-label cursor-pointer"
+              onClick={handleEdit}
+              title="Click to edit section name"
+            >
+              <span className="text-base">{getSectionIcon(sectionName)}</span>
+              <span>{sectionName}</span>
+            </div>
+          )}
           
-          {/* Section Line */}
-          <div className="flex-1 h-px bg-gradient-to-r from-primary-300/60 via-creative-300/60 to-transparent"></div>
+          {/* Decorative Line */}
+          <div className="section-decorative-line"></div>
         </div>
         
         {/* Section Actions */}
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button
             onClick={handleEdit}
-            className="p-1.5 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-all duration-200"
+            className="p-1 text-neutral-400 hover:text-primary-600 hover:bg-primary-50/50 rounded transition-all duration-200 text-xs"
             title="Edit section name"
           >
-            <span className="text-sm">✏️</span>
+            ✏️
           </button>
           <button
             onClick={handleDelete}
-            className="p-1.5 text-neutral-500 hover:text-red-600 hover:bg-red-50 rounded transition-all duration-200"
+            className="p-1 text-neutral-400 hover:text-red-500 hover:bg-red-50/50 rounded transition-all duration-200 text-xs"
             title="Delete section"
           >
-            <span className="text-sm">🗑️</span>
+            🗑️
           </button>
         </div>
       </div>

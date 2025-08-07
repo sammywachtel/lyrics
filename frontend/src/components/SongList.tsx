@@ -28,20 +28,24 @@ export function SongList({ onEditSong }: SongListProps) {
       const response = await apiClient.listSongs()
       setSongs(response.songs)
       setError(null)
-      
-      // Update search results with new songs
-      const results = filterSongs(response.songs, currentSearch)
-      setSearchResults(results)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load songs')
     } finally {
       setLoading(false)
     }
-  }, [currentSearch])
+  }, [])
 
   useEffect(() => {
     loadSongs()
   }, [loadSongs])
+
+  // Separate effect to update search results when songs or search criteria change
+  useEffect(() => {
+    if (songs.length > 0) {
+      const results = filterSongs(songs, currentSearch)
+      setSearchResults(results)
+    }
+  }, [songs, currentSearch])
 
   const handleSongCreated = () => {
     setShowCreateForm(false)
