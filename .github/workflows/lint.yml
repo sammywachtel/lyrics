@@ -1,4 +1,4 @@
-name: Lint and Code Quality
+name: Code Quality Validation
 
 on:
   pull_request:
@@ -7,16 +7,13 @@ on:
     branches: [ main, feature/* ]
 
 jobs:
-  lint:
-    name: Lint Frontend Code
+  validate:
+    name: Validate Code Quality
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -35,125 +32,100 @@ jobs:
             npm ci
           fi
 
-      - name: Run ESLint and fix issues
+      - name: Run ESLint validation
         run: |
-          echo "📋 Running ESLint..."
-          
-          if [ -f "frontend/package.json" ]; then
-            cd frontend
-          fi
-          
-          if npm run lint -- --fix; then
-            echo "✅ ESLint passed without issues"
-          else
-            echo "🔧 ESLint found issues, attempting to fix..."
-            npm run lint -- --fix || true
-          fi
-
-      - name: Check for remaining lint issues
-        run: |
-          echo "🔍 Checking for remaining lint issues..."
+          echo "📋 Validating ESLint compliance..."
           
           if [ -f "frontend/package.json" ]; then
             cd frontend
           fi
           
           if npm run lint; then
-            echo "✅ All linting issues resolved"
+            echo "✅ ESLint validation passed"
           else
-            echo "❌ ESLint found issues that couldn't be auto-fixed"
+            echo "❌ ESLint validation failed"
             echo ""
-            echo "Please review and fix the remaining linting errors:"
-            echo "Run 'npm run lint -- --fix' locally to auto-fix what's possible"
-            npm run lint
+            echo "🔧 To fix these issues locally:"
+            echo "1. Run: npm run lint:fix"
+            echo "2. Commit the fixes"
+            echo "3. Push your changes"
+            echo ""
+            echo "💡 Tip: Set up pre-commit hooks to catch this earlier:"
+            echo "   ./setup-dev.sh"
             exit 1
           fi
 
-      - name: Commit and push lint fixes
-        if: github.event_name == 'pull_request'
+      - name: Run TypeScript validation
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          
-          if ! git diff --quiet; then
-            echo "📝 Auto-fixing lint issues and committing changes"
-            git add .
-            git commit -m "Auto-fix lint issues
-
-Automatically applied ESLint fixes during PR workflow.
-            
-- Fixed formatting and style issues
-- Applied automatic ESLint rules
-- No manual intervention required"
-            
-            git push origin HEAD:${{ github.head_ref }}
-            echo "✅ Lint fixes committed and pushed"
-          else
-            echo "✅ No lint fixes needed"
-          fi
-
-  typescript:
-    name: TypeScript Check
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            frontend/package-lock.json
-
-      - name: Install dependencies
-        run: |
-          if [ -f "frontend/package.json" ]; then
-            cd frontend && npm ci
-          elif [ -f "package.json" ]; then
-            npm ci
-          fi
-
-      - name: Run TypeScript check
-        run: |
-          echo "🔍 Running TypeScript compilation check..."
+          echo "🔍 Validating TypeScript compilation..."
           
           if [ -f "frontend/tsconfig.app.json" ]; then
             cd frontend
             echo "Found frontend/tsconfig.app.json, running TypeScript check..."
             if npx tsc --noEmit --project tsconfig.app.json; then
-              echo "✅ TypeScript compilation successful"
+              echo "✅ TypeScript validation passed"
             else
-              echo "❌ TypeScript compilation failed"
+              echo "❌ TypeScript validation failed"
               echo ""
-              echo "Please fix the TypeScript errors above"
+              echo "🔧 To fix these issues:"
+              echo "1. Fix the TypeScript errors shown above"
+              echo "2. Run: npx tsc --noEmit to verify locally"
+              echo "3. Commit and push your fixes"
+              echo ""
+              echo "💡 Tip: Set up pre-commit hooks to catch this earlier:"
+              echo "   ./setup-dev.sh"
               exit 1
             fi
           elif [ -f "frontend/tsconfig.json" ]; then
             cd frontend
             echo "Found frontend/tsconfig.json, running TypeScript check..."
             if npx tsc --noEmit; then
-              echo "✅ TypeScript compilation successful"
+              echo "✅ TypeScript validation passed"
             else
-              echo "❌ TypeScript compilation failed"
+              echo "❌ TypeScript validation failed"
               echo ""
-              echo "Please fix the TypeScript errors above"
+              echo "🔧 To fix these issues:"
+              echo "1. Fix the TypeScript errors shown above"
+              echo "2. Run: npx tsc --noEmit to verify locally"
+              echo "3. Commit and push your fixes"
               exit 1
             fi
           elif [ -f "tsconfig.json" ]; then
             echo "Found root tsconfig.json, running TypeScript check..."
             if npx tsc --noEmit; then
-              echo "✅ TypeScript compilation successful"
+              echo "✅ TypeScript validation passed"
             else
-              echo "❌ TypeScript compilation failed"
+              echo "❌ TypeScript validation failed"
               echo ""
-              echo "Please fix the TypeScript errors above"
+              echo "🔧 To fix these issues:"
+              echo "1. Fix the TypeScript errors shown above"
+              echo "2. Run: npx tsc --noEmit to verify locally"
+              echo "3. Commit and push your fixes"
               exit 1
             fi
           else
             echo "❌ No TypeScript config file found"
+            exit 1
+          fi
+
+      - name: Run tests
+        run: |
+          echo "🧪 Running test suite..."
+          
+          if [ -f "frontend/package.json" ]; then
+            cd frontend
+          fi
+          
+          if npm test; then
+            echo "✅ All tests passed"
+          else
+            echo "❌ Tests failed"
+            echo ""
+            echo "🔧 To fix failing tests:"
+            echo "1. Run tests locally: npm test"
+            echo "2. Fix failing tests"
+            echo "3. Commit and push your fixes"
+            echo ""
+            echo "💡 Tip: Use 'npm run test:watch' for interactive development"
             exit 1
           fi

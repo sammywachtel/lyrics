@@ -23,6 +23,22 @@ The requirements.md file contains:
 - ✅ Completed feature tracking
 - Comprehensive AI constraints and behavior requirements
 
+## 📚 DOCUMENTATION ARCHITECTURE
+
+**Organized Documentation Structure:**
+All supplementary documentation is now organized in the `docs/` directory for better maintainability:
+
+- **`docs/design/specifications.md`** - Complete UI/UX design specifications and component details
+- **`docs/deployment/docker.md`** - Local Docker development setup guide
+- **`docs/deployment/cloud-run.md`** - Google Cloud Run deployment and CI/CD pipeline documentation
+- **`docs/project/development-plan.md`** - Phased implementation roadmap and task breakdown
+- **`docs/README.md`** - Navigation guide for all documentation
+
+**Key Documentation Access:**
+- **Design Requirements**: Always reference `docs/design/specifications.md` for UI/UX implementation details
+- **Deployment Guide**: Use `docs/deployment/` for infrastructure and deployment procedures
+- **Implementation Planning**: Check `docs/project/development-plan.md` for development phases and task priorities
+
 ## Project Overview
 
 This is a full-stack web application for AI-assisted songwriting with the following architecture:
@@ -61,13 +77,23 @@ This is a full-stack web application for AI-assisted songwriting with the follow
 │   │   ├── config.py           # Application settings
 │   │   └── __init__.py
 │   └── requirements.txt        # Python dependencies
+├── docs/                        # Organized documentation
+│   ├── README.md               # Documentation navigation guide
+│   ├── design/
+│   │   └── specifications.md   # UI/UX design specifications
+│   ├── deployment/
+│   │   ├── docker.md           # Docker development guide
+│   │   └── cloud-run.md        # Cloud Run deployment guide
+│   └── project/
+│       └── development-plan.md # Implementation roadmap
 ├── database-schema.sql          # Supabase PostgreSQL schema
 ├── docker-compose.yml           # Local development setup
 ├── Dockerfile.frontend          # Frontend Docker build
 ├── Dockerfile.backend           # Backend Docker build
 ├── nginx.conf                   # Nginx reverse proxy config
 ├── package.json                # Root package.json for scripts
-└── requirements.md              # Comprehensive project requirements
+├── CLAUDE.md                   # Comprehensive codebase guide (this file)
+└── requirements.md              # Master requirements document
 ```
 
 ## Development Environment Setup
@@ -614,3 +640,17 @@ When receiving responses from LLMs:
 4. **Preserve Formatting**: Maintain line breaks and text structure
 
 This architecture ensures that AI interactions maintain the song's structural integrity while providing clear context for meaningful feedback and suggestions.
+
+## Getting Help
+
+- **Requirements**: See `requirements.md` for comprehensive feature specifications and implementation status
+- **Design Guidelines**: Reference `docs/design/specifications.md` for UI/UX implementation details
+- **Development Planning**: Check `docs/project/development-plan.md` for phased implementation roadmap
+- **Deployment Setup**: Use `docs/deployment/docker.md` for local development or `docs/deployment/cloud-run.md` for production deployment
+- **Documentation Navigation**: Start with `docs/README.md` for organized access to all project documentation
+- **Frontend Docs**: React/Vite/TypeScript documentation
+- **Backend Docs**: FastAPI documentation and Supabase Python client docs
+- **Database**: Supabase PostgreSQL documentation for advanced queries
+- **Infrastructure**: Docker and Google Cloud Run documentation
+
+This codebase is set up for rapid development of a comprehensive AI-assisted songwriting application with proper separation of concerns, scalable architecture, and modern development practices.

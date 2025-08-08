@@ -37,7 +37,10 @@
     "gcp:logs:frontend": "gcloud logging read \"resource.type=cloud_run_revision AND resource.labels.service_name=lyrics-frontend\" --limit 50 --format json",
     "gcp:logs:backend": "gcloud logging read \"resource.type=cloud_run_revision AND resource.labels.service_name=lyrics-backend\" --limit 50 --format json",
     "gcp:status": "gcloud run services list --region us-central1",
-    "deploy": "npm run gcp:deploy"
+    "deploy": "npm run gcp:deploy",
+    "precommit:install": "pre-commit install",
+    "precommit:run": "pre-commit run --all-files",
+    "setup:hooks": "npm run precommit:install && echo 'Pre-commit hooks installed successfully!'"
   },
   "keywords": [
     "songwriting",
@@ -49,7 +52,8 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "pre-commit": "^3.6.0"
   },
   "dependencies": {
     "lint": "^1.1.2"

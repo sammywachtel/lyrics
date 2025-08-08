@@ -7,7 +7,6 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { 
   $getRoot, 
-  $createTextNode, 
   type LexicalEditor,
   $getSelection,
   $isRangeSelection,
@@ -24,6 +23,12 @@ import { SyllableNode } from './lexical/nodes/SyllableNode'
 import { RhymeNode } from './lexical/nodes/RhymeNode'
 import { SectionParagraphNode, $createSectionParagraphNode, $isSectionParagraphNode } from './lexical/nodes/SectionParagraphNode'
 import { SectionTagNode } from './nodes/SectionTagNode'
+import { StressedTextNode, $createStressedTextNode } from './lexical/nodes/StressedTextNode'
+import { StressMarkDecoratorNode } from './lexical/nodes/StressMarkDecoratorNode'
+import { StressMarkDecoratorPlugin } from './lexical/plugins/StressMarkDecoratorPlugin'
+import { AutoStressDetectionPlugin } from './lexical/plugins/AutoStressDetectionPlugin'
+import { StableTextToStressedPlugin } from './lexical/plugins/StableTextToStressedPlugin'
+import StressContextMenu from './lexical/ui/StressContextMenu'
 // import SectionHeaderPlugin from './plugins/SectionHeaderPlugin' // TODO: Re-enable when test environment supports full Lexical
 // TODO: Re-enable when plugins are fully TypeScript compliant
 // import { SectionDetectionPlugin } from './lexical/plugins/SectionDetectionPlugin'
@@ -31,6 +36,10 @@ import { SectionTagNode } from './nodes/SectionTagNode'
 
 // Import the section formatting commands and utilities
 import { SECTION_FORMAT_COMMAND, $getCurrentSectionType, $applySectionFormatting, $clearSectionFormatting } from './lexical/commands/SectionFormattingCommands'
+// Import prosody styles
+import '../styles/prosody.css'
+// Import validation utilities
+import { safeLexicalLoad, prepareLexicalForSave } from '../utils/lexicalDataValidation'
 
 interface RichTextLyricsEditorProps {
   value: string
@@ -45,6 +54,7 @@ interface RichTextLyricsEditorProps {
   enableProsodyAnalysis?: boolean
   enableSyllableMarking?: boolean
   enableRhymeScheme?: boolean
+  enableStressMarking?: boolean
 }
 
 // Enhanced Lexical theme configuration for rich text
@@ -123,8 +133,17 @@ function ValueSyncPlugin({
             // If it's Lexical JSON, parse and set the editor state
             try {
               const editorState = editor.parseEditorState(value)
-              editor.setEditorState(editorState)
-              return
+              // Ensure the editor state has content before setting it
+              const hasContent = editorState.read(() => {
+                const root = $getRoot()
+                return root.getChildren().length > 0
+              })
+              if (hasContent) {
+                editor.setEditorState(editorState)
+                return
+              } else {
+                console.warn('Parsed Lexical JSON has empty root, falling back to plain text')
+              }
             } catch (error) {
               console.warn('Failed to parse Lexical JSON, falling back to plain text:', error)
             }
@@ -135,7 +154,7 @@ function ValueSyncPlugin({
           lines.forEach((line) => {
             const paragraph = $createSectionParagraphNode()
             if (line.trim()) {
-              const textNode = $createTextNode(line)
+              const textNode = $createStressedTextNode(line)
               paragraph.append(textNode)
             }
             root.append(paragraph)
@@ -161,32 +180,43 @@ function ValueSyncPlugin({
       // Get current editor content as JSON for comparison
       const currentContent = JSON.stringify(editor.getEditorState().toJSON())
       
-      if (currentContent !== value && !isLexicalJSON(value)) {
-        // Only update if value is different and not already Lexical JSON
+      if (currentContent !== value) {
+        // Use safe loading for updates
+        const safeLoad = safeLexicalLoad(value)
+        
+        if (safeLoad.wasRepaired) {
+          console.warn('⚠️ Lexical data was repaired during update:', safeLoad.errors)
+        }
+        
         isUpdatingFromProps.current = true
-        lastSavedContentRef.current = value
+        lastSavedContentRef.current = safeLoad.data
         
         editor.update(() => {
           const root = $getRoot()
           root.clear()
           
-          if (value) {
-            if (isLexicalJSON(value)) {
-              try {
-                const editorState = editor.parseEditorState(value)
+          if (safeLoad.data) {
+            try {
+              const editorState = editor.parseEditorState(safeLoad.data)
+              const hasContent = editorState.read(() => {
+                const root = $getRoot()
+                return root.getChildren().length > 0
+              })
+              
+              if (hasContent) {
                 editor.setEditorState(editorState)
                 return
-              } catch (error) {
-                console.warn('Failed to parse Lexical JSON during update:', error)
               }
+            } catch (error) {
+              console.error('Failed to parse validated Lexical JSON during update:', error)
             }
             
-            // Fallback to plain text parsing
+            // Final fallback to plain text parsing
             const lines = value.split('\n')
             lines.forEach((line) => {
               const paragraph = $createSectionParagraphNode()
               if (line.trim()) {
-                const textNode = $createTextNode(line)
+                const textNode = $createStressedTextNode(line)
                 paragraph.append(textNode)
               }
               root.append(paragraph)
@@ -205,22 +235,35 @@ function ValueSyncPlugin({
   }, [editor, value])
   
   // Handle editor content changes - now using Lexical JSON serialization
-  const handleEditorChange = useCallback(() => {
+  const handleEditorChange = useCallback((editorState: any, editor: LexicalEditor, tags: Set<string>) => {
     if (isUpdatingFromProps.current) {
       return
     }
     
-    // Get the current editor state as JSON (preserves all formatting)
-    const editorState = editor.getEditorState()
-    const jsonContent = JSON.stringify(editorState.toJSON())
-    
-    // Only process if content actually changed from the last saved version
-    if (jsonContent === lastSavedContentRef.current) {
+    // Ignore discrete updates from stress marking plugins
+    if (tags.has('stable-text-conversion') || 
+        tags.has('auto-stress-detection') || 
+        tags.has('decorator-replacement')) {
       return
     }
     
-    // Update parent component with new content (as Lexical JSON)
-    onChange(jsonContent)
+    // Get the current editor state as JSON (preserves all formatting)
+    const rawJSON = JSON.stringify(editorState.toJSON())
+    
+    // Validate and prepare for saving
+    const safeData = prepareLexicalForSave(rawJSON)
+    
+    if (!safeData.isValid) {
+      console.warn('⚠️ Prevented saving corrupted Lexical data:', safeData.errors)
+    }
+    
+    // Only process if content actually changed from the last saved version
+    if (safeData.data === lastSavedContentRef.current) {
+      return
+    }
+    
+    // Update parent component with validated content
+    onChange(safeData.data)
     lastChangeTimeRef.current = Date.now()
     
     // Setup debounced auto-save
@@ -232,23 +275,25 @@ function ValueSyncPlugin({
       autoSaveTimeoutRef.current = setTimeout(() => {
         const timeSinceLastChange = Date.now() - lastChangeTimeRef.current
         if (timeSinceLastChange >= autoSaveDelay - 100) {
-          // Get current state for auto-save
+          // Get current state for auto-save with validation
           const currentEditorState = editor.getEditorState()
-          const currentContent = JSON.stringify(currentEditorState.toJSON())
+          const rawCurrentContent = JSON.stringify(currentEditorState.toJSON())
+          const safeCurrentData = prepareLexicalForSave(rawCurrentContent)
           
           console.log('📝 Auto-save content check:', {
-            capturedAtChange: jsonContent.length,
-            currentAtSave: currentContent.length,
-            hasFormatting: currentContent.includes('"format"')
+            capturedAtChange: safeData.data.length,
+            currentAtSave: safeCurrentData.data.length,
+            hasFormatting: safeCurrentData.data.includes('"format"'),
+            wasValidated: !safeCurrentData.isValid
           })
           
-          if (currentContent !== jsonContent) {
+          if (safeCurrentData.data !== safeData.data) {
             console.log('🔧 React state behind Lexical - updating immediately')
-            onChange(currentContent)
+            onChange(safeCurrentData.data)
           }
           
-          lastSavedContentRef.current = currentContent
-          onAutoSave(currentContent).catch(error => {
+          lastSavedContentRef.current = safeCurrentData.data
+          onAutoSave(safeCurrentData.data).catch(error => {
             console.error('Auto-save failed:', error)
           })
         }
@@ -384,7 +429,7 @@ function PastePlugin() {
             const paragraphNodes = lines.map(line => {
               const paragraph = $createSectionParagraphNode()
               if (line.trim()) {
-                const textNode = $createTextNode(line)
+                const textNode = $createStressedTextNode(line)
                 paragraph.append(textNode)
               }
               return paragraph
@@ -403,6 +448,36 @@ function PastePlugin() {
 
   return null
 }
+
+// Handle stress mark interactions from decorator plugin - now inline in plugin usage
+/* function StressInteractionHandler({ 
+  setContextMenu 
+}: { 
+  setContextMenu: (menu: { x: number; y: number; word: string; syllableIndex?: number } | null) => void 
+}) {
+  const handleStressMarkInteraction = useCallback((event: {
+    word: string
+    syllableIndex: number
+    nodeKey: string
+    x: number
+    y: number
+  }) => {
+    setContextMenu({
+      x: event.x,
+      y: event.y,
+      word: event.word,
+      syllableIndex: event.syllableIndex,
+    })
+  }, [setContextMenu])
+
+  return (
+    <StressMarkDecoratorPlugin
+      enabled={true}
+      autoDetectionEnabled={true}
+      onStressMarkInteraction={handleStressMarkInteraction}
+    />
+  )
+} */
 
 
 const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLyricsEditorProps>(
@@ -427,6 +502,14 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
     // Section formatting state
     const [activeSection, setActiveSection] = useState<string | null>(null)
     
+    // Stress marking context menu state
+    const [contextMenu, setContextMenu] = useState<{
+      x: number
+      y: number
+      word: string
+      syllableIndex?: number
+    } | null>(null)
+    
     // Lexical configuration with custom nodes  
     const initialConfig = React.useMemo(() => ({
       namespace: 'RichTextLyricsEditor',
@@ -437,6 +520,8 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
         RhymeNode,
         SectionParagraphNode,
         SectionTagNode,
+        StressedTextNode,
+        StressMarkDecoratorNode,
       ],
       onError: (error: Error) => {
         console.error('Lexical error:', error)
@@ -822,12 +907,43 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
               <SectionFormattingPlugin />
               {/* <SectionHeaderPlugin /> */} {/* TODO: Re-enable when test environment supports full Lexical */}
               <PastePlugin />
+              <StableTextToStressedPlugin 
+                enabled={false}
+                debounceMs={5000}
+              />
+              <StressMarkDecoratorPlugin
+                enabled={false}
+                autoDetectionEnabled={false}
+                onStressMarkInteraction={(event) => {
+                  setContextMenu({
+                    x: event.x,
+                    y: event.y,
+                    word: event.word,
+                    syllableIndex: event.syllableIndex,
+                  })
+                }}
+              />
+              <AutoStressDetectionPlugin 
+                enabled={false}
+                debounceMs={1000}
+              />
               {/* TODO: Re-enable when plugins are fully TypeScript compliant */}
               {/* <SectionDetectionPlugin /> */}
               {/* <ProsodyAnalysisPlugin /> */}
             </div>
           </LexicalComposer>
         </div>
+        
+        {/* Stress Context Menu */}
+        {contextMenu && (
+          <StressContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            word={contextMenu.word}
+            syllableIndex={contextMenu.syllableIndex}
+            onClose={() => setContextMenu(null)}
+          />
+        )}
         
         {/* View Source Debug - Subtle Button */}
         <button

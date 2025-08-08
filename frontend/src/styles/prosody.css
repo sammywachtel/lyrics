@@ -1,0 +1,505 @@
+/* Prosody and Stress Marking Styles */
+
+/* High specificity overrides for stress marks */
+.word-stress-container .syllable.stressed::before,
+span.word-stress-container span.syllable.stressed::before,
+.stressed-text-node .word-stress-container .syllable.stressed::before {
+  content: '´' !important;
+  position: absolute !important;
+  top: -16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  color: #dc2626 !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  text-shadow: 0 2px 4px rgba(220, 38, 38, 0.3) !important;
+  z-index: 1000 !important;
+  line-height: 1 !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
+.word-stress-container .syllable.unstressed::before,
+span.word-stress-container span.syllable.unstressed::before,
+.stressed-text-node .word-stress-container .syllable.unstressed::before {
+  content: '˘' !important;
+  position: absolute !important;
+  top: -16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #4b5563 !important;
+  opacity: 0.9 !important;
+  pointer-events: none !important;
+  text-shadow: 0 2px 4px rgba(75, 85, 99, 0.2) !important;
+  z-index: 999 !important;
+  line-height: 1 !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Force visibility for all stress mark containers */
+span.word-stress-container,
+.word-stress-container,
+.stressed-text-node .word-stress-container {
+  position: relative !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  overflow: visible !important;
+}
+
+/* Force visibility for syllables */
+span.syllable,
+.syllable,
+.word-stress-container .syllable {
+  position: relative !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  overflow: visible !important;
+}
+
+/* Stressed Text Node Container */
+.stressed-text-node {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  line-height: normal;
+  padding-top: 0px;
+}
+
+/* Word Stress Container */
+.word-stress-container {
+  position: relative !important;
+  display: inline-block !important;
+  margin: 0 1px !important;
+  /* Reduced spacing when stress marks are disabled */
+  padding-top: 0px !important;
+  line-height: normal !important;
+}
+
+/* Individual Syllables */
+.syllable {
+  position: relative !important;
+  display: inline-block !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 2px;
+  padding: 0 1px;
+  /* Reduced spacing when stress marks are disabled */
+  margin-top: 0px !important;
+}
+
+/* Stress States */
+.syllable.stressed {
+  font-weight: 700;
+  color: #111827; /* darker text for stressed */
+  background-color: rgba(220, 38, 38, 0.05);
+}
+
+.syllable.unstressed {
+  font-weight: 400;
+  color: #4b5563; /* slightly darker for better visibility */
+  background-color: rgba(156, 163, 175, 0.05);
+}
+
+/* Stress Marks (Traditional Notation) */
+.syllable.stressed::before {
+  content: '´' !important;
+  position: absolute !important;
+  top: -16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  color: #dc2626 !important; /* red accent mark */
+  opacity: 1 !important;
+  pointer-events: none !important;
+  text-shadow: 0 2px 4px rgba(220, 38, 38, 0.3) !important;
+  z-index: 1000 !important;
+  line-height: 1 !important;
+  display: block !important;
+}
+
+.syllable.unstressed::before {
+  content: '˘' !important;
+  position: absolute !important;
+  top: -16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #4b5563 !important; /* darker gray accent mark */
+  opacity: 0.9 !important;
+  pointer-events: none !important;
+  text-shadow: 0 2px 4px rgba(75, 85, 99, 0.2) !important;
+  z-index: 999 !important;
+  line-height: 1 !important;
+  display: block !important;
+}
+
+/* Confidence Indicators */
+.syllable.high-confidence {
+  /* Solid accent marks for high confidence */
+}
+
+.syllable.low-confidence::before {
+  opacity: 0.4; /* Faded accent marks for low confidence */
+}
+
+/* User Override Indicators */
+.syllable.user-overridden {
+  background-color: #fef3c7; /* yellow highlight for manual overrides */
+  border: 1px solid #f59e0b;
+}
+
+.syllable.user-overridden::after {
+  content: '✓';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 8px;
+  color: #059669;
+  background-color: white;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border: 1px solid #d1fae5;
+}
+
+.syllable.auto-detected {
+  /* Default styling for auto-detected stress */
+}
+
+/* Hover Effects */
+.syllable:hover {
+  background-color: #e5f3ff;
+  transform: scale(1.05);
+}
+
+.syllable.stressed:hover::before {
+  color: #dc2626;
+  opacity: 1;
+  font-size: 12px;
+}
+
+.syllable.unstressed:hover::before {
+  color: #4b5563;
+  opacity: 0.8;
+  font-size: 12px;
+}
+
+/* Interactive States */
+.syllable:active {
+  background-color: #dbeafe;
+  transform: scale(0.98);
+}
+
+/* Alternative Visual Style: Color-coded backgrounds */
+.prosody-background-mode .syllable.stressed {
+  background-color: #fee2e2; /* light red for stressed */
+  color: #7f1d1d;
+}
+
+.prosody-background-mode .syllable.unstressed {
+  background-color: #f3f4f6; /* light gray for unstressed */
+  color: #374151;
+}
+
+.prosody-background-mode .syllable::before {
+  display: none; /* Hide accent marks in background mode */
+}
+
+/* Alternative Visual Style: Underline indicators */
+.prosody-underline-mode .syllable::before {
+  display: none; /* Hide top accent marks */
+}
+
+.prosody-underline-mode .syllable.stressed::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #dc2626;
+  border-radius: 1px;
+}
+
+.prosody-underline-mode .syllable.unstressed::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #9ca3af;
+  border-radius: 1px;
+  opacity: 0.5;
+}
+
+/* Context Menu Styling */
+.stress-context-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  min-width: 180px;
+  font-size: 14px;
+  padding: 4px 0;
+}
+
+.stress-context-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.stress-context-menu-item:hover {
+  background-color: #f3f4f6;
+}
+
+.stress-context-menu-item:active {
+  background-color: #e5e7eb;
+}
+
+.stress-context-menu-item .icon {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.stress-context-menu-divider {
+  height: 1px;
+  background-color: #e5e7eb;
+  margin: 4px 0;
+}
+
+/* Stress Pattern Settings Panel */
+.stress-settings-panel {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+}
+
+.stress-settings-panel h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+}
+
+.stress-toggle-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.stress-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.stress-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+.stress-visual-mode-selector {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.stress-mode-button {
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.stress-mode-button.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.stress-mode-button:hover:not(.active) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+/* Statistics Display */
+.stress-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 8px 0;
+  border-top: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.stress-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stress-stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.stress-stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .syllable::before {
+    font-size: 8px;
+    top: -6px;
+  }
+  
+  .syllable.user-overridden::after {
+    font-size: 6px;
+    width: 8px;
+    height: 8px;
+    top: -4px;
+    right: -4px;
+  }
+  
+  .stress-toggle-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .stress-visual-mode-selector {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .syllable:hover {
+    background-color: transparent;
+    transform: none;
+  }
+  
+  .stress-context-menu {
+    display: none;
+  }
+  
+  .syllable.user-overridden::after {
+    display: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .syllable.stressed {
+    color: #000000;
+    font-weight: 700;
+  }
+  
+  .syllable.unstressed {
+    color: #4a4a4a;
+  }
+  
+  .syllable.stressed::before {
+    color: #cc0000;
+    font-weight: 900;
+  }
+  
+  .syllable.unstressed::before {
+    color: #666666;
+  }
+  
+  .syllable.user-overridden {
+    background-color: #ffff99;
+    border-color: #cc9900;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .syllable {
+    transition: none;
+  }
+  
+  .syllable:hover {
+    transform: none;
+  }
+  
+  .syllable:active {
+    transform: none;
+  }
+  
+  .stress-mode-button {
+    transition: none;
+  }
+}
+
+/* DEBUG MODE - Disabled to clean up interface */
+/*
+.syllable {
+  background-color: rgba(255, 255, 0, 0.2) !important;
+  border: 1px solid orange !important;
+}
+
+.syllable.stressed {
+  background-color: rgba(220, 38, 38, 0.2) !important;
+}
+
+.syllable.unstressed {
+  background-color: rgba(156, 163, 175, 0.2) !important;
+}
+
+.syllable.stressed::before {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-radius: 50% !important;
+  padding: 2px !important;
+  margin: -2px !important;
+}
+
+.syllable.unstressed::before {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-radius: 50% !important;
+  padding: 2px !important;
+  margin: -2px !important;
+}
+*/
