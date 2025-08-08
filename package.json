@@ -52,8 +52,7 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "pre-commit": "^3.6.0"
+    "concurrently": "^8.2.2"
   },
   "dependencies": {
     "lint": "^1.1.2"

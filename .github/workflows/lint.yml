@@ -10,7 +10,7 @@ jobs:
   validate:
     name: Validate Code Quality
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,11 +35,11 @@ jobs:
       - name: Run ESLint validation
         run: |
           echo "📋 Validating ESLint compliance..."
-          
+
           if [ -f "frontend/package.json" ]; then
             cd frontend
           fi
-          
+
           if npm run lint; then
             echo "✅ ESLint validation passed"
           else
@@ -58,7 +58,7 @@ jobs:
       - name: Run TypeScript validation
         run: |
           echo "🔍 Validating TypeScript compilation..."
-          
+
           if [ -f "frontend/tsconfig.app.json" ]; then
             cd frontend
             echo "Found frontend/tsconfig.app.json, running TypeScript check..."
@@ -111,11 +111,11 @@ jobs:
       - name: Run tests
         run: |
           echo "🧪 Running test suite..."
-          
+
           if [ -f "frontend/package.json" ]; then
             cd frontend
           fi
-          
+
           if npm test; then
             echo "✅ All tests passed"
           else

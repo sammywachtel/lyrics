@@ -1,0 +1,8 @@
+Test file to verify CI/CD pipeline works correctly.
+
+This file tests:
+- Pre-commit hooks on commit
+- GitHub Actions CI validation
+- End-to-end quality pipeline
+
+Created: 2025-08-08

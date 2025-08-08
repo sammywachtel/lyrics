@@ -205,7 +205,7 @@ lyrics/
 
 This hybrid approach ensures:
 - ⚡ **Fast feedback** during development
-- 🧹 **Clean commit history** without auto-fix commits  
+- 🧹 **Clean commit history** without auto-fix commits
 - 🔒 **Quality assurance** at every stage
 - 🚀 **Efficient CI** that focuses on validation
 - 👥 **Consistent code** across the team
@@ -213,7 +213,7 @@ This hybrid approach ensures:
 ## Getting Help
 
 - **Setup Issues**: Run `./setup-dev.sh` again
-- **Hook Problems**: Check `.pre-commit-config.yaml` configuration  
+- **Hook Problems**: Check `.pre-commit-config.yaml` configuration
 - **CI Failures**: Compare local commands with CI steps
 - **Test Issues**: Use `npm run test:watch` for interactive debugging
 
