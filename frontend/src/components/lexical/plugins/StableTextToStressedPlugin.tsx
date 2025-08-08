@@ -20,7 +20,9 @@ export function StableTextToStressedPlugin({
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
+    console.log('🚀 STABLE-PLUGIN: Plugin mounted, enabled:', enabled, 'debounceMs:', debounceMs)
     if (!enabled) {
+      console.log('🚫 STABLE-PLUGIN: Plugin disabled')
       return
     }
 
@@ -29,32 +31,40 @@ export function StableTextToStressedPlugin({
     const convertedNodeKeys = new Set<string>() // Track converted nodes by key
 
     const convertStableTextNodes = () => {
+      console.log('🔄 STABLE-PLUGIN: Starting analysis and conversion process...')
       if (isConverting) {
-        console.log('🚫 Conversion already in progress, skipping')
+        console.log('🚫 STABLE-PLUGIN: Conversion already in progress, skipping')
         return
       }
-      
+
       isConverting = true
-      
+
       editor.update(() => {
         // Find text nodes in section paragraphs that should be converted
         const nodesToConvert: TextNode[] = []
+        let stressedNodesNeedingAnalysis = 0
 
         function collectTextNodes(node: any) {
-          // Only look inside section paragraphs
+          // Look inside section paragraphs AND regular paragraphs
           if ($isSectionParagraphNode(node)) {
             const children = node.getChildren()
-            children.forEach((child: any) => {
-              if ($isTextNode(child) && !$isStressedTextNode(child)) {
-                const text = child.getTextContent()
-                const nodeKey = child.getKey()
-                
-                // Only convert nodes with substantial text content and not already converted
-                if (text.trim().length > 2 && !convertedNodeKeys.has(nodeKey)) {
-                  nodesToConvert.push(child)
-                }
-              }
-            })
+            console.log('🔍 STABLE-PLUGIN: Section paragraph children:', children.map((c: any) => ({
+              type: c.getType(),
+              isText: $isTextNode(c),
+              isStressed: $isStressedTextNode(c),
+              content: c.getTextContent?.()?.substring(0, 15) + '...'
+            })))
+            processChildren(children)
+          } else if (node.getType?.() === 'paragraph') {
+            // Also process regular Lexical paragraphs (unsectioned text)
+            const children = node.getChildren()
+            console.log('🔍 STABLE-PLUGIN: Regular paragraph children:', children.map((c: any) => ({
+              type: c.getType(),
+              isText: $isTextNode(c),
+              isStressed: $isStressedTextNode(c),
+              content: c.getTextContent?.()?.substring(0, 15) + '...'
+            })))
+            processChildren(children)
           } else {
             // Continue traversing other node types
             const children = node.getChildren?.() || []
@@ -62,11 +72,50 @@ export function StableTextToStressedPlugin({
           }
         }
 
+        function processChildren(children: any[]) {
+          children.forEach((child: any) => {
+            if ($isTextNode(child) && !$isStressedTextNode(child)) {
+                const text = child.getTextContent()
+                const nodeKey = child.getKey()
+
+                // Only convert nodes with substantial text content and not already converted
+                if (text.trim().length > 2 && !convertedNodeKeys.has(nodeKey)) {
+                  nodesToConvert.push(child)
+                }
+              } else if ($isStressedTextNode(child)) {
+                // Check StressedTextNodes that might need stress pattern analysis
+                const text = child.getTextContent()
+                const patterns = child.getAllStressPatterns()
+                const nodeKey = child.getKey()
+
+                // Analyze StressedTextNodes that:
+                // 1. Have substantial content (>2 chars)
+                // 2. Have 0 stress patterns OR patterns for words that don't match current content
+                const words = text.split(/\s+/).filter(w => w.trim().length > 0)
+                const wordsNeedingPatterns = words.filter(word => {
+                  const cleanWord = word.replace(/[^\w']/g, '').toLowerCase()
+                  return cleanWord.length > 2 && !patterns.has(cleanWord)
+                })
+
+                if (text.trim().length > 2 && (patterns.size === 0 || wordsNeedingPatterns.length > 0)) {
+                  console.log(`🔍 STABLE-PLUGIN: Found StressedTextNode "${text.substring(0, 15)}..." needing analysis (${wordsNeedingPatterns.length} words without patterns)`)
+                  // Mark as processed to trigger auto-detection
+                  convertedNodeKeys.add(nodeKey)
+                  stressedNodesNeedingAnalysis++
+                }
+              }
+          })
+        }
+
         // Start from root and collect text nodes
         const root = editor.getEditorState()._nodeMap.get('root')
+        console.log('🌳 STABLE-PLUGIN: Root node found:', !!root)
         if (root) {
           collectTextNodes(root)
         }
+
+        console.log('📊 STABLE-PLUGIN: Found', nodesToConvert.length, 'text nodes to convert')
+        console.log('🔍 STABLE-PLUGIN: Found', stressedNodesNeedingAnalysis, 'StressedTextNodes needing analysis')
 
         // Convert each text node to a stressed text node
         let conversionCount = 0
@@ -74,36 +123,41 @@ export function StableTextToStressedPlugin({
           try {
             const text = textNode.getTextContent()
             const nodeKey = textNode.getKey()
-            
+
             // Skip if text is too short or already converted
             if (text.trim().length < 3) {
               return
             }
-            
+
             const stressedNode = $createStressedTextNode(text)
-            
+
             // Copy all formatting
             stressedNode.setFormat(textNode.getFormat())
             stressedNode.setDetail(textNode.getDetail())
             stressedNode.setMode(textNode.getMode())
             stressedNode.setStyle(textNode.getStyle())
-            
+
             // Mark as converted BEFORE replacement to prevent re-processing
             convertedNodeKeys.add(nodeKey)
-            
+
             // Replace the text node
             textNode.replace(stressedNode)
-            
+
             conversionCount++
-            // console.log(`🔄 Converted (${conversionCount}): "${text.substring(0, 15)}..."`);
+            console.log(`🔄 STABLE-PLUGIN: Converted (${conversionCount}): "${text.substring(0, 15)}..."`);
           } catch (error) {
             console.warn('Failed to convert TextNode to StressedTextNode:', error)
           }
         })
-        
-        // console.log(`✅ Conversion batch complete: ${conversionCount} nodes`)
+
+        console.log(`✅ STABLE-PLUGIN: Process complete: ${conversionCount} nodes converted, ${stressedNodesNeedingAnalysis} nodes marked for analysis`)
+
+        // If we found any nodes needing work, trigger the update
+        if (stressedNodesNeedingAnalysis > 0 || conversionCount > 0) {
+          console.log(`🎯 STABLE-PLUGIN: Triggering analysis for ${conversionCount} new + ${stressedNodesNeedingAnalysis} existing StressedTextNodes`)
+        }
       }, { tag: 'stable-text-conversion' })
-      
+
       // Reset conversion flag after a delay
       setTimeout(() => {
         isConverting = false
@@ -111,12 +165,14 @@ export function StableTextToStressedPlugin({
     }
 
     const scheduleConversion = () => {
+      console.log('⏱️ STABLE-PLUGIN: Scheduling conversion in', debounceMs, 'ms')
       if (timeoutId) {
         clearTimeout(timeoutId)
       }
-      
+
       // Use requestAnimationFrame to avoid React scheduling conflicts
       timeoutId = setTimeout(() => {
+        console.log('⏰ STABLE-PLUGIN: Timeout fired, starting conversion')
         requestAnimationFrame(() => {
           convertStableTextNodes()
         })
@@ -124,23 +180,37 @@ export function StableTextToStressedPlugin({
     }
 
     // Listen for editor changes and schedule conversion after stable period
-    const removeListener = editor.registerUpdateListener(({ dirtyLeaves }) => {
-      // Only react to changes that involve text nodes
-      let hasTextChanges = false
-      dirtyLeaves.forEach(nodeKey => {
-        const node = editor.getEditorState()._nodeMap.get(nodeKey)
-        if ($isTextNode(node)) {
-          hasTextChanges = true
-        }
-      })
+    const removeListener = editor.registerUpdateListener(({ dirtyLeaves, tags }) => {
+      // Ignore our own conversion updates
+      if (tags.has('stable-text-conversion')) {
+        console.log('🏷️ STABLE-PLUGIN: Ignoring our own conversion update')
+        return
+      }
 
-      if (hasTextChanges) {
+      // React to ANY content changes (not just TextNodes)
+      // This includes typing within existing StressedTextNodes
+      let hasContentChanges = false
+
+      if (dirtyLeaves.size > 0) {
+        dirtyLeaves.forEach(nodeKey => {
+          const node = editor.getEditorState()._nodeMap.get(nodeKey)
+          // Check for any text-containing nodes (TextNode or StressedTextNode)
+          if ($isTextNode(node) || $isStressedTextNode(node)) {
+            hasContentChanges = true
+          }
+        })
+      }
+
+      if (hasContentChanges) {
+        console.log('📝 STABLE-PLUGIN: Content changes detected, scheduling analysis')
         scheduleConversion()
       }
     })
 
     // Also run an initial conversion after a delay
+    console.log('🏁 STABLE-PLUGIN: Setting up initial conversion in 1000ms')
     const initialTimeout = setTimeout(() => {
+      console.log('🏁 STABLE-PLUGIN: Initial timeout fired')
       requestAnimationFrame(() => {
         convertStableTextNodes()
       })

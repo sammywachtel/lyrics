@@ -50,14 +50,27 @@ export function AutoStressDetectionPlugin({
           const root = $getRoot()
           collectStressedTextNodes(root)
 
+          console.log(`📊 AUTO-DETECT: Starting analysis of ${nodesToProcess.length} StressedTextNodes`)
+
           // Process each StressedTextNode
           nodesToProcess.forEach(node => {
             if (node.isAutoDetectionEnabled() && node.getTextContent().trim()) {
               try {
+                const existingPatterns = node.getAllStressPatterns()
+
+                // Check if any existing patterns have user overrides
+                const hasOverrides = Array.from(existingPatterns.values()).some(pattern => pattern.overridden)
+
+                if (hasOverrides) {
+                  console.log(`🛡️ AUTO-DETECT: Skipping "${node.getTextContent().substring(0, 15)}..." - contains user overrides`)
+                  return
+                }
+
+                // Only analyze if no user overrides exist
                 const writableNode = node.getWritable()
                 writableNode.autoDetectStress()
-                // console.log(`🎯 Detected stress for: "${node.getTextContent().substring(0, 15)}..."`)
-                // console.log(`📊 Patterns:`, writableNode.getAllStressPatterns().size)
+                console.log(`🎯 AUTO-DETECT: Detected stress for: "${node.getTextContent().substring(0, 15)}..."`)
+                console.log(`📊 AUTO-DETECT: Patterns:`, writableNode.getAllStressPatterns().size)
               } catch (error) {
                 console.warn('Auto stress detection failed for node:', error)
               }
@@ -69,7 +82,20 @@ export function AutoStressDetectionPlugin({
     }
 
     // Register text content change listener
-    const removeListener = editor.registerUpdateListener(({ editorState, dirtyLeaves }) => {
+    const removeListener = editor.registerUpdateListener(({ editorState, dirtyLeaves, tags }) => {
+      // Only ignore our own auto-stress-detection updates to prevent loops
+      if (tags.has('auto-stress-detection')) {
+        console.log('🏷️ AUTO-DETECT: Ignoring own update to prevent loop')
+        return
+      }
+
+      // IMPORTANT: Process stable-text-conversion updates - that's when new StressedTextNodes need analysis!
+      if (tags.has('stable-text-conversion')) {
+        console.log('🎯 AUTO-DETECT: Processing stable-text-conversion - analyzing newly converted StressedTextNodes')
+        triggerAutoDetection()
+        return
+      }
+
       // Check if any StressedTextNodes were modified
       let hasStressedTextChanges = false
 
@@ -81,6 +107,7 @@ export function AutoStressDetectionPlugin({
       })
 
       if (hasStressedTextChanges) {
+        console.log('🎯 AUTO-DETECT: StressedTextNode changes detected, triggering analysis')
         triggerAutoDetection()
       }
     })

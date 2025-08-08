@@ -1,15 +1,16 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $createTextNode, $isTextNode, TextNode } from 'lexical'
-import { useEffect } from 'react'
-import { 
-  StressedTextNode, 
+import { useEffect, useState } from 'react'
+import ReactDOM from 'react-dom'
+
+// Global flag to ensure only one plugin instance renders overlays
+let activePluginId: string | null = null
+
+import {
+  $isStressedTextNode,
   type StressPattern,
 } from '../nodes/StressedTextNode'
-import { 
-  $createStressMarkDecoratorNode, 
-  StressMarkDecoratorNode 
-} from '../nodes/StressMarkDecoratorNode'
-import { mergeRegister } from '@lexical/utils'
+import { $isSectionParagraphNode } from '../nodes/SectionParagraphNode'
+import { $getRoot } from 'lexical'
 
 interface StressMarkDecoratorPluginProps {
   enabled?: boolean
@@ -23,136 +24,372 @@ interface StressMarkDecoratorPluginProps {
   }) => void
 }
 
-/**
- * Plugin that converts StressedTextNodes into visual StressMarkDecoratorNodes
- * This provides proper separation between text editing and stress visualization
- */
-export function StressMarkDecoratorPlugin({
-  enabled = true,
-  autoDetectionEnabled = true,
-  onStressMarkInteraction
-}: StressMarkDecoratorPluginProps) {
-  const [editor] = useLexicalComposerContext()
-
-  useEffect(() => {
-    if (!enabled) {
-      return
-    }
-    
-    let removeTransform: (() => void) | null = null
-    let handleStressMarkEvent: ((event: Event) => void) | null = null
-    
-    // Defer registration to avoid React scheduling conflicts
-    const registrationTimeout = setTimeout(() => {
-      removeTransform = mergeRegister(
-      // Transform StressedTextNodes with stress patterns into decorators
-      editor.registerNodeTransform(StressedTextNode, (node: StressedTextNode) => {
-        if (!enabled) return
-
-        // Check if this node has already been processed to prevent loops
-        if ((node as any).__decoratorProcessed) {
-          return
-        }
-
-        const stressPatterns = node.getAllStressPatterns()
-        if (stressPatterns.size === 0) return
-
-        const text = node.getTextContent()
-        const words = extractWords(text)
-        
-        // If this text node contains words with stress patterns, convert to decorators
-        const hasStressMarks = words.some(({ word }) => {
-          const cleanWord = word.replace(/[^a-zA-Z']/g, '').toLowerCase()
-          return stressPatterns.has(cleanWord)
-        })
-        
-        if (!hasStressMarks) {
-          return
-        }
-        
-        // console.log(`🎨 Creating decorators for: "${text.substring(0, 15)}..." with ${stressPatterns.size} patterns`);
-        
-        // Mark this node as processed
-        (node as any).__decoratorProcessed = true;
-        
-        // Create a sequence of text nodes and decorator nodes
-        const replacementNodes = createReplacementNodes(text, words, stressPatterns, node)
-        
-        if (replacementNodes.length > 0) {
-          // Replace the stressed text node with the sequence
-          // Use explicit types for TypeScript compatibility
-          if (replacementNodes.length === 1) {
-            node.replace(replacementNodes[0])
-          } else {
-            // For multiple nodes, insert them one by one
-            let currentNode: typeof node | typeof replacementNodes[0] = node
-            for (let i = 0; i < replacementNodes.length; i++) {
-              if (i === 0) {
-                currentNode = node.replace(replacementNodes[i])
-              } else {
-                currentNode = currentNode.insertAfter(replacementNodes[i])
-              }
-            }
-          }
-        }
-      }),
-
-      // Clean up orphaned decorator nodes when text changes
-      editor.registerNodeTransform(StressMarkDecoratorNode, (node: StressMarkDecoratorNode) => {
-        const parent = node.getParent()
-        if (!parent) return
-
-        // Check if the word still exists in nearby text
-        const siblings = parent.getChildren()
-        const textContent = siblings
-          .filter((n): n is TextNode => $isTextNode(n))
-          .map(n => n.getTextContent())
-          .join('')
-
-        const word = node.getWord().toLowerCase()
-        if (!textContent.toLowerCase().includes(word)) {
-          // Word no longer exists, remove the decorator
-          node.remove()
-        }
-      })
-    )
-
-      // Listen for stress mark interactions
-      handleStressMarkEvent = (event: Event) => {
-        if (!onStressMarkInteraction) return
-
-        const customEvent = event as CustomEvent
-        const { word, syllableIndex, nodeKey, x, y } = customEvent.detail
-
-        onStressMarkInteraction({ word, syllableIndex, nodeKey, x, y })
-      }
-
-      // Add event listeners for stress mark interactions
-      const rootElement = editor.getRootElement()
-      if (rootElement && onStressMarkInteraction) {
-        rootElement.addEventListener('stressMarkClick', handleStressMarkEvent)
-        rootElement.addEventListener('stressMarkContextMenu', handleStressMarkEvent)
-      }
-    }, 0) // Defer to next tick
-
-    return () => {
-      clearTimeout(registrationTimeout)
-      if (removeTransform) {
-        removeTransform()
-      }
-      const rootElement = editor.getRootElement()
-      if (rootElement && handleStressMarkEvent) {
-        rootElement.removeEventListener('stressMarkClick', handleStressMarkEvent)
-        rootElement.removeEventListener('stressMarkContextMenu', handleStressMarkEvent)
-      }
-    }
-  }, [editor, enabled, autoDetectionEnabled, onStressMarkInteraction])
-
-  return null
+interface StressMarkOverlay {
+  nodeKey: string
+  word: string
+  pattern: StressPattern
+  rect: DOMRect
 }
 
 /**
- * Extract words and their positions from text
+ * Plugin that renders stress marks as CSS overlays without fragmenting text
+ * This maintains text integrity while providing visual stress indicators
+ *
+ * Architecture Note:
+ * This plugin uses React Portals to render stress marks directly to document.body.
+ * This is necessary because the Lexical editor or its containers may have CSS transforms,
+ * filters, or other properties that create new stacking contexts, which would break
+ * the fixed positioning of stress marks. By using a portal, we ensure stress marks
+ * are positioned correctly relative to the viewport while maintaining the plugin's
+ * integration with Lexical's update cycle and state management.
+ *
+ * This approach is compatible with future Lexical features as it:
+ * - Doesn't modify the editor's DOM structure
+ * - Maintains proper React component lifecycle
+ * - Responds correctly to Lexical state updates
+ * - Preserves text node integrity for other plugins
+ */
+export function StressMarkDecoratorPlugin({
+  enabled = true,
+  onStressMarkInteraction
+}: StressMarkDecoratorPluginProps) {
+  const [editor] = useLexicalComposerContext()
+  const [overlays, setOverlays] = useState<StressMarkOverlay[]>([])
+  const [pluginId] = useState(() => Math.random().toString(36).substr(2, 9))
+
+  useEffect(() => {
+    console.log(`🎨 STRESS-DECORATOR [${pluginId}]: Plugin mounted, enabled:`, enabled)
+
+    // Add manual trigger for testing - press F1 to force update
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F1') {
+        e.preventDefault()
+        console.log('🔥 MANUAL TRIGGER: Forcing stress overlay update')
+        updateStressOverlays()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    // Only allow one plugin instance to be active
+    if (!enabled) {
+      setOverlays([])
+      if (activePluginId === pluginId) {
+        activePluginId = null
+      }
+      return
+    }
+
+    if (!activePluginId) {
+      activePluginId = pluginId
+      console.log(`🏆 STRESS-DECORATOR [${pluginId}]: Became the active plugin`)
+    } else if (activePluginId !== pluginId) {
+      console.log(`⏸️ STRESS-DECORATOR [${pluginId}]: Another plugin is active (${activePluginId}), staying passive`)
+      setOverlays([]) // Clear overlays from inactive plugin
+      return
+    }
+
+    let updateTimeout: NodeJS.Timeout | null = null
+    let scrollTimeout: NodeJS.Timeout | null = null
+
+    const updateStressOverlays = () => {
+      if (updateTimeout) {
+        clearTimeout(updateTimeout)
+      }
+
+      // Debounce overlay updates to avoid excessive DOM queries
+      updateTimeout = setTimeout(() => {
+        requestAnimationFrame(() => {
+          const newOverlays: StressMarkOverlay[] = []
+
+          // Simple approach: use viewport coordinates directly
+
+          editor.getEditorState().read(() => {
+            const root = $getRoot()
+
+            function processNode(node: unknown) {
+              if ($isSectionParagraphNode(node)) {
+                const children = node.getChildren()
+                children.forEach((child: unknown) => {
+                  processTextChild(child)
+                })
+              } else if (node?.getType?.() === 'paragraph') {
+                // Also process regular Lexical paragraphs (unsectioned text)
+                const children = node.getChildren()
+                children.forEach((child: unknown) => {
+                  processTextChild(child)
+                })
+              } else {
+                const children = node.getChildren?.() || []
+                children.forEach(processNode)
+              }
+            }
+
+            function processTextChild(child: unknown) {
+                  const text = child?.getTextContent?.() || 'N/A'
+                  if ($isStressedTextNode(child)) {
+                    const stressPatterns = child.getAllStressPatterns()
+                    console.log(`✅ FOUND: StressedTextNode "${text}" with ${stressPatterns.size} patterns`)
+                    if (stressPatterns.size === 0) {
+                      console.log(`⚠️  NO PATTERNS: StressedTextNode "${text}" has no stress patterns - needs auto-detection`)
+                    }
+                  } else {
+                    console.log(`❌ SKIP: ${child?.constructor?.name} "${text}" (not StressedTextNode)`)
+                  }
+
+                  if ($isStressedTextNode(child)) {
+                    const stressPatterns = child.getAllStressPatterns()
+                    if (stressPatterns.size > 0) {
+                      // Find the DOM element for this node
+                      const domElement = editor.getElementByKey(child.getKey())
+                      console.log(`🔍 STRESS-DECORATOR: DOM element found:`, !!domElement)
+                      if (domElement) {
+                        const elementRect = domElement.getBoundingClientRect()
+                        console.log(`🔍 STRESS-DECORATOR: Element "${child.getTextContent()}" rect:`, elementRect)
+                      }
+                      if (domElement) {
+                        const text = child.getTextContent()
+                        const words = extractWordsWithPositions(text)
+                        console.log(`🔍 STRESS-DECORATOR: Found ${words.length} words:`, words.map(w => w.word))
+
+                        words.forEach(({ word, startIndex, endIndex }) => {
+                          const cleanWord = word.replace(/[^a-zA-Z']/g, '').toLowerCase()
+                          const pattern = stressPatterns.get(cleanWord)
+                          console.log(`🔍 STRESS-DECORATOR: Word "${cleanWord}" has pattern:`, !!pattern)
+
+                          if (pattern && pattern.syllables.length > 0) {
+                            // Calculate word position within the text
+                            const rect = getWordRect(domElement, startIndex, endIndex)
+                            console.log(`🔍 STRESS-DECORATOR: Word "${cleanWord}" rect:`, rect ? `{left: ${rect.left}, top: ${rect.top}, width: ${rect.width}}` : 'null')
+                            if (rect) {
+                              // Use viewport coordinates directly (simpler approach)
+                              console.log(`📍 VIEWPORT: Using direct coordinates for "${cleanWord}" at (${rect.left}, ${rect.top})`)
+
+                              const isDuplicate = newOverlays.some(existing => {
+                                return existing.nodeKey === child.getKey() &&
+                                       existing.word === cleanWord &&
+                                       Math.abs(existing.rect.left - rect.left) < 5 &&
+                                       Math.abs(existing.rect.top - rect.top) < 5
+                              })
+
+                              if (!isDuplicate) {
+                                newOverlays.push({
+                                  nodeKey: child.getKey(),
+                                  word: cleanWord,
+                                  pattern,
+                                  rect
+                                })
+                                console.log(`✅ OVERLAY: "${cleanWord}" → rect(${rect.left.toFixed(1)}, ${rect.top.toFixed(1)}) wordRect should be ${getWordRect(domElement, startIndex, endIndex)?.top.toFixed(1)}`)
+                              }
+                            }
+                          }
+                        })
+                      }
+                    }
+                  }
+            }
+
+            processNode(root)
+          })
+
+          console.log(`🎨 STRESS-DECORATOR [${pluginId}]: Updated overlays:`, newOverlays.length)
+          setOverlays(newOverlays)
+        })
+      }, 100)
+    }
+
+    // Listen for editor changes
+    const removeListener = editor.registerUpdateListener(({ tags }) => {
+      // Only log important updates
+      if (tags.has('auto-stress-detection') || tags.has('stable-text-conversion')) {
+        console.log('🔄 STRESS-DECORATOR: Important update with tags:', Array.from(tags))
+      }
+      // Update overlays for any content change, but avoid recursive updates
+      if (!tags.has('stress-decorator-update')) {
+        updateStressOverlays()
+      }
+    })
+
+    // Handle scroll events to update overlay positions
+    const handleScroll = () => {
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout)
+      }
+
+      // Debounce scroll updates to avoid excessive recalculations
+      scrollTimeout = setTimeout(() => {
+        console.log('📜 STRESS-DECORATOR: Scroll detected, updating overlay positions')
+        updateStressOverlays()
+      }, 50) // Short delay for smooth scrolling
+    }
+
+    // Add scroll event listeners to relevant containers
+    const editorElement = editor.getRootElement()
+    const parentScrollContainer = editorElement?.closest('[class*="overflow"]') // Find scrollable parent
+
+    // Set up ResizeObserver to handle layout changes
+    let resizeObserver: ResizeObserver | null = null
+
+    if (editorElement) {
+      window.addEventListener('scroll', handleScroll, { passive: true })
+      editorElement.addEventListener('scroll', handleScroll, { passive: true })
+
+      if (parentScrollContainer && parentScrollContainer !== editorElement) {
+        parentScrollContainer.addEventListener('scroll', handleScroll, { passive: true })
+      }
+
+      // Watch for size changes that might affect text positioning
+      resizeObserver = new ResizeObserver(() => {
+        console.log('📏 STRESS-DECORATOR: Resize detected, updating overlay positions')
+        updateStressOverlays()
+      })
+
+      resizeObserver.observe(editorElement)
+    }
+
+    // Initial overlay update
+    updateStressOverlays()
+
+    return () => {
+      // Reset active plugin if this was the active one
+      if (activePluginId === pluginId) {
+        activePluginId = null
+        console.log(`🏁 STRESS-DECORATOR [${pluginId}]: Active plugin unmounted, resetting`)
+      }
+
+      removeListener()
+      if (updateTimeout) {
+        clearTimeout(updateTimeout)
+      }
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout)
+      }
+
+      // Remove scroll event listeners and ResizeObserver
+      if (editorElement) {
+        window.removeEventListener('scroll', handleScroll)
+        editorElement.removeEventListener('scroll', handleScroll)
+
+        if (parentScrollContainer && parentScrollContainer !== editorElement) {
+          parentScrollContainer.removeEventListener('scroll', handleScroll)
+        }
+      }
+
+      if (resizeObserver) {
+        resizeObserver.disconnect()
+      }
+
+      document.removeEventListener('keydown', handleKeyDown)
+
+      setOverlays([])
+    }
+  }, [editor, enabled, pluginId])
+
+  // Create a portal container for stress marks
+  // This ensures marks render outside any transformed containers while maintaining proper React lifecycle
+  const portalContainer = typeof document !== 'undefined' ? document.body : null
+
+  if (!portalContainer || overlays.length === 0) {
+    return null
+  }
+
+  // Use React Portal to render stress marks directly to body
+  // This avoids CSS transform issues while keeping the plugin architecture clean
+  return ReactDOM.createPortal(
+    <div
+      className="lexical-stress-marks-portal"
+      data-lexical-stress-marks="true"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: 0,
+        height: 0,
+        pointerEvents: 'none',
+        zIndex: 1000
+      }}
+    >
+      {overlays.map((overlay, index) => {
+        console.log(`🎭 PLUGIN-${pluginId}: Rendering overlay ${index} "${overlay.word}"`)
+        return (
+          <StressMarkOverlay
+            key={`${overlay.nodeKey}-${overlay.word}-${index}`}
+            overlay={overlay}
+            onInteraction={onStressMarkInteraction}
+          />
+        )
+      })}
+    </div>,
+    portalContainer
+  )
+}
+
+/**
+ * Individual stress mark overlay component
+ */
+function StressMarkOverlay({
+  overlay,
+  onInteraction
+}: {
+  overlay: StressMarkOverlay
+  onInteraction?: StressMarkDecoratorPluginProps['onStressMarkInteraction']
+}) {
+  const { word, pattern, rect } = overlay
+
+  // Calculate stress mark positions for each syllable
+
+  const stressMarks = pattern.syllables.map((syllable, index) => {
+    const mark = syllable.stressed ? '´' : '˘'
+    const syllableWidth = rect.width / pattern.syllables.length
+    const x = rect.left + (index * syllableWidth) + (syllableWidth / 2)
+    const y = rect.top - 5
+
+
+    return (
+      <span
+        key={index}
+        className="stress-mark"
+        style={{
+          position: 'fixed', // Fixed positioning relative to viewport
+          left: `${x}px`, // Back to real coordinates
+          top: `${y}px`,
+          fontSize: '14px',
+          fontWeight: 'bold',
+          color: syllable.stressed ? '#dc2626' : '#6b7280', // Red for stressed, gray for unstressed
+          pointerEvents: 'auto',
+          cursor: 'pointer',
+          zIndex: 1001,
+          userSelect: 'none',
+          textAlign: 'center',
+          transform: 'translateX(-50%)', // Center horizontally on the x coordinate
+          backgroundColor: 'transparent', // No background for cleaner look
+          textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)', // White shadow for visibility on dark backgrounds
+          // Temporary debug: add a small label to identify which word this mark belongs to
+          fontSize: '10px'
+        }}
+        onClick={(e) => {
+          if (onInteraction) {
+            // Use click coordinates directly since we're using fixed positioning
+            onInteraction({
+              word,
+              syllableIndex: index,
+              nodeKey: overlay.nodeKey,
+              x: e.clientX,
+              y: e.clientY
+            })
+          }
+        }}
+      >
+        {mark}
+      </span>
+    )
+  }).filter(Boolean) // Remove null values from bounds checking
+
+  return <>{stressMarks}</>
+}
+
+/**
+ * Extract words with their positions in the text
  */
 interface WordInfo {
   word: string
@@ -160,88 +397,55 @@ interface WordInfo {
   endIndex: number
 }
 
-function extractWords(text: string): WordInfo[] {
+function extractWordsWithPositions(text: string): WordInfo[] {
   const words: WordInfo[] = []
   const wordRegex = /\b[\w']+\b/g
   let match
 
   while ((match = wordRegex.exec(text)) !== null) {
-    // Clean the word for pattern matching (remove punctuation, convert to lowercase)
-    const cleanWord = match[0].replace(/[^a-zA-Z']/g, '').toLowerCase()
-    if (cleanWord.length > 0) {
-      words.push({
-        word: match[0], // Keep original word for display
-        startIndex: match.index,
-        endIndex: match.index + match[0].length,
-      })
-    }
+    words.push({
+      word: match[0],
+      startIndex: match.index,
+      endIndex: match.index + match[0].length
+    })
   }
 
   return words
 }
 
 /**
- * Create replacement nodes (mix of text and decorators) for a stressed text node
+ * Get the DOM rectangle for a specific word within a text element
  */
-function createReplacementNodes(
-  originalText: string,
-  words: WordInfo[],
-  stressPatterns: Map<string, StressPattern>,
-  originalNode: StressedTextNode
-) {
-  const replacementNodes = []
-  let currentIndex = 0
-
-  for (const wordInfo of words) {
-    const { word, startIndex, endIndex } = wordInfo
-    const cleanWord = word.replace(/[^a-zA-Z']/g, '').toLowerCase()
-    const pattern = stressPatterns.get(cleanWord)
-
-    // Add any text before this word
-    if (startIndex > currentIndex) {
-      const beforeText = originalText.slice(currentIndex, startIndex)
-      if (beforeText) {
-        const textNode = $createTextNode(beforeText)
-        // Copy formatting from original node
-        textNode.setFormat(originalNode.getFormat())
-        textNode.setDetail(originalNode.getDetail())
-        textNode.setMode(originalNode.getMode())
-        textNode.setStyle(originalNode.getStyle())
-        replacementNodes.push(textNode)
-      }
+function getWordRect(element: Element, startIndex: number, endIndex: number): DOMRect | null {
+  try {
+    // Create a range for the specific word
+    const textNode = element.firstChild
+    if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
+      console.warn(`getWordRect: No text node found in element`)
+      return null
     }
 
-    if (pattern) {
-      // Create stress decorator for this word
-      const decoratorNode = $createStressMarkDecoratorNode(word, pattern)
-      replacementNodes.push(decoratorNode)
-    } else {
-      // Create regular text node for words without stress patterns
-      const wordTextNode = $createTextNode(word)
-      // Copy formatting from original node
-      wordTextNode.setFormat(originalNode.getFormat())
-      wordTextNode.setDetail(originalNode.getDetail())
-      wordTextNode.setMode(originalNode.getMode())
-      wordTextNode.setStyle(originalNode.getStyle())
-      replacementNodes.push(wordTextNode)
-    }
+    // Debug: log what we're trying to select
+    const fullText = textNode.textContent || ''
+    const selectedText = fullText.substring(startIndex, endIndex)
+    console.log(`🔍 getWordRect: Selecting "${selectedText}" from "${fullText}" (${startIndex}-${endIndex})`)
 
-    currentIndex = endIndex
+    const range = document.createRange()
+    range.setStart(textNode, startIndex)
+    range.setEnd(textNode, endIndex)
+
+    const rect = range.getBoundingClientRect()
+    console.log(`🔍 getWordRect: Range rect for "${selectedText}":`, rect)
+
+    // Also get the full element rect for comparison
+    const elementRect = element.getBoundingClientRect()
+    console.log(`🔍 getWordRect: Full element rect:`, elementRect)
+
+    range.detach()
+
+    return rect
+  } catch (error) {
+    console.warn('Failed to get word rect:', error)
+    return null
   }
-
-  // Add any remaining text after the last word
-  if (currentIndex < originalText.length) {
-    const afterText = originalText.slice(currentIndex)
-    if (afterText) {
-      const textNode = $createTextNode(afterText)
-      // Copy formatting from original node
-      textNode.setFormat(originalNode.getFormat())
-      textNode.setDetail(originalNode.getDetail())
-      textNode.setMode(originalNode.getMode())
-      textNode.setStyle(originalNode.getStyle())
-      replacementNodes.push(textNode)
-    }
-  }
-
-  return replacementNodes
 }

@@ -128,9 +128,9 @@ export class StressedTextNode extends TextNode {
   // Set stress pattern for a word (manual override)
   setStressPattern(word: string, pattern: StressPattern): this {
     const self = this.getWritable()
-    self.__stressPatterns.set(word.toLowerCase(), { 
-      ...pattern, 
-      overridden: true 
+    self.__stressPatterns.set(word.toLowerCase(), {
+      ...pattern,
+      overridden: true
     })
     return self
   }
@@ -139,7 +139,7 @@ export class StressedTextNode extends TextNode {
   toggleSyllableStress(word: string, syllableIndex: number): this {
     const self = this.getWritable()
     const pattern = self.__stressPatterns.get(word.toLowerCase())
-    
+
     if (pattern && pattern.syllables[syllableIndex]) {
       const newSyllables = [...pattern.syllables]
       newSyllables[syllableIndex] = {
@@ -147,14 +147,14 @@ export class StressedTextNode extends TextNode {
         stressed: !newSyllables[syllableIndex].stressed,
         overridden: true,
       }
-      
+
       self.__stressPatterns.set(word.toLowerCase(), {
         ...pattern,
         syllables: newSyllables,
         overridden: true,
       })
     }
-    
+
     return self
   }
 
@@ -167,10 +167,20 @@ export class StressedTextNode extends TextNode {
 
     words.forEach(word => {
       const cleanWord = word.replace(/[^\w']/g, '') // Remove punctuation but keep apostrophes
-      if (cleanWord && !self.__stressPatterns.has(cleanWord.toLowerCase())) {
+      const lowerWord = cleanWord.toLowerCase()
+
+      if (cleanWord && !self.__stressPatterns.has(lowerWord)) {
+        // Only analyze words that don't already have patterns
         const pattern = analyzeWordStress(cleanWord)
         if (pattern) {
-          self.__stressPatterns.set(cleanWord.toLowerCase(), pattern)
+          self.__stressPatterns.set(lowerWord, pattern)
+        }
+      } else if (cleanWord && self.__stressPatterns.has(lowerWord)) {
+        // Skip words that already have patterns (including user overrides)
+        const existingPattern = self.__stressPatterns.get(lowerWord)
+        if (existingPattern?.overridden) {
+          // Don't re-analyze words with user overrides
+          return
         }
       }
     })
@@ -217,13 +227,13 @@ export class StressedTextNode extends TextNode {
 
   updateDOM(prevNode: this, dom: HTMLElement, config: EditorConfig): boolean {
     const prevNeedsUpdate = super.updateDOM(prevNode, dom, config)
-    
+
     // No need to handle stress pattern changes in DOM - decorators handle this
     // Just update text content if needed
     if (dom.textContent !== this.__text) {
       dom.textContent = this.__text
     }
-    
+
     return prevNeedsUpdate
   }
 
@@ -296,39 +306,95 @@ function analyzeWordStress(word: string): StressPattern | null {
  * In practice, you'd use a more sophisticated phonetic algorithm
  */
 function syllabify(word: string): string[] {
-  const cleanWord = word.toLowerCase()
-  
-  // Very basic syllable detection based on vowel clusters
+  const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '')
+
+  if (cleanWord.length === 0) return []
+  if (cleanWord.length <= 2) return [cleanWord] // Short words are usually one syllable
+
+  // Special cases for common single-syllable words that might be mis-syllabified
+  const singleSyllableWords = ['new', 'are', 'you', 'the', 'and', 'but', 'can', 'way', 'how', 'why', 'now', 'our', 'out', 'use', 'her', 'his', 'she', 'see', 'two', 'may', 'say', 'day', 'try', 'oil', 'eye']
+  if (singleSyllableWords.includes(cleanWord)) {
+    return [cleanWord]
+  }
+
   const vowels = 'aeiouy'
-  const syllables: string[] = []
-  let currentSyllable = ''
-  let lastWasVowel = false
-  
+
+  // Find vowel groups (consecutive vowels count as one sound)
+  const vowelGroups: { start: number; end: number; text: string }[] = []
+  let inVowelGroup = false
+  let groupStart = -1
+
   for (let i = 0; i < cleanWord.length; i++) {
-    const char = cleanWord[i]
-    const isVowel = vowels.includes(char)
-    
-    if (isVowel && !lastWasVowel && currentSyllable.length > 0) {
-      // Start of new syllable
-      syllables.push(currentSyllable)
-      currentSyllable = char
-    } else {
-      currentSyllable += char
+    const isVowel = vowels.includes(cleanWord[i])
+
+    if (isVowel && !inVowelGroup) {
+      // Start of new vowel group
+      inVowelGroup = true
+      groupStart = i
+    } else if (!isVowel && inVowelGroup) {
+      // End of vowel group
+      vowelGroups.push({
+        start: groupStart,
+        end: i - 1,
+        text: cleanWord.slice(groupStart, i)
+      })
+      inVowelGroup = false
     }
-    
-    lastWasVowel = isVowel
   }
-  
-  if (currentSyllable) {
-    syllables.push(currentSyllable)
+
+  // Handle final vowel group
+  if (inVowelGroup && groupStart !== -1) {
+    vowelGroups.push({
+      start: groupStart,
+      end: cleanWord.length - 1,
+      text: cleanWord.slice(groupStart)
+    })
   }
-  
-  // Handle edge cases (e.g., silent e)
-  if (syllables.length === 0) {
-    return [word]
+
+  // If no vowel groups found, treat as one syllable
+  if (vowelGroups.length === 0) {
+    return [cleanWord]
   }
-  
-  return syllables
+
+  // If only one vowel group, check for silent e
+  if (vowelGroups.length === 1) {
+    // Check for silent e pattern (consonant + vowel + consonant + e)
+    if (cleanWord.endsWith('e') && cleanWord.length > 3 && !vowels.includes(cleanWord[cleanWord.length - 2])) {
+      return [cleanWord] // Silent e - still one syllable
+    }
+    return [cleanWord]
+  }
+
+  // Split word based on vowel groups
+  const syllables: string[] = []
+
+  for (let i = 0; i < vowelGroups.length; i++) {
+    const currentGroup = vowelGroups[i]
+    const nextGroup = vowelGroups[i + 1]
+
+    if (i === 0) {
+      // First syllable: from start to midpoint between first and second vowel group
+      if (nextGroup) {
+        const splitPoint = Math.floor((currentGroup.end + nextGroup.start) / 2) + 1
+        syllables.push(cleanWord.slice(0, splitPoint))
+      } else {
+        syllables.push(cleanWord)
+      }
+    } else if (i === vowelGroups.length - 1) {
+      // Last syllable: from previous split to end
+      const prevSplit = Math.floor((vowelGroups[i - 1].end + currentGroup.start) / 2) + 1
+      syllables.push(cleanWord.slice(prevSplit))
+    } else {
+      // Middle syllables
+      const prevSplit = Math.floor((vowelGroups[i - 1].end + currentGroup.start) / 2) + 1
+      const nextSplit = Math.floor((currentGroup.end + nextGroup.start) / 2) + 1
+      syllables.push(cleanWord.slice(prevSplit, nextSplit))
+    }
+  }
+
+  // Clean up empty syllables and ensure we have at least one
+  const cleanSyllables = syllables.filter(s => s.length > 0)
+  return cleanSyllables.length > 0 ? cleanSyllables : [cleanWord]
 }
 
 /**
@@ -336,13 +402,13 @@ function syllabify(word: string): string[] {
  */
 /* function mapsEqual<K, V>(map1: Map<K, V>, map2: Map<K, V>): boolean {
   if (map1.size !== map2.size) return false
-  
+
   for (const [key, value] of map1) {
     if (!map2.has(key) || map2.get(key) !== value) {
       return false
     }
   }
-  
+
   return true
 } */
 
@@ -379,7 +445,7 @@ function patchStressConversion(
       forChild: (lexicalNode, parent) => {
         const originalForChild = originalOutput?.forChild ?? ((x) => x)
         const result = originalForChild(lexicalNode, parent)
-        
+
         if ($isTextNode(result) && stressPatterns.size > 0) {
           const stressedNode = new StressedTextNode(
             result.getTextContent(),
@@ -390,7 +456,7 @@ function patchStressConversion(
           stressedNode.setDetail(result.getDetail())
           stressedNode.setMode(result.getMode())
           stressedNode.setStyle(result.getStyle())
-          
+
           return stressedNode
         }
         return result
@@ -404,22 +470,22 @@ function patchStressConversion(
  */
 function extractStressPatternsFromDOM(element: HTMLElement): Map<string, StressPattern> {
   const patterns = new Map<string, StressPattern>()
-  
+
   const wordContainers = element.querySelectorAll('.word-stress-container')
-  
+
   wordContainers.forEach((container) => {
     const word = container.getAttribute('data-word')
     if (!word) return
-    
+
     const syllableElements = container.querySelectorAll('.syllable')
     const syllables: Syllable[] = []
-    
+
     syllableElements.forEach((syllableEl, index) => {
       const text = syllableEl.textContent || ''
       const stressed = syllableEl.classList.contains('stressed')
       const overridden = syllableEl.classList.contains('user-overridden')
       const confidence = parseFloat(syllableEl.getAttribute('data-confidence') || '0.6')
-      
+
       syllables.push({
         text,
         stressed,
@@ -428,7 +494,7 @@ function extractStressPatternsFromDOM(element: HTMLElement): Map<string, StressP
         overridden,
       })
     })
-    
+
     if (syllables.length > 0) {
       patterns.set(word, {
         syllables,
@@ -436,6 +502,6 @@ function extractStressPatternsFromDOM(element: HTMLElement): Map<string, StressP
       })
     }
   })
-  
+
   return patterns
 }
