@@ -7,6 +7,7 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
   $getRoot,
+  $createTextNode,
   type LexicalEditor,
   $getSelection,
   $isRangeSelection,
@@ -23,11 +24,12 @@ import { SyllableNode } from './lexical/nodes/SyllableNode'
 import { RhymeNode } from './lexical/nodes/RhymeNode'
 import { SectionParagraphNode, $createSectionParagraphNode, $isSectionParagraphNode } from './lexical/nodes/SectionParagraphNode'
 import { SectionTagNode } from './nodes/SectionTagNode'
-import { StressedTextNode, $createStressedTextNode } from './lexical/nodes/StressedTextNode'
+import { StressedTextNode, $createStressedTextNode, $isStressedTextNode } from './lexical/nodes/StressedTextNode'
 import { StressMarkDecoratorNode } from './lexical/nodes/StressMarkDecoratorNode'
 import { StressMarkDecoratorPlugin } from './lexical/plugins/StressMarkDecoratorPlugin'
 import { AutoStressDetectionPlugin } from './lexical/plugins/AutoStressDetectionPlugin'
 import { StableTextToStressedPlugin } from './lexical/plugins/StableTextToStressedPlugin'
+import { SyllableCountDecoratorPlugin } from './lexical/plugins/SyllableCountDecoratorPlugin'
 import StressContextMenu from './lexical/ui/StressContextMenu'
 // import SectionHeaderPlugin from './plugins/SectionHeaderPlugin' // TODO: Re-enable when test environment supports full Lexical
 // TODO: Re-enable when plugins are fully TypeScript compliant
@@ -930,6 +932,9 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
                 enabled={true}
                 debounceMs={3000}
               />
+              <SyllableCountDecoratorPlugin
+                enabled={true}
+              />
               {/* TODO: Re-enable when plugins are fully TypeScript compliant */}
               {/* <SectionDetectionPlugin /> */}
               {/* <ProsodyAnalysisPlugin /> */}
@@ -948,14 +953,69 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
           />
         )}
 
-        {/* View Source Debug - Subtle Button */}
-        <button
-          onClick={toggleDebugView}
-          className="absolute top-4 right-4 z-10 px-2 py-1 text-xs font-mono rounded-md transition-all duration-200 bg-white/80 text-neutral-500 hover:text-neutral-700 hover:bg-white/95 border border-neutral-200/50 hover:border-neutral-300/70 backdrop-blur-sm opacity-60 hover:opacity-100"
-          title="View Lexical JSON (Debug)"
-        >
-          {showSourceDebug ? '🔍 Hide' : '🔍'}
-        </button>
+        {/* Compact Toolbar */}
+        <div className="absolute top-4 right-4 z-10 flex gap-1">
+          {/* Stress Refresh Button */}
+          <button
+            onClick={() => {
+              if (editorRef.current) {
+                console.log('🔄 REFRESH: Clearing all stress data and forcing re-evaluation')
+                editorRef.current.update(() => {
+                  // Get all StressedTextNodes and convert them back to regular TextNodes
+                  const root = $getRoot()
+                  const allNodes = root.getAllTextNodes()
+
+                  allNodes.forEach(node => {
+                    if ($isStressedTextNode(node)) {
+                      // Create a new regular TextNode with the same text content
+                      const textContent = node.getTextContent()
+                      const newTextNode = $createTextNode(textContent)
+
+                      // Copy formatting
+                      newTextNode.setFormat(node.getFormat())
+                      newTextNode.setDetail(node.getDetail())
+                      newTextNode.setMode(node.getMode())
+                      newTextNode.setStyle(node.getStyle())
+
+                      // Replace the StressedTextNode
+                      node.replace(newTextNode)
+                      console.log(`🔄 REFRESH: Converted StressedTextNode back to TextNode: "${textContent.substring(0, 15)}..."`)
+                    }
+                  })
+                }, { tag: 'stress-refresh' })
+
+                // Force re-evaluation after a short delay
+                setTimeout(() => {
+                  console.log('⏰ REFRESH: Triggering forced re-evaluation')
+                  if (editorRef.current) {
+                    editorRef.current.update(() => {
+                      // Trigger a dummy update to mark content as dirty
+                      const root = $getRoot()
+                      const firstChild = root.getFirstChild()
+                      if (firstChild) {
+                        const key = firstChild.getKey()
+                        console.log(`🎯 REFRESH: Marking node ${key} as dirty for re-evaluation`)
+                      }
+                    }, { tag: 'force-stress-reeval' })
+                  }
+                }, 100)
+              }
+            }}
+            className="px-2 py-1 text-xs font-mono rounded transition-all duration-200 bg-blue-50 text-blue-600 hover:text-blue-700 hover:bg-blue-100 border border-blue-200/50 hover:border-blue-300/70 backdrop-blur-sm opacity-70 hover:opacity-100"
+            title="Clear all stress data and re-evaluate with new function-based detection"
+          >
+            🔄
+          </button>
+
+          {/* View Source Debug Button */}
+          <button
+            onClick={toggleDebugView}
+            className="px-2 py-1 text-xs font-mono rounded transition-all duration-200 bg-white/80 text-neutral-500 hover:text-neutral-700 hover:bg-white/95 border border-neutral-200/50 hover:border-neutral-300/70 backdrop-blur-sm opacity-70 hover:opacity-100"
+            title="View Lexical JSON (Debug)"
+          >
+            {showSourceDebug ? '👁️' : '🔍'}
+          </button>
+        </div>
 
         {/* Debug Modal */}
         {showSourceDebug && (

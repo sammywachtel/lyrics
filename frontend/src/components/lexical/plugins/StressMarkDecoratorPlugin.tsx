@@ -367,9 +367,22 @@ function StressMarkOverlay({
           // Temporary debug: add a small label to identify which word this mark belongs to
           fontSize: '10px'
         }}
-        onClick={(e) => {
+        onContextMenu={(e) => {
+          e.preventDefault() // Prevent browser context menu
           if (onInteraction) {
-            // Use click coordinates directly since we're using fixed positioning
+            // Use right-click coordinates for stress context menu
+            onInteraction({
+              word,
+              syllableIndex: index,
+              nodeKey: overlay.nodeKey,
+              x: e.clientX,
+              y: e.clientY
+            })
+          }
+        }}
+        onClick={(e) => {
+          // For debugging - left click can also trigger menu
+          if (e.shiftKey && onInteraction) {
             onInteraction({
               word,
               syllableIndex: index,

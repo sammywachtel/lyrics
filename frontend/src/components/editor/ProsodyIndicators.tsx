@@ -19,17 +19,17 @@ export const ProsodyIndicators: React.FC<ProsodyIndicatorsProps> = ({
 }) => {
   // Group lines by their rhyme scheme letter
   const getRhymeLetter = (lineIndex: number): string => {
-    const connection = rhymeConnections.find(conn => 
+    const connection = rhymeConnections.find(conn =>
       conn.lines.includes(lineIndex)
     );
-    
+
     if (!connection) return '';
-    
+
     // Assign letters based on connection groups
-    const sortedConnections = [...rhymeConnections].sort((a, b) => 
+    const sortedConnections = [...rhymeConnections].sort((a, b) =>
       Math.min(...a.lines) - Math.min(...b.lines)
     );
-    
+
     const connectionIndex = sortedConnections.indexOf(connection);
     return String.fromCharCode('A'.charCodeAt(0) + connectionIndex);
   };
@@ -39,27 +39,27 @@ export const ProsodyIndicators: React.FC<ProsodyIndicatorsProps> = ({
     const tips = [`Line ${line.lineNumber}: ${line.endingType} ending`];
     tips.push(`Syllables: ${line.syllableCount}`);
     tips.push(`Ending: "${line.endingWord}"`);
-    
+
     if (line.endingType === 'stable') {
       tips.push('Tip: Stable endings create resolution and closure');
     } else if (line.endingType === 'unstable') {
       tips.push('Tip: Unstable endings create movement and flow');
     }
-    
+
     return tips.join('\n');
   };
 
   // Get tooltip content for rhymes
   const getRhymeTooltip = (lineIndex: number): string => {
-    const connection = rhymeConnections.find(conn => 
+    const connection = rhymeConnections.find(conn =>
       conn.lines.includes(lineIndex)
     );
-    
+
     if (!connection) return 'No rhyme detected';
-    
+
     const otherLines = connection.lines.filter(i => i !== lineIndex);
     const rhymeType = connection.type.charAt(0).toUpperCase() + connection.type.slice(1);
-    
+
     return `${rhymeType} rhyme with line${otherLines.length > 1 ? 's' : ''} ${otherLines.map(i => i + 1).join(', ')}`;
   };
 
@@ -68,7 +68,7 @@ export const ProsodyIndicators: React.FC<ProsodyIndicatorsProps> = ({
       {lines.map((line, index) => {
         const isCurrentLine = currentLineIndex === index;
         const rhymeLetter = getRhymeLetter(index);
-        
+
         return (
           <div
             key={index}
@@ -78,16 +78,21 @@ export const ProsodyIndicators: React.FC<ProsodyIndicatorsProps> = ({
             {showStability && (
               <div
                 className="line-number-indicator"
-                style={{ 
+                style={{
                   borderLeftColor: getStabilityColor(line.endingType === 'neutral' ? 'mixed' : line.endingType),
                   backgroundColor: isCurrentLine ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
                 }}
                 title={getStabilityTooltip(line)}
               >
-                <span className="line-number">{line.lineNumber}</span>
+                <div className="line-number-container">
+                  <span className="line-number">{line.lineNumber}</span>
+                  <span className="syllable-count" title={`${line.syllableCount} total syllables, ${line.stressedSyllableCount} stressed syllables. Stressed syllables determine line length in songwriting.`}>
+                    ({line.syllableCount}/{line.stressedSyllableCount})
+                  </span>
+                </div>
               </div>
             )}
-            
+
             {/* Rhyme scheme badge */}
             {showRhymes && rhymeLetter && (
               <div
@@ -98,13 +103,13 @@ export const ProsodyIndicators: React.FC<ProsodyIndicatorsProps> = ({
                 {rhymeLetter}
               </div>
             )}
-            
+
             {/* Line content with subtle indicators */}
             <div className="line-content">
               <span className={`line-text ${line.endingType}-ending`}>
                 {line.text}
               </span>
-              
+
               {/* Syllable count indicator */}
               <span className="syllable-count" title={`${line.syllableCount} syllables`}>
                 {line.syllableCount}
@@ -113,27 +118,27 @@ export const ProsodyIndicators: React.FC<ProsodyIndicatorsProps> = ({
           </div>
         );
       })}
-      
+
       {/* Rhyme connection lines (optional advanced feature) */}
       {showRhymes && (
         <svg className="rhyme-connections" aria-hidden="true">
           {rhymeConnections.map((connection, index) => {
             if (connection.lines.length < 2) return null;
-            
+
             // Draw subtle connection lines between rhyming lines
             const color = getRhymeColor(String.fromCharCode('A'.charCodeAt(0) + index));
-            
+
             return connection.lines.slice(1).map((lineIndex, i) => {
               const fromLine = connection.lines[i];
               const toLine = lineIndex;
-              
+
               // Simple bezier curve between lines
               const y1 = fromLine * 24 + 12;
               const y2 = toLine * 24 + 12;
               const x1 = 0;
               const x2 = 20;
               const midY = (y1 + y2) / 2;
-              
+
               return (
                 <path
                   key={`${index}-${i}`}
@@ -185,7 +190,7 @@ export const SectionStabilitySummary: React.FC<{
     <div className="section-stability-summary">
       <div className="section-header">
         <span className="section-name">{sectionName}</span>
-        <span 
+        <span
           className="stability-icon"
           style={{ color: getStabilityColor(stability) }}
           title={getStabilityDescription()}
@@ -204,7 +209,7 @@ export const SectionStabilitySummary: React.FC<{
         </span>
         <span className="stat">
           <span className="stat-label">Stability:</span>
-          <span 
+          <span
             className="stat-value"
             style={{ color: getStabilityColor(stability) }}
           >

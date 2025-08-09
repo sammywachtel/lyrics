@@ -100,9 +100,20 @@ export class StressedTextNode extends TextNode {
   }
 
   exportJSON(): SerializedStressedTextNode {
+    // Only save patterns that have been manually overridden by the user
+    // This prevents old auto-detected patterns from persisting across saves
+    const overriddenPatterns: [string, StressPattern][] = []
+
+    this.__stressPatterns.forEach((pattern, word) => {
+      // Only save if the pattern or any of its syllables have been overridden
+      if (pattern.overridden || pattern.syllables.some(s => s.overridden)) {
+        overriddenPatterns.push([word, pattern])
+      }
+    })
+
     return {
       ...super.exportJSON(),
-      stressPatterns: Array.from(this.__stressPatterns.entries()),
+      stressPatterns: overriddenPatterns, // Only save user overrides
       autoDetectionEnabled: this.__autoDetectionEnabled,
       type: 'stressed-text',
       version: 1,
@@ -256,8 +267,45 @@ export function $isStressedTextNode(
 }
 
 /**
+ * Function-based stress detection for single-syllable words (from songwriting pedagogy)
+ */
+function isWordStressed(word: string): boolean {
+  const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '');
+
+  // UNSTRESSED - Grammatical function words
+  const unstressedWords = new Set([
+    // Articles
+    'the', 'a', 'an',
+    // Conjunctions
+    'and', 'but', 'or', 'yet', 'if', 'so', 'nor', 'for',
+    // Personal Pronouns
+    'i', 'you', 'he', 'she', 'it', 'we', 'they', 'us', 'them', 'me', 'him', 'her',
+    // Common Prepositions
+    'in', 'on', 'at', 'to', 'of', 'for', 'with', 'by', 'from', 'up', 'about', 'into',
+    'over', 'after', 'before', 'under', 'through', 'during', 'between', 'among',
+    'against', 'without', 'within', 'upon', 'beneath', 'beside', 'beyond', 'across',
+    // Modal verbs and auxiliaries
+    'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had',
+    'do', 'does', 'did', 'will', 'would', 'can', 'could', 'may', 'might', 'must', 'shall', 'should'
+  ]);
+
+  if (unstressedWords.has(cleanWord)) {
+    return false;
+  }
+
+  // CONTEXTUAL WORDS that can be either stressed or unstressed
+  const contextualWords = new Set(['there', 'here', 'where', 'when', 'how', 'why', 'what']);
+  if (contextualWords.has(cleanWord)) {
+    return true; // Default to stressed as demonstrative
+  }
+
+  // STRESSED - Meaning/Semantic function words (default)
+  return true;
+}
+
+/**
  * Analyze a word and return its stress pattern
- * This is a simplified implementation - in production you'd use a more sophisticated algorithm
+ * Uses function-based detection for single-syllable words (songwriting pedagogy)
  */
 function analyzeWordStress(word: string): StressPattern | null {
   if (!word || word.length === 0) return null
@@ -265,18 +313,20 @@ function analyzeWordStress(word: string): StressPattern | null {
   const syllables = syllabify(word)
   if (syllables.length === 0) return null
 
-  // Simple stress detection rules (this would be much more sophisticated in practice)
+  const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '')
+
+  // Stress detection based on syllable count and word function
   const stressedSyllables: Syllable[] = syllables.map((syl, index) => {
     let stressed = false
     let confidence = 0.6 // Default confidence
 
-    // Simple heuristics for stress detection
     if (syllables.length === 1) {
-      // Monosyllabic words are usually stressed
-      stressed = true
-      confidence = 0.9
+      // Single-syllable words: use function-based detection
+      stressed = isWordStressed(cleanWord)
+      confidence = stressed ? 0.9 : 0.8 // High confidence for function-based detection
     } else if (syllables.length === 2) {
       // For two-syllable words, stress the first syllable by default
+      // TODO: Use dictionary-based stress patterns in future
       stressed = index === 0
       confidence = 0.7
     } else {
@@ -312,12 +362,26 @@ function syllabify(word: string): string[] {
   if (cleanWord.length <= 2) return [cleanWord] // Short words are usually one syllable
 
   // Special cases for common single-syllable words that might be mis-syllabified
-  const singleSyllableWords = ['new', 'are', 'you', 'the', 'and', 'but', 'can', 'way', 'how', 'why', 'now', 'our', 'out', 'use', 'her', 'his', 'she', 'see', 'two', 'may', 'say', 'day', 'try', 'oil', 'eye']
+  const singleSyllableWords = ['new', 'are', 'you', 'the', 'and', 'but', 'can', 'way', 'how', 'why', 'now', 'our', 'out', 'use', 'her', 'his', 'she', 'see', 'two', 'may', 'say', 'day', 'try', 'oil', 'eye', 'line', 'time', 'like', 'make', 'take', 'come', 'some', 'home', 'made', 'name', 'same', 'came', 'here', 'there', 'where']
   if (singleSyllableWords.includes(cleanWord)) {
     return [cleanWord]
   }
 
   const vowels = 'aeiouy'
+
+  // Check for silent-e pattern first (CVCe pattern like "line", "time", "make")
+  // This catches words with pattern: consonant + vowel + consonant + 'e'
+  if (cleanWord.endsWith('e') && cleanWord.length >= 3) {
+    const beforeE = cleanWord.slice(0, -1)
+    const vowelCount = beforeE.split('').filter(c => vowels.includes(c)).length
+    const lastChar = beforeE[beforeE.length - 1]
+
+    // If there's only one vowel before the 'e' and the last char before 'e' is a consonant
+    // then it's likely a silent-e word (like "line", "time", "make")
+    if (vowelCount === 1 && !vowels.includes(lastChar)) {
+      return [cleanWord]
+    }
+  }
 
   // Find vowel groups (consecutive vowels count as one sound)
   const vowelGroups: { start: number; end: number; text: string }[] = []
