@@ -41,7 +41,7 @@ gcloud iam service-accounts create $SA_NAME \
 echo "🔐 Granting IAM roles to service account..."
 ROLES=(
   "roles/artifactregistry.admin"
-  "roles/run.admin" 
+  "roles/run.admin"
   "roles/storage.admin"
   "roles/iam.serviceAccountTokenCreator"
   "roles/iam.serviceAccountUser"

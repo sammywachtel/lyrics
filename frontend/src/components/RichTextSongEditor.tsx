@@ -43,7 +43,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
   const [artist, setArtist] = useState('')
   const [status, setStatus] = useState<Song['status']>('draft')
   const [tags, setTags] = useState<string[]>([])
-  
+
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -54,12 +54,12 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
   const [currentSection, setCurrentSection] = useState<string>('')
   const [hasSelectedText, setHasSelectedText] = useState(false)
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('saved')
-  
+
   // Rich-text specific states
   const [prosodyEnabled, setProsodyEnabled] = useState(false)
   const [rhymeSchemeEnabled, setRhymeSchemeEnabled] = useState(false)
   const [syllableMarkingEnabled, setSyllableMarkingEnabled] = useState(false)
-  
+
   const richTextEditorRef = useRef<RichTextLyricsEditorRef>(null)
   const isMountedRef = useRef(true)
   const handleSaveRef = useRef<(() => Promise<void>) | null>(null)
@@ -81,7 +81,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
         setIsLoading(true)
         const response = await apiClient.getSong(songId)
         const songData = response.song!
-        
+
         setSong(songData)
         setTitle(songData.title)
         setArtist(songData.artist || '')
@@ -90,13 +90,13 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
         setTags(songData.tags)
         setSettings(songData.settings || createDefaultSettings())
         setError(null)
-        
+
         // Mark as initialized after data is loaded and UI has settled
         setTimeout(() => {
           isInitialized.current = true
           lastAutoSaveRef.current = songData.lyrics
         }, 500)
-        
+
         // Notify parent of song load
         if (onSongLoaded) {
           setTimeout(() => {
@@ -133,7 +133,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     )
 
     setHasUnsavedChanges(hasChanges)
-    
+
     // Notify parent component of change status
     if (onHasUnsavedChangesChange) {
       onHasUnsavedChangesChange(hasChanges)
@@ -167,14 +167,14 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     }
 
     if (!isMountedRef.current) return
-    
+
     setIsSaving(true)
     setError(null)
     onSaveStatusChange?.('saving')
 
     try {
       const finalLyrics = lyricsToSave !== undefined ? lyricsToSave : lyrics
-      
+
       const updateData = {
         title,
         artist: artist || undefined,
@@ -185,11 +185,11 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
       }
 
       const response = await apiClient.updateSong(songId, updateData)
-      
+
       if (!isMountedRef.current) return
-      
+
       const updatedSong = response.song!
-      
+
       setSong(updatedSong)
       setTimeout(() => {
         setHasUnsavedChanges(false)
@@ -197,7 +197,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
           onHasUnsavedChangesChange(false)
         }
       }, 0)
-      
+
       setTimeout(() => {
         onSaveStatusChange?.('saved')
         if (onSongChange) {
@@ -242,9 +242,9 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     if (!isMountedRef.current || !song || isSaving || !isInitialized.current) {
       return
     }
-    
+
     const contentToSave = currentContent || lyrics
-    
+
     const hasActualChanges = (
       title !== song.title ||
       artist !== (song.artist || '') ||
@@ -262,13 +262,13 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     try {
       setAutoSaveStatus('saving')
       lastAutoSaveRef.current = contentToSave
-      
+
       if (currentContent && currentContent !== lyrics) {
         setLyrics(currentContent)
       }
-      
+
       await handleSave(contentToSave)
-      
+
       if (isMountedRef.current) {
         setAutoSaveStatus('saved')
       }
@@ -279,7 +279,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
       }
     }
   }, [song, isSaving, title, artist, lyrics, status, tags, settings, handleSave])
-  
+
   // Update auto-save status when changes occur
   useEffect(() => {
     if (hasUnsavedChanges && autoSaveStatus === 'saved') {
@@ -298,7 +298,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
   useEffect(() => {
     const parsedSections = parseSections(lyrics)
     setSections(parsedSections)
-    
+
     // Reset current section if it no longer exists
     if (currentSection && !parsedSections.find(s => s.name === currentSection)) {
       setCurrentSection('')
@@ -313,7 +313,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
       const selectedText = editorRef.getSelectedText()
       setHasSelectedText(selectedText.length > 0)
     }
-    
+
     if (sections.length === 0) {
       if (currentSection !== '') {
         setCurrentSection('')
@@ -327,7 +327,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     if (!selection || selection.rangeCount === 0) {
       return
     }
-    
+
     try {
       const editorElement = richTextEditorRef.current?.getWysiwygElement()
       if (!editorElement) return
@@ -335,11 +335,11 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
       // Simplified section detection for rich-text editor
       // In a full implementation, you'd traverse the Lexical editor state
       const currentLineNumber = 0
-      
+
       // Find which section contains this line
       const sectionAtCursor = getSectionAtLine(sections, currentLineNumber)
       const newCurrentSection = sectionAtCursor?.name || ''
-      
+
       if (newCurrentSection !== currentSection) {
         setCurrentSection(newCurrentSection)
       }
@@ -353,9 +353,9 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     if (newLyrics === lyrics) {
       return
     }
-    
+
     setLyrics(newLyrics)
-    
+
     const timer = setTimeout(updateCurrentSection, 100)
     return () => clearTimeout(timer)
   }, [lyrics, updateCurrentSection])
@@ -376,7 +376,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     try {
       const selectedText = editorRef.getSelectedText()
       const sectionTag = generateSectionTag(sections, sectionType)
-      
+
       if (selectedText && selectedText.trim()) {
         // If there's selected text, wrap it with the section tag
         // Insert section tag above the selection
@@ -388,12 +388,12 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
         const sectionTagWithNewlines = `\n${sectionTag}\n`
         editorRef.insertTextAtCursor(sectionTagWithNewlines)
       }
-      
+
       // Update the current section detection
       setTimeout(() => {
         updateCurrentSection()
       }, 100)
-      
+
     } catch (error) {
       console.error('Error inserting section:', error)
       // Fallback to append at end
@@ -422,16 +422,16 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
   // Rename a section
   const handleRenameSection = useCallback((oldName: string, newName: string) => {
     if (!newName.trim() || newName === oldName) return
-    
+
     const existingNames = sections.map(s => s.name.toLowerCase())
     if (existingNames.includes(newName.toLowerCase()) && newName.toLowerCase() !== oldName.toLowerCase()) {
       alert(`A section named '${newName}' already exists. Please choose a different name.`)
       return
     }
-    
+
     const escapedOldName = oldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const newTag = `[${newName.trim()}]`
-    
+
     const newLyrics = lyrics.replace(new RegExp(`\\[${escapedOldName}\\]`, 'g'), newTag)
     setLyrics(newLyrics)
     updateCurrentSection()
@@ -444,7 +444,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
       console.warn('Section not found:', sectionName)
       return
     }
-    
+
     const editorRef = richTextEditorRef.current
     if (!editorRef) {
       console.warn('Editor reference not found')
@@ -565,7 +565,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
                   <span className="text-xs text-neutral-500 bg-neutral-100 px-2 py-1 rounded-md">Text selected - use toolbar above to format</span>
                 )}
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {sections.length > 0 && (
                   <>
@@ -576,7 +576,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
                     >
                       📋 Quick Nav
                     </button>
-                    
+
                     {!showSectionSidebar && (
                       <button
                         onClick={() => setShowSectionSidebar(!showSectionSidebar)}
@@ -591,7 +591,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
               </div>
             </div>
           </div>
-          
+
           {/* Rich-Text Lyrics Editor */}
           <div className="flex-1 relative overflow-hidden">
             <RichTextLyricsEditor
@@ -608,7 +608,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
               enableSyllableMarking={syllableMarkingEnabled}
               enableRhymeScheme={rhymeSchemeEnabled}
             />
-            
+
             {showSectionNav && (
               <SectionNavigation
                 sections={sections}
@@ -620,7 +620,7 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
           </div>
         </div>
       </div>
-      
+
       {/* Rich-Text Section Sidebar */}
       {showSectionSidebar && (
         <div className="w-72 flex-shrink-0">

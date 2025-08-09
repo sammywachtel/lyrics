@@ -19,17 +19,17 @@ interface FormatButtonProps {
   variant?: 'primary' | 'secondary' | 'accent'
 }
 
-const FormatButton: React.FC<FormatButtonProps> = ({ 
-  onClick, 
-  isActive = false, 
-  title, 
-  children, 
-  variant = 'primary' 
+const FormatButton: React.FC<FormatButtonProps> = ({
+  onClick,
+  isActive = false,
+  title,
+  children,
+  variant = 'primary'
 }) => {
   const baseClasses = "relative overflow-hidden px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 transform hover:scale-105 backdrop-blur-sm border"
-  
+
   const variantClasses = {
-    primary: isActive 
+    primary: isActive
       ? "bg-primary-100 text-primary-800 border-primary-300 shadow-soft"
       : "bg-white/80 text-neutral-700 border-neutral-200/50 hover:bg-white hover:border-primary-300 hover:shadow-soft",
     secondary: isActive
@@ -39,7 +39,7 @@ const FormatButton: React.FC<FormatButtonProps> = ({
       ? "bg-warm-100 text-warm-800 border-warm-300 shadow-soft"
       : "bg-white/80 text-neutral-700 border-neutral-200/50 hover:bg-warm-50 hover:border-warm-300 hover:shadow-soft"
   }
-  
+
   return (
     <button
       onClick={onClick}
@@ -67,7 +67,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
   rhymeSchemeEnabled
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false)
-  
+
   const formatButtons = [
     {
       format: 'bold' as const,
@@ -94,7 +94,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
       shortcut: ''
     }
   ]
-  
+
   return (
     <div className="flex flex-wrap items-center gap-3 p-4 bg-gradient-to-r from-neutral-50/80 to-white/60 backdrop-blur-sm">
       {/* Basic Formatting */}
@@ -102,7 +102,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
         <span className="w-2 h-2 rounded-full bg-gradient-creative from-primary-400 to-creative-500"></span>
         <span className="text-sm font-semibold text-neutral-700">Format:</span>
       </div>
-      
+
       <div className="flex gap-2">
         {formatButtons.map((button) => (
           <FormatButton
@@ -114,7 +114,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
             <span className="font-bold text-base">{button.icon}</span>
           </FormatButton>
         ))}
-        
+
         <FormatButton
           onClick={onClearFormatting}
           title="Clear Formatting (Ctrl+\\)"
@@ -124,16 +124,16 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
           <span>Clear</span>
         </FormatButton>
       </div>
-      
+
       {/* Divider */}
       <div className="w-px h-6 bg-neutral-300/50"></div>
-      
+
       {/* Songwriting Features */}
       <div className="flex items-center space-x-2">
         <span className="w-2 h-2 rounded-full bg-gradient-creative from-creative-400 to-warm-500"></span>
         <span className="text-sm font-semibold text-neutral-700">Songwriting:</span>
       </div>
-      
+
       <div className="flex gap-2">
         <FormatButton
           onClick={onToggleSyllableMarking}
@@ -144,7 +144,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
           <span>○●○</span>
           <span>Syllables</span>
         </FormatButton>
-        
+
         <FormatButton
           onClick={onToggleProsodyAnalysis}
           isActive={prosodyAnalysisEnabled}
@@ -154,7 +154,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
           <span>🎵</span>
           <span>Prosody</span>
         </FormatButton>
-        
+
         <FormatButton
           onClick={onToggleRhymeScheme}
           isActive={rhymeSchemeEnabled}
@@ -165,10 +165,10 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
           <span>Rhymes</span>
         </FormatButton>
       </div>
-      
+
       {/* Advanced Toggle */}
       <div className="flex-1" />
-      
+
       <button
         onClick={() => setShowAdvanced(!showAdvanced)}
         className="group relative overflow-hidden px-3 py-2 text-sm font-medium text-neutral-600 bg-white/60 hover:bg-white border border-neutral-200/50 hover:border-neutral-300 rounded-lg hover:shadow-soft transition-all duration-200 transform hover:scale-105 backdrop-blur-sm"
@@ -179,7 +179,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
           <span>{showAdvanced ? 'Less' : 'More'}</span>
         </span>
       </button>
-      
+
       {/* Advanced Features Panel */}
       {showAdvanced && (
         <div className="absolute top-full left-0 right-0 z-20 mt-2 p-4 bg-white/95 backdrop-blur-md border border-neutral-200/50 rounded-lg shadow-strong">
@@ -188,7 +188,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
               <span className="w-2 h-2 rounded-full bg-gradient-creative from-success-400 to-primary-500"></span>
               <span className="text-sm font-semibold text-neutral-700">AI Assistance:</span>
             </div>
-            
+
             <div className="flex gap-2">
               <FormatButton
                 onClick={() => {/* TODO: Implement AI suggestions */}}
@@ -198,7 +198,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
                 <span>🤖</span>
                 <span>AI Suggest</span>
               </FormatButton>
-              
+
               <FormatButton
                 onClick={() => {/* TODO: Implement rhyme suggestions */}}
                 title="Find rhyming words for selected text"
@@ -207,7 +207,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
                 <span>🎯</span>
                 <span>Find Rhymes</span>
               </FormatButton>
-              
+
               <FormatButton
                 onClick={() => {/* TODO: Implement synonym suggestions */}}
                 title="Find synonyms for selected text"
@@ -217,14 +217,14 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
                 <span>Synonyms</span>
               </FormatButton>
             </div>
-            
+
             <div className="w-px h-6 bg-neutral-300/50"></div>
-            
+
             <div className="flex items-center space-x-2">
               <span className="w-2 h-2 rounded-full bg-gradient-creative from-warm-400 to-creative-500"></span>
               <span className="text-sm font-semibold text-neutral-700">Analysis:</span>
             </div>
-            
+
             <div className="flex gap-2">
               <FormatButton
                 onClick={() => {/* TODO: Implement sentiment analysis */}}
@@ -234,7 +234,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
                 <span>😊</span>
                 <span>Sentiment</span>
               </FormatButton>
-              
+
               <FormatButton
                 onClick={() => {/* TODO: Implement reading level analysis */}}
                 title="Check reading level and complexity"
@@ -243,7 +243,7 @@ const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
                 <span>📊</span>
                 <span>Complexity</span>
               </FormatButton>
-              
+
               <FormatButton
                 onClick={() => {/* TODO: Implement cliche detection */}}
                 title="Detect and suggest alternatives to cliches"

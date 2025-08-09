@@ -36,7 +36,7 @@ describe('StressMarkDecoratorNode', () => {
     it('should create a new StressMarkDecoratorNode', () => {
       editor.update(() => {
         const node = $createStressMarkDecoratorNode('walking', mockPattern)
-        
+
         expect($isStressMarkDecoratorNode(node)).toBe(true)
         expect(node.getWord()).toBe('walking')
         expect(node.getPattern()).toEqual(mockPattern)
@@ -46,7 +46,7 @@ describe('StressMarkDecoratorNode', () => {
     it('should create node with custom className', () => {
       editor.update(() => {
         const node = $createStressMarkDecoratorNode('walking', mockPattern, 'custom-class')
-        
+
         expect(node.getClassName()).toBe('custom-class')
       })
     })
@@ -128,7 +128,7 @@ describe('StressMarkDecoratorNode', () => {
       editor.update(() => {
         const node = $createStressMarkDecoratorNode('walking', mockPattern, 'test-class')
         const json = node.exportJSON()
-        
+
         expect(json).toEqual({
           word: 'walking',
           pattern: mockPattern,
@@ -144,7 +144,7 @@ describe('StressMarkDecoratorNode', () => {
         const node = $createStressMarkDecoratorNode('walking', mockPattern, 'test-class')
         const json = node.exportJSON()
         const importedNode = StressMarkDecoratorNode.importJSON(json)
-        
+
         expect(importedNode.getWord()).toBe('walking')
         expect(importedNode.getPattern()).toEqual(mockPattern)
         expect(importedNode.getClassName()).toBe('test-class')
@@ -155,7 +155,7 @@ describe('StressMarkDecoratorNode', () => {
       editor.update(() => {
         const node = $createStressMarkDecoratorNode('walking', mockPattern, 'test-class')
         const clonedNode = StressMarkDecoratorNode.clone(node)
-        
+
         expect(clonedNode.getWord()).toBe(node.getWord())
         expect(clonedNode.getPattern()).toEqual(node.getPattern())
         expect(clonedNode.getClassName()).toBe(node.getClassName())
@@ -169,7 +169,7 @@ describe('StressMarkDecoratorNode', () => {
       editor.update(() => {
         const node = $createStressMarkDecoratorNode('walking', mockPattern, 'test-class')
         const component = node.decorate()
-        
+
         expect(component).toBeDefined()
         expect((component as any).props.word).toBe('walking')
         expect((component as any).props.pattern).toEqual(mockPattern)
@@ -183,7 +183,7 @@ describe('StressMarkDecoratorNode', () => {
       editor.update(() => {
         const node = $createStressMarkDecoratorNode('walking', mockPattern)
         const domOutput = node.exportDOM()
-        
+
         const element = domOutput.element as HTMLElement
         expect(element.tagName).toBe('SPAN')
         expect(element.className).toBe('stress-decorated-word')
@@ -196,7 +196,7 @@ describe('StressMarkDecoratorNode', () => {
       editor.update(() => {
         const node = $createStressMarkDecoratorNode('walking', mockPattern, 'custom-class')
         const domOutput = node.exportDOM()
-        
+
         const element = domOutput.element as HTMLElement
         expect(element.className).toBe('stress-decorated-word custom-class')
       })
@@ -206,15 +206,15 @@ describe('StressMarkDecoratorNode', () => {
       editor.update(() => {
         const node = $createStressMarkDecoratorNode('walking', mockPattern)
         const domOutput = node.exportDOM()
-        
+
         const element = domOutput.element as HTMLElement
         const syllableElements = element.querySelectorAll('.syllable')
         expect(syllableElements).toHaveLength(2)
-        
+
         expect(syllableElements[0].textContent).toBe('walk')
         expect(syllableElements[0].classList.contains('stressed')).toBe(true)
         expect(syllableElements[0].classList.contains('auto-detected')).toBe(true)
-        
+
         expect(syllableElements[1].textContent).toBe('ing')
         expect(syllableElements[1].classList.contains('unstressed')).toBe(true)
         expect(syllableElements[1].classList.contains('auto-detected')).toBe(true)

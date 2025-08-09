@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react'
 import { XMarkIcon, ChevronDownIcon, ChevronRightIcon, PlusIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
 import type { PanelState } from '../../hooks/usePanelState'
-import type { 
-  SongSettings, 
+import type {
+  SongSettings,
   SectionStructure,
   KeywordSettings,
   StyleGuide,
@@ -34,41 +34,41 @@ export function SettingsPanel({ panelState, settings, onSettingsChange, children
     rhyme: true,
     prosody: true
   })
-  const isVisible = panelState.isMobile 
+  const isVisible = panelState.isMobile
     ? panelState.activeTab === 'settings'
     : panelState.panels.left
-  
+
   if (!isVisible) return null
-  
+
   const panelClasses = [
     // Base styles
     'bg-white/90 backdrop-blur-md border-r border-neutral-200/50 shadow-soft',
     // Desktop styles
     'lg:relative lg:flex lg:flex-col',
     // Mobile/Tablet styles
-    panelState.isMobile 
+    panelState.isMobile
       ? 'absolute inset-0 z-40 flex flex-col'
       : panelState.isTablet
       ? 'absolute left-0 top-0 bottom-0 z-30 w-80 flex flex-col shadow-strong'
       : 'w-80 flex-shrink-0',
     className
   ].join(' ')
-  
+
   return (
     <>
       {/* Overlay for tablet/mobile */}
       {(panelState.isMobile || panelState.isTablet) && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-20"
           onClick={() => panelState.closePanel('left')}
         />
       )}
-      
+
       <div className={panelClasses}>
         {/* Panel Header */}
         <div className="flex items-center justify-between p-4 border-b border-neutral-200/50">
           <h2 className="text-lg font-semibold text-neutral-900">Song Settings</h2>
-          
+
           {/* Close button for mobile/tablet */}
           {!panelState.isDesktop && (
             <button
@@ -80,7 +80,7 @@ export function SettingsPanel({ panelState, settings, onSettingsChange, children
             </button>
           )}
         </div>
-        
+
         {/* Tab Navigation */}
         <div className="flex overflow-x-auto border-b border-neutral-200/50 bg-neutral-50/50">
           {
@@ -113,8 +113,8 @@ export function SettingsPanel({ panelState, settings, onSettingsChange, children
           {children ? (
             children
           ) : settings ? (
-            <SettingsContent 
-              settings={settings} 
+            <SettingsContent
+              settings={settings}
               onSettingsChange={onSettingsChange!}
               activeTab={activeTab}
               collapsedSections={collapsedSections}
@@ -130,7 +130,7 @@ export function SettingsPanel({ panelState, settings, onSettingsChange, children
             </div>
           )}
         </div>
-        
+
         {/* Panel Footer */}
         <div className="p-4 border-t border-neutral-200/50 bg-neutral-50/50">
           <p className="text-xs text-neutral-500 text-center">
@@ -214,7 +214,7 @@ function SettingsContent({ settings, onSettingsChange, activeTab, collapsedSecti
     defaultExpanded?: boolean
   }) => {
     const isExpanded = collapsedSections[id] !== undefined ? !collapsedSections[id] : defaultExpanded
-    
+
     return (
       <div className="border border-neutral-200/50 rounded-xl bg-white/50 backdrop-blur-sm">
         <button

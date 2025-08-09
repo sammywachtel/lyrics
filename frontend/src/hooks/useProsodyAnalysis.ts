@@ -49,11 +49,11 @@ export function useProsodyAnalysis({
     () =>
       debounce((textToAnalyze: string) => {
         setIsAnalyzing(true);
-        
+
         try {
           // Perform analysis based on settings
           const result = analyzeProsody(textToAnalyze);
-          
+
           // Filter results based on settings
           const filteredResult: ProsodyAnalysis = {
             ...result,
@@ -61,7 +61,7 @@ export function useProsodyAnalysis({
             sections: mergedSettings.enableStabilityAnalysis ? result.sections : [],
             clicheDetections: mergedSettings.enableClicheDetection ? result.clicheDetections : [],
           };
-          
+
           setAnalysis(filteredResult);
           onAnalysisComplete?.(filteredResult);
         } catch (error) {
@@ -118,21 +118,21 @@ export function useProsodyAnalysis({
 // Hook for section-specific analysis
 export function useSectionAnalysis(sectionText: string, sectionName: string) {
   const { analysis } = useProsodyAnalysis({ text: sectionText });
-  
+
   const sectionAnalysis = useMemo(() => {
     if (!analysis || !analysis.sections.length) return null;
-    
+
     // Find the section or use the first one
     return analysis.sections.find(s => s.name === sectionName) || analysis.sections[0];
   }, [analysis, sectionName]);
-  
+
   return sectionAnalysis;
 }
 
 // Hook for real-time line analysis (for current line being edited)
 export function useLineAnalysis(line: string) {
   const [lineAnalysis, setLineAnalysis] = useState<LineAnalysis | null>(null);
-  
+
   const analyzeLine = useMemo(
     () =>
       debounce((lineText: string) => {
@@ -140,7 +140,7 @@ export function useLineAnalysis(line: string) {
           setLineAnalysis(null);
           return;
         }
-        
+
         const analysis = analyzeProsody(lineText);
         if (analysis.lines.length > 0) {
           setLineAnalysis(analysis.lines[0]);
@@ -148,14 +148,14 @@ export function useLineAnalysis(line: string) {
       }, 300),
     []
   );
-  
+
   useEffect(() => {
     analyzeLine(line);
     return () => {
       analyzeLine.cancel();
     };
   }, [line, analyzeLine]);
-  
+
   return lineAnalysis;
 }
 
@@ -169,11 +169,11 @@ export function useProsodySettings() {
     enableClicheDetection: true,
     analysisDelay: 500,
   };
-  
+
   const updateSettings = useCallback((updates: Partial<ProsodySettings>) => {
     // Update settings in context
     console.log('Updating prosody settings:', updates);
   }, []);
-  
+
   return { settings, updateSettings };
 }

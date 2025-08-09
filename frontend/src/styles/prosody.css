@@ -393,7 +393,7 @@ span.syllable,
     font-size: 8px;
     top: -6px;
   }
-  
+
   .syllable.user-overridden::after {
     font-size: 6px;
     width: 8px;
@@ -401,12 +401,12 @@ span.syllable,
     top: -4px;
     right: -4px;
   }
-  
+
   .stress-toggle-group {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .stress-visual-mode-selector {
     flex-direction: column;
     gap: 4px;
@@ -419,11 +419,11 @@ span.syllable,
     background-color: transparent;
     transform: none;
   }
-  
+
   .stress-context-menu {
     display: none;
   }
-  
+
   .syllable.user-overridden::after {
     display: none;
   }
@@ -435,20 +435,20 @@ span.syllable,
     color: #000000;
     font-weight: 700;
   }
-  
+
   .syllable.unstressed {
     color: #4a4a4a;
   }
-  
+
   .syllable.stressed::before {
     color: #cc0000;
     font-weight: 900;
   }
-  
+
   .syllable.unstressed::before {
     color: #666666;
   }
-  
+
   .syllable.user-overridden {
     background-color: #ffff99;
     border-color: #cc9900;
@@ -460,15 +460,15 @@ span.syllable,
   .syllable {
     transition: none;
   }
-  
+
   .syllable:hover {
     transform: none;
   }
-  
+
   .syllable:active {
     transform: none;
   }
-  
+
   .stress-mode-button {
     transition: none;
   }

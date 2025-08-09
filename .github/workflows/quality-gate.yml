@@ -1,0 +1,219 @@
+name: Quality Gate - Strict Enforcement
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ main, master ]
+
+env:
+  NODE_VERSION: 20
+  PYTHON_VERSION: 3.11
+
+jobs:
+  # Block PR if pre-commit hooks weren't run
+  pre-commit-check:
+    name: Pre-commit Hook Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Check if pre-commit hooks were bypassed
+        run: |
+          # Run pre-commit on all files and capture exit code
+          if ! pre-commit run --all-files; then
+            echo "❌ QUALITY GATE FAILURE: Code does not pass pre-commit hooks"
+            echo ""
+            echo "This indicates that either:"
+            echo "1. Pre-commit hooks were not installed locally"
+            echo "2. Hooks were bypassed with --no-verify"
+            echo "3. Code was committed directly via GitHub web interface"
+            echo ""
+            echo "To fix:"
+            echo "1. Install hooks: pre-commit install"
+            echo "2. Fix all issues: pre-commit run --all-files"
+            echo "3. Commit the fixes"
+            echo ""
+            echo "Pre-commit hooks are MANDATORY and cannot be bypassed in CI/CD"
+            exit 1
+          fi
+          echo "✅ All pre-commit hooks pass - quality gate satisfied"
+
+  # Fast-fail frontend quality checks
+  frontend-quality-gate:
+    name: Frontend Quality Gate
+    runs-on: ubuntu-latest
+    needs: pre-commit-check
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: ESLint Quality Gate (Zero Tolerance)
+        run: |
+          echo "🔍 Running ESLint with zero tolerance for errors..."
+          if ! npm run lint; then
+            echo ""
+            echo "❌ QUALITY GATE FAILURE: ESLint errors detected"
+            echo ""
+            echo "ESLint errors are blocking this PR. All errors must be fixed before merge."
+            echo "Run locally: cd frontend && npm run lint:fix"
+            echo "Then manually fix any remaining errors that cannot be auto-fixed."
+            exit 1
+          fi
+          echo "✅ ESLint quality gate passed"
+        working-directory: frontend
+
+      - name: TypeScript Quality Gate
+        run: |
+          echo "🔍 Running TypeScript compilation check..."
+          if ! npx tsc --noEmit; then
+            echo ""
+            echo "❌ QUALITY GATE FAILURE: TypeScript compilation errors"
+            echo ""
+            echo "TypeScript errors are blocking this PR. All errors must be fixed before merge."
+            exit 1
+          fi
+          echo "✅ TypeScript quality gate passed"
+        working-directory: frontend
+
+      - name: Test Quality Gate
+        run: |
+          echo "🧪 Running test suite..."
+          if ! npm test -- --watchAll=false --coverage --coverageReporters=text; then
+            echo ""
+            echo "❌ QUALITY GATE FAILURE: Tests are failing"
+            echo ""
+            echo "All tests must pass before merge."
+            exit 1
+          fi
+          echo "✅ Test quality gate passed"
+        working-directory: frontend
+
+  # Fast-fail backend quality checks
+  backend-quality-gate:
+    name: Backend Quality Gate
+    runs-on: ubuntu-latest
+    needs: pre-commit-check
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install black isort flake8 mypy
+        working-directory: backend
+
+      - name: Black Format Quality Gate
+        run: |
+          echo "🔍 Checking Python code formatting with Black..."
+          if ! black --check --diff .; then
+            echo ""
+            echo "❌ QUALITY GATE FAILURE: Code formatting issues detected"
+            echo ""
+            echo "Run locally: cd backend && black ."
+            exit 1
+          fi
+          echo "✅ Black formatting quality gate passed"
+        working-directory: backend
+
+      - name: isort Import Quality Gate
+        run: |
+          echo "🔍 Checking import sorting with isort..."
+          if ! isort --check-only --diff .; then
+            echo ""
+            echo "❌ QUALITY GATE FAILURE: Import sorting issues detected"
+            echo ""
+            echo "Run locally: cd backend && isort ."
+            exit 1
+          fi
+          echo "✅ isort quality gate passed"
+        working-directory: backend
+
+      - name: Flake8 Linting Quality Gate
+        run: |
+          echo "🔍 Running flake8 linting..."
+          if ! flake8; then
+            echo ""
+            echo "❌ QUALITY GATE FAILURE: Linting errors detected"
+            echo ""
+            echo "Fix all linting errors before merge."
+            exit 1
+          fi
+          echo "✅ Flake8 quality gate passed"
+        working-directory: backend
+
+      - name: MyPy Type Quality Gate
+        run: |
+          echo "🔍 Running MyPy type checking..."
+          if ! mypy . --no-error-summary; then
+            echo ""
+            echo "❌ QUALITY GATE FAILURE: Type checking errors detected"
+            echo ""
+            echo "All type annotations must be correct before merge."
+            exit 1
+          fi
+          echo "✅ MyPy quality gate passed"
+        working-directory: backend
+
+  # Final quality gate summary
+  quality-gate-summary:
+    name: Quality Gate Summary
+    runs-on: ubuntu-latest
+    needs: [pre-commit-check, frontend-quality-gate, backend-quality-gate]
+    if: always()
+    steps:
+      - name: Quality Gate Results
+        run: |
+          if [[ "${{ needs.pre-commit-check.result }}" != "success" ]]; then
+            echo "❌ Pre-commit hooks failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.frontend-quality-gate.result }}" != "success" ]]; then
+            echo "❌ Frontend quality gate failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.backend-quality-gate.result }}" != "success" ]]; then
+            echo "❌ Backend quality gate failed"
+            exit 1
+          fi
+
+          echo "🎉 ALL QUALITY GATES PASSED!"
+          echo ""
+          echo "✅ Pre-commit hooks: PASSED"
+          echo "✅ Frontend quality: PASSED"
+          echo "✅ Backend quality: PASSED"
+          echo ""
+          echo "This PR meets all quality standards and is ready for merge."

@@ -182,9 +182,9 @@ describe('searchUtils', () => {
     })
 
     it('should combine multiple filters', () => {
-      const results = filterSongs(mockSongs, { 
-        query: 'john', 
-        status: 'completed' 
+      const results = filterSongs(mockSongs, {
+        query: 'john',
+        status: 'completed'
       })
       expect(results).toHaveLength(1)
       expect(results[0].song.artist).toBe('John Doe')
@@ -201,10 +201,10 @@ describe('searchUtils', () => {
     })
 
     it('should sort by title when specified', () => {
-      const results = filterSongs(mockSongs, { 
-        query: '', 
-        sortBy: 'title', 
-        sortOrder: 'asc' 
+      const results = filterSongs(mockSongs, {
+        query: '',
+        sortBy: 'title',
+        sortOrder: 'asc'
       })
       expect(results[0].song.title).toBe('Acoustic Dreams')
       expect(results[1].song.title).toBe('Love Song')

@@ -51,7 +51,7 @@ padding: 16px
 
 **Format Buttons:**
 - **Bold Button**: Bold "𝐁" icon, primary-100 when active
-- **Italic Button**: Italic "𝐼" icon, primary-100 when active  
+- **Italic Button**: Italic "𝐼" icon, primary-100 when active
 - **Underline Button**: "𝐔" icon with underline, primary-100 when active
 - **Strikethrough Button**: "𝐒" with strikethrough, primary-100 when active
 
@@ -374,7 +374,7 @@ padding: 16px
 // Keyboard shortcuts
 const shortcuts = {
   'Ctrl+B': 'Bold formatting',
-  'Ctrl+I': 'Italic formatting', 
+  'Ctrl+I': 'Italic formatting',
   'Ctrl+U': 'Underline formatting',
   'Ctrl+Shift+Enter': 'Insert new section',
   'F6': 'Navigate between editor regions',
@@ -387,7 +387,7 @@ const shortcuts = {
 ```html
 <!-- Section tags are properly announced -->
 <div class="section-border" aria-label="Section: Verse 1" role="separator">
-  
+
 <!-- Prosody indicators have descriptions -->
 <span class="stress-indicator" aria-label="Stressed syllable">●</span>
 

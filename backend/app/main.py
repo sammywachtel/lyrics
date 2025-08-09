@@ -1,15 +1,22 @@
+import logging
+import os
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from supabase import create_client, Client
-from datetime import datetime, timezone
-from typing import Dict, Any, Optional
-import os
-import logging
-from dotenv import load_dotenv
-from .config import settings
+from supabase import Client, create_client
+
 from .auth import create_auth_dependency
+from .config import settings
+from .dictionary import (
+    StressPattern,
+    analyze_contextual_stress,
+    get_cmu_dictionary,
+    lookup_stress_pattern,
+)
 from .songs import create_songs_router
-from .dictionary import get_cmu_dictionary, lookup_stress_pattern, analyze_contextual_stress, StressPattern
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,7 +28,7 @@ load_dotenv()
 app = FastAPI(
     title=settings.api_title,
     description=settings.api_description,
-    version=settings.api_version
+    version=settings.api_version,
 )
 
 # CORS middleware
@@ -37,6 +44,7 @@ app.add_middleware(
 supabase: Optional[Client] = None
 supabase_available = False
 
+
 def initialize_supabase() -> Optional[Client]:
     """Initialize Supabase client with proper error handling."""
     global supabase_available
@@ -47,7 +55,9 @@ def initialize_supabase() -> Optional[Client]:
         supabase_key = os.getenv("SUPABASE_KEY") or settings.supabase_key
 
         if not supabase_url or not supabase_key:
-            logger.warning("Supabase credentials not provided. Running without database connection.")
+            logger.warning(
+                "Supabase credentials not provided. Running without database connection."
+            )
             return None
 
         # Test the credentials by creating a client
@@ -61,7 +71,9 @@ def initialize_supabase() -> Optional[Client]:
             logger.info("Supabase client initialized successfully")
             return client
         except Exception as test_error:
-            logger.warning(f"Supabase client created but connection test failed: {test_error}")
+            logger.warning(
+                f"Supabase client created but connection test failed: {test_error}"
+            )
             # Return client anyway as it might work for other operations
             supabase_available = False
             return client
@@ -70,6 +82,7 @@ def initialize_supabase() -> Optional[Client]:
         logger.error(f"Failed to initialize Supabase client: {e}")
         supabase_available = False
         return None
+
 
 # Initialize Supabase
 supabase = initialize_supabase()
@@ -89,7 +102,7 @@ async def root() -> Dict[str, Any]:
         "message": "Songwriting App API",
         "version": "1.0.0",
         "status": "running",
-        "framework": "FastAPI"
+        "framework": "FastAPI",
     }
 
 
@@ -104,7 +117,7 @@ async def health_check() -> Dict[str, Any]:
             "timestamp": timestamp,
             "database": "not_configured",
             "framework": "FastAPI",
-            "message": "API is running without database connection"
+            "message": "API is running without database connection",
         }
 
     try:
@@ -115,7 +128,7 @@ async def health_check() -> Dict[str, Any]:
             "status": "healthy",
             "timestamp": timestamp,
             "database": "connected",
-            "framework": "FastAPI"
+            "framework": "FastAPI",
         }
     except Exception as e:
         return {
@@ -124,7 +137,7 @@ async def health_check() -> Dict[str, Any]:
             "database": "disconnected",
             "error": str(e),
             "framework": "FastAPI",
-            "message": "API is running but database is unavailable"
+            "message": "API is running but database is unavailable",
         }
 
 
@@ -139,7 +152,7 @@ async def get_word_stress(word: str) -> Dict[str, Any]:
             return {
                 "word": word,
                 "found": False,
-                "message": "Word not found in CMU dictionary"
+                "message": "Word not found in CMU dictionary",
             }
 
         return {
@@ -148,12 +161,14 @@ async def get_word_stress(word: str) -> Dict[str, Any]:
             "syllables": pattern.syllables,
             "stress_pattern": pattern.stress_pattern,
             "phonemes": pattern.phonemes,
-            "confidence": pattern.confidence
+            "confidence": pattern.confidence,
         }
 
     except Exception as e:
         logger.error(f"Dictionary lookup error for '{word}': {e}")
-        raise HTTPException(status_code=500, detail=f"Dictionary lookup failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Dictionary lookup failed: {str(e)}"
+        )
 
 
 @app.get("/api/dictionary/stats")
@@ -166,12 +181,14 @@ async def get_dictionary_stats() -> Dict[str, Any]:
         return {
             "status": "loaded",
             "statistics": stats,
-            "message": "CMU Pronouncing Dictionary ready"
+            "message": "CMU Pronouncing Dictionary ready",
         }
 
     except Exception as e:
         logger.error(f"Dictionary stats error: {e}")
-        raise HTTPException(status_code=500, detail=f"Dictionary stats failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Dictionary stats failed: {str(e)}"
+        )
 
 
 @app.post("/api/dictionary/contextual-stress")
@@ -181,34 +198,38 @@ async def analyze_word_in_context(request: Dict[str, Any]) -> Dict[str, Any]:
         word = request.get("word", "").strip()
         context = request.get("context", "").strip()
         position = request.get("position", 0)
-        
+
         if not word or not context:
-            raise HTTPException(status_code=400, detail="Both 'word' and 'context' are required")
-        
+            raise HTTPException(
+                status_code=400, detail="Both 'word' and 'context' are required"
+            )
+
         stress_result = analyze_contextual_stress(word, context, position)
-        
+
         if stress_result is None:
             return {
                 "word": word,
                 "context": context,
                 "is_contextual": False,
-                "message": f"'{word}' is not a contextual word"
+                "message": f"'{word}' is not a contextual word",
             }
-        
+
         return {
             "word": word,
             "context": context,
             "is_contextual": True,
             "stressed": stress_result,
             "explanation": "Determined by grammatical function analysis",
-            "confidence": 0.8  # Good confidence for rule-based analysis
+            "confidence": 0.8,  # Good confidence for rule-based analysis
         }
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Contextual analysis error: {e}")
-        raise HTTPException(status_code=500, detail=f"Contextual analysis failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Contextual analysis failed: {str(e)}"
+        )
 
 
 @app.get("/api/test")
@@ -218,29 +239,31 @@ async def test_endpoint() -> Dict[str, Any]:
         return {
             "message": "Test endpoint accessible but database not configured",
             "framework": "FastAPI",
-            "database": "not_configured"
+            "database": "not_configured",
         }
 
     try:
         # Insert a test record
-        response = supabase.table("test_records").insert({
-            "message": "Hello from Google Cloud with FastAPI!",
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }).execute()
+        response = (
+            supabase.table("test_records")
+            .insert(
+                {
+                    "message": "Hello from Google Cloud with FastAPI!",
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+            )
+            .execute()
+        )
 
         return {
             "message": "Test successful - record added to database",
             "data": response.data,
-            "framework": "FastAPI"
+            "framework": "FastAPI",
         }
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail={
-                "error": "Test failed",
-                "details": str(e),
-                "framework": "FastAPI"
-            }
+            detail={"error": "Test failed", "details": str(e), "framework": "FastAPI"},
         )
 
 
@@ -248,10 +271,7 @@ async def test_endpoint() -> Dict[str, Any]:
 async def test_songs_endpoint() -> Dict[str, Any]:
     """Test endpoint for songs table without RLS."""
     if supabase is None:
-        return {
-            "message": "Database not configured",
-            "framework": "FastAPI"
-        }
+        return {"message": "Database not configured", "framework": "FastAPI"}
 
     try:
         # Test song creation
@@ -261,7 +281,7 @@ async def test_songs_endpoint() -> Dict[str, Any]:
             "title": "Test Song",
             "content": "Test lyrics content",
             "metadata": {"artist": "Test Artist", "tags": ["test"], "status": "draft"},
-            "is_archived": False
+            "is_archived": False,
         }
 
         response = supabase.table("songs").insert(song_data).execute()
@@ -269,16 +289,17 @@ async def test_songs_endpoint() -> Dict[str, Any]:
         return {
             "message": "Test song created successfully",
             "data": response.data,
-            "framework": "FastAPI"
+            "framework": "FastAPI",
         }
     except Exception as e:
         return {
             "error": "Failed to create test song",
             "details": str(e),
-            "framework": "FastAPI"
+            "framework": "FastAPI",
         }
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8001)

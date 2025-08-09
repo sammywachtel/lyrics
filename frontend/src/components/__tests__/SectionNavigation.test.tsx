@@ -71,7 +71,7 @@ describe('SectionNavigation', () => {
 
     // Check line counts and positions
     expect(screen.getByText('2 lines • Line 1')).toBeInTheDocument() // Verse 1
-    expect(screen.getByText('2 lines • Line 5')).toBeInTheDocument() // Chorus  
+    expect(screen.getByText('2 lines • Line 5')).toBeInTheDocument() // Chorus
     expect(screen.getByText('1 line • Line 8')).toBeInTheDocument() // Bridge
   })
 
@@ -155,9 +155,9 @@ describe('SectionNavigation', () => {
       />
     )
 
-    const allButtons = screen.getAllByRole('button').filter(button => 
-      button.textContent?.includes('Verse') || 
-      button.textContent?.includes('Chorus') || 
+    const allButtons = screen.getAllByRole('button').filter(button =>
+      button.textContent?.includes('Verse') ||
+      button.textContent?.includes('Chorus') ||
       button.textContent?.includes('Bridge')
     )
 

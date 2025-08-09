@@ -21,7 +21,7 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -85,7 +85,7 @@ jobs:
     permissions:
       security-events: write
       contents: read
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     # Deploy regardless of test results to enable rapid iteration
     if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+
     permissions:
       contents: read
       id-token: write
@@ -159,12 +159,12 @@ jobs:
             -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:$GITHUB_SHA \
             -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:latest \
             .
-          
+
           # Scan image for vulnerabilities
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
             aquasec/trivy image --exit-code 0 --severity HIGH,CRITICAL \
             $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:$GITHUB_SHA
-      
+
       - name: Push backend image to Artifact Registry
         run: |
           docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND:$GITHUB_SHA
@@ -191,7 +191,7 @@ jobs:
             --service-account ${{ secrets.WIF_SERVICE_ACCOUNT }} \
             --labels "app=songwriting,tier=backend,env=production" \
             --quiet
-          
+
           # Get backend URL for frontend configuration
           echo "BACKEND_URL=$(gcloud run services describe $SERVICE_BACKEND --region=$REGION --format='value(status.url)')" >> $GITHUB_OUTPUT
 
@@ -203,12 +203,12 @@ jobs:
             -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA \
             -t $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:latest \
             .
-          
+
           # Scan image for vulnerabilities
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
             aquasec/trivy image --exit-code 0 --severity HIGH,CRITICAL \
             $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA
-      
+
       - name: Push frontend image to Artifact Registry
         run: |
           docker push $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND:$GITHUB_SHA
@@ -239,17 +239,17 @@ jobs:
         run: |
           # Wait for services to be ready
           sleep 30
-          
+
           # Health check backend
           BACKEND_URL=$(gcloud run services describe $SERVICE_BACKEND --region=$REGION --format='value(status.url)')
           echo "Testing backend health at: $BACKEND_URL/health"
           curl -f $BACKEND_URL/health || exit 1
-          
+
           # Health check frontend
           FRONTEND_URL=$(gcloud run services describe $SERVICE_FRONTEND --region=$REGION --format='value(status.url)')
           echo "Testing frontend at: $FRONTEND_URL"
           curl -f $FRONTEND_URL || exit 1
-          
+
           echo "✅ All services deployed successfully!"
           echo "🚀 Frontend URL: $FRONTEND_URL"
           echo "🔧 Backend URL: $BACKEND_URL"
@@ -260,7 +260,7 @@ jobs:
           gcloud artifacts docker images list $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_BACKEND \
             --sort-by=~CREATE_TIME --limit=999 --format="value(IMAGE)" | tail -n +6 | \
             xargs -I {} gcloud artifacts docker images delete {} --quiet || true
-          
+
           gcloud artifacts docker images list $GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE_FRONTEND \
             --sort-by=~CREATE_TIME --limit=999 --format="value(IMAGE)" | tail -n +6 | \
             xargs -I {} gcloud artifacts docker images delete {} --quiet || true

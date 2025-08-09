@@ -28,7 +28,7 @@ function AppContent() {
     setSaveStatus('saved')
     setHasUnsavedChanges(false)
   }, [])
-  
+
   const handleSongUpdate = useCallback((updates: Partial<Song>) => {
     console.log('🔄 App.handleSongUpdate called with:', updates)
     if (currentSong) {
@@ -43,7 +43,7 @@ function AppContent() {
       // Note: The actual API call should be handled by the SongEditor component
     }
   }, [currentSong, saveStatus])
-  
+
   const handleSaveStatusChange = useCallback((status: 'saved' | 'saving' | 'error') => {
     console.log('💾 App.handleSaveStatusChange:', status)
     setSaveStatus(status)
@@ -51,13 +51,13 @@ function AppContent() {
     setHasUnsavedChanges(status !== 'saved')
     console.log('📝 App: setHasUnsavedChanges(' + (status !== 'saved') + ')')
   }, [])
-  
+
   const handleSettingsChange = useCallback((newSettings: SongSettings) => {
     setSettings(newSettings)
     setSaveStatus('saving')
     // The SongEditor will handle the actual saving
   }, [])
-  
+
   const handleSave = useCallback(async () => {
     console.log('🔧 App.handleSave called, songEditorRef:', !!songEditorRef.current)
     if (songEditorRef.current?.triggerSave) {

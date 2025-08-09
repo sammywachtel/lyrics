@@ -91,7 +91,7 @@ export class StressMarkDecoratorNode extends DecoratorNode<ReactElement> {
     element.className = `stress-decorated-word ${this.__className}`.trim()
     element.setAttribute('data-word', this.__word)
     element.setAttribute('data-pattern', JSON.stringify(this.__pattern))
-    
+
     // Create syllable elements for export
     this.__pattern.syllables.forEach((syllable, index) => {
       const syllableEl = document.createElement('span')
@@ -149,9 +149,9 @@ export class StressMarkDecoratorNode extends DecoratorNode<ReactElement> {
   }
 
   decorate(): ReactElement {
-    return <StressMarkComponent 
-      word={this.__word} 
-      pattern={this.__pattern} 
+    return <StressMarkComponent
+      word={this.__word}
+      pattern={this.__pattern}
       className={this.__className}
       nodeKey={this.getKey()}
     />
@@ -178,10 +178,10 @@ interface StressMarkComponentProps {
 
 function StressMarkComponent({ word, pattern, className = '', nodeKey }: StressMarkComponentProps) {
   // console.log(`🎭 Rendering stress marks for: "${word}" with ${pattern.syllables.length} syllables`)
-  
+
   const handleSyllableClick = React.useCallback((event: React.MouseEvent, syllableIndex: number) => {
     event.preventDefault()
-    
+
     // Dispatch custom event for stress context menu
     const customEvent = new CustomEvent('stressMarkClick', {
       detail: {
@@ -193,13 +193,13 @@ function StressMarkComponent({ word, pattern, className = '', nodeKey }: StressM
       },
       bubbles: true,
     })
-    
+
     event.currentTarget.dispatchEvent(customEvent)
   }, [word, nodeKey])
 
   const handleContextMenu = React.useCallback((event: React.MouseEvent, syllableIndex: number) => {
     event.preventDefault()
-    
+
     // Dispatch custom event for stress context menu
     const customEvent = new CustomEvent('stressMarkContextMenu', {
       detail: {
@@ -211,23 +211,23 @@ function StressMarkComponent({ word, pattern, className = '', nodeKey }: StressM
       },
       bubbles: true,
     })
-    
+
     event.currentTarget.dispatchEvent(customEvent)
   }, [word, nodeKey])
 
   return (
-    <span 
+    <span
       className={`word-stress-container ${className}`.trim()}
       data-word={word}
       data-node-key={nodeKey}
     >
       {pattern.syllables.map((syllable, index) => {
-        const confidenceClass = syllable.confidence > 0.8 ? 'high-confidence' : 
+        const confidenceClass = syllable.confidence > 0.8 ? 'high-confidence' :
                                syllable.confidence < 0.5 ? 'low-confidence' : ''
-        
+
         const stressClass = syllable.stressed ? 'stressed' : 'unstressed'
         const overrideClass = syllable.overridden ? 'user-overridden' : 'auto-detected'
-        
+
         return (
           <span
             key={index}
@@ -274,11 +274,11 @@ function convertStressDecoratorElement(domNode: Node): DOMConversionOutput | nul
   const element = domNode as HTMLElement
   const word = element.getAttribute('data-word')
   const patternData = element.getAttribute('data-pattern')
-  
+
   if (!word) return null
-  
+
   let pattern: StressPattern
-  
+
   if (patternData) {
     try {
       pattern = JSON.parse(patternData)
@@ -289,11 +289,11 @@ function convertStressDecoratorElement(domNode: Node): DOMConversionOutput | nul
   } else {
     pattern = extractPatternFromDOM(element)
   }
-  
+
   const className = element.className
     .replace(/\bstress-decorated-word\b/, '')
     .trim()
-  
+
   return {
     node: $createStressMarkDecoratorNode(word, pattern, className),
   }
@@ -305,13 +305,13 @@ function convertStressDecoratorElement(domNode: Node): DOMConversionOutput | nul
 function extractPatternFromDOM(element: HTMLElement): StressPattern {
   const syllableElements = element.querySelectorAll('.syllable')
   const syllables: Syllable[] = []
-  
+
   syllableElements.forEach((syllableEl, index) => {
     const text = syllableEl.textContent || ''
     const stressed = syllableEl.classList.contains('stressed')
     const overridden = syllableEl.classList.contains('user-overridden')
     const confidence = parseFloat(syllableEl.getAttribute('data-confidence') || '0.6')
-    
+
     syllables.push({
       text,
       stressed,
@@ -320,7 +320,7 @@ function extractPatternFromDOM(element: HTMLElement): StressPattern {
       overridden,
     })
   })
-  
+
   if (syllables.length === 0) {
     // Fallback: create single syllable from text content
     const text = element.textContent || ''
@@ -332,7 +332,7 @@ function extractPatternFromDOM(element: HTMLElement): StressPattern {
       overridden: false,
     })
   }
-  
+
   return {
     syllables,
     overridden: syllables.some(s => s.overridden),

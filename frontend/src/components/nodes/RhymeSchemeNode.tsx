@@ -117,7 +117,7 @@ function RhymeSchemeComponent({ rhymeLetter, rhymeSound }: { rhymeLetter: string
   const getRhymeColor = (letter: string) => {
     const colors = {
       'a': 'bg-primary-500',
-      'b': 'bg-success-500', 
+      'b': 'bg-success-500',
       'c': 'bg-creative-500',
       'd': 'bg-warm-500',
       'e': 'bg-red-500',
@@ -135,7 +135,7 @@ function RhymeSchemeComponent({ rhymeLetter, rhymeSound }: { rhymeLetter: string
   }
 
   return (
-    <span 
+    <span
       className="rhyme-scheme-node absolute right-0 top-0 inline-flex items-center cursor-pointer z-10"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -143,14 +143,14 @@ function RhymeSchemeComponent({ rhymeLetter, rhymeSound }: { rhymeLetter: string
       title={`Rhyme: ${rhymeLetter.toUpperCase()} (${rhymeSound})`}
     >
       {/* Rhyme Badge */}
-      <span 
+      <span
         className={`rhyme-badge ${getRhymeColor(rhymeLetter)} text-white font-bold text-xs w-5 h-5 rounded flex items-center justify-center transition-all duration-200 transform ${
           isHovered ? 'scale-110 shadow-md' : ''
         }`}
       >
         {rhymeLetter.toUpperCase()}
       </span>
-      
+
       {/* Rhyme Sound Tooltip */}
       {isHovered && (
         <span className="absolute -top-8 right-0 px-2 py-1 bg-neutral-800 text-white text-xs rounded whitespace-nowrap shadow-lg">
@@ -174,7 +174,7 @@ export function detectRhymeSound(word: string): string {
   // This is a very simplified phonetic ending detector
   // In a real implementation, you'd use a proper phonetic dictionary
   const word_lower = word.toLowerCase().replace(/[^a-z]/g, '')
-  
+
   // Simple patterns for common English rhyme sounds
   const rhymePatterns = [
     { pattern: /ight$/, sound: 'aɪt' },
@@ -188,13 +188,13 @@ export function detectRhymeSound(word: string): string {
     { pattern: /ful$/, sound: 'fəl' },
     { pattern: /less$/, sound: 'ləs' },
   ]
-  
+
   for (const { pattern, sound } of rhymePatterns) {
     if (pattern.test(word_lower)) {
       return sound
     }
   }
-  
+
   // Fallback: use last 2-3 characters as a simple approximation
   return word_lower.slice(-2) || word_lower
 }
@@ -206,16 +206,16 @@ export function assignRhymeLetter(rhymeSound: string, existingRhymes: Map<string
       return letter
     }
   }
-  
+
   // Assign next available letter
   const letters = 'abcdefghijklmnopqrstuvwxyz'
   const usedLetters = new Set(existingRhymes.values())
-  
+
   for (const letter of letters) {
     if (!usedLetters.has(letter)) {
       return letter
     }
   }
-  
+
   return 'x' // Fallback if we run out of letters
 }

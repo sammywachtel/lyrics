@@ -29,7 +29,7 @@ export function isValidLexicalJSON(jsonString: string): ValidationResult {
 
   try {
     const parsed = JSON.parse(jsonString)
-    
+
     // Check basic structure
     if (!parsed || typeof parsed !== 'object') {
       result.errors.push('Invalid JSON structure')
@@ -226,7 +226,7 @@ export function repairLexicalJSON(jsonString: string): ValidationResult {
 
     // Try to extract any text content
     const extractedText = extractTextFromCorruptedJSON(parsed)
-    
+
     if (extractedText && extractedText.trim().length > 0) {
       // Migrate extracted text to valid Lexical JSON
       result.migratedData = migrateTextToLexical(extractedText)
@@ -323,7 +323,7 @@ export function safeLexicalLoad(content: string): {
 
   // Validate Lexical structure
   const validation = isValidLexicalJSON(content)
-  
+
   if (validation.isValid) {
     return {
       data: content,
@@ -334,7 +334,7 @@ export function safeLexicalLoad(content: string): {
 
   // Try to repair
   const repair = repairLexicalJSON(content)
-  
+
   if (repair.isValid && repair.migratedData) {
     return {
       data: repair.migratedData,
@@ -361,7 +361,7 @@ export function prepareLexicalForSave(editorStateJSON: string): {
   errors: string[]
 } {
   const validation = isValidLexicalJSON(editorStateJSON)
-  
+
   if (validation.isValid) {
     return {
       data: editorStateJSON,
@@ -372,7 +372,7 @@ export function prepareLexicalForSave(editorStateJSON: string): {
 
   // Don't save corrupted data - extract text instead
   const safeLoad = safeLexicalLoad(editorStateJSON)
-  
+
   return {
     data: safeLoad.data,
     isValid: false,
@@ -387,25 +387,25 @@ export function debugLexicalJSON(content: string, label = 'Lexical Content'): vo
   if (process.env.NODE_ENV !== 'development') return
 
   console.group(`🔍 ${label} Validation`)
-  
+
   const validation = isValidLexicalJSON(content)
-  
+
   if (validation.isValid) {
     console.log('✅ Valid Lexical JSON')
   } else {
     console.error('❌ Invalid Lexical JSON:')
     validation.errors.forEach(error => console.error(`  - ${error}`))
-    
+
     try {
       const parsed = JSON.parse(content)
       const nodeValidation = validateNodeStructure(parsed.root || parsed)
       console.log('📊 Node Analysis:')
       console.log(`  - Has content: ${nodeValidation.hasContent}`)
       console.log(`  - Node types: ${[...new Set(nodeValidation.nodeTypes)].join(', ')}`)
-    } catch (e) {
+    } catch {
       console.error('  - Cannot parse as JSON')
     }
   }
-  
+
   console.groupEnd()
 }

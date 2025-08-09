@@ -50,12 +50,12 @@ export function SongCard({ song, onEdit, onDelete }: SongCardProps) {
   }
 
   const statusStyles = getStatusStyles(song.status)
-  
+
   return (
     <div className="group relative bg-white/70 backdrop-blur-sm shadow-medium hover:shadow-strong rounded-2xl border border-white/50 p-6 transition-all duration-300 hover:scale-[1.02] transform overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-creative from-primary-200/10 to-creative-200/10 rounded-full blur-2xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
-      
+
       <div className="relative">
         {/* Header */}
         <div className="flex justify-between items-start mb-4">

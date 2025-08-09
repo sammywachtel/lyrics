@@ -80,7 +80,7 @@ The production deployment uses Google Cloud Run for serverless, scalable contain
    ```bash
    # macOS
    brew install google-cloud-sdk
-   
+
    # Or download from: https://cloud.google.com/sdk/docs/install
    ```
 
@@ -101,7 +101,7 @@ The production deployment uses Google Cloud Run for serverless, scalable contain
    ```bash
    # Automated setup and deployment
    ./scripts/deploy-to-gcp.sh
-   
+
    # Or step-by-step:
    npm run gcp:setup
    npm run deploy
@@ -206,7 +206,7 @@ GCP_REPOSITORY=lyrics-app
    ```bash
    # Check container logs
    npm run docker:dev:logs
-   
+
    # Check container status
    docker ps
    ```
@@ -240,7 +240,7 @@ GCP_REPOSITORY=lyrics-app
    # Check build logs in Cloud Console
    # Or view recent builds
    gcloud builds list --limit=5
-   
+
    # View specific build logs
    gcloud builds log BUILD_ID
    ```
@@ -249,7 +249,7 @@ GCP_REPOSITORY=lyrics-app
    ```bash
    # Check service status
    npm run gcp:status
-   
+
    # View service logs
    npm run gcp:logs:frontend
    npm run gcp:logs:backend

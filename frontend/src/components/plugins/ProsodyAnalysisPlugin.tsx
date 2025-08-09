@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { 
-  $getRoot, 
+import {
+  $getRoot,
   $createTextNode,
   COMMAND_PRIORITY_EDITOR,
   createCommand,
@@ -8,9 +8,9 @@ import {
   // type ElementNode removed - unused
 } from 'lexical'
 import { useEffect, useCallback } from 'react'
-import { 
-  $createProsodyLineNode, 
-  $isProsodyLineNode, 
+import {
+  $createProsodyLineNode,
+  $isProsodyLineNode,
   analyzeProsody
 } from '../nodes/ProsodyLineNode'
 
@@ -31,30 +31,30 @@ export default function ProsodyAnalysisPlugin(): null {
       const root = $getRoot()
       const children = root.getChildren()
       let lineNumber = 1
-      
+
       children.forEach((child) => {
         if (child.getType() === 'paragraph') {
           const textContent = child.getTextContent().trim()
-          
+
           // Skip empty lines and section tags
           if (!textContent || textContent.match(/^\[.*\]$/)) {
             return
           }
-          
+
           // Check if this line is already a prosody node
           const isProsodyLine = child.getChildren().some(node => $isProsodyLineNode(node))
-          
+
           if (!isProsodyLine && textContent) {
             // Analyze the prosody of this line
             const prosodyData = analyzeProsody(textContent)
-            
+
             // Create prosody line node
             const prosodyNode = $createProsodyLineNode(textContent, lineNumber, prosodyData)
-            
+
             // Replace the paragraph content with the prosody node
             child.clear()
             child.append(prosodyNode)
-            
+
             lineNumber++
           }
         }
@@ -66,17 +66,17 @@ export default function ProsodyAnalysisPlugin(): null {
     editor.update(() => {
       const root = $getRoot()
       const children = root.getChildren()
-      
+
       children.forEach((child) => {
         if (child.getType() === 'paragraph') {
           const prosodyNodes = child.getChildren().filter(node => $isProsodyLineNode(node))
-          
+
           prosodyNodes.forEach((prosodyNode) => {
             if ($isProsodyLineNode(prosodyNode)) {
               // Replace prosody node with plain text
               const textContent = prosodyNode.getLineText()
               child.clear()
-              
+
               // Add text nodes for the content
               const textParts = textContent.split(' ')
               textParts.forEach((part, index) => {
@@ -124,13 +124,13 @@ export default function ProsodyAnalysisPlugin(): null {
       TOGGLE_PROSODY_ANALYSIS_COMMAND,
       () => {
         prosodyAnalysisEnabled = !prosodyAnalysisEnabled
-        
+
         if (prosodyAnalysisEnabled) {
           analyzeDocumentProsody()
         } else {
           removeProsodyAnalysis()
         }
-        
+
         return true
       },
       COMMAND_PRIORITY_EDITOR
@@ -138,14 +138,14 @@ export default function ProsodyAnalysisPlugin(): null {
 
     // Auto-analyze prosody when content changes (debounced)
     let analysisTimeout: NodeJS.Timeout | null = null
-    
+
     const removeContentListener = editor.registerTextContentListener(() => {
       if (prosodyAnalysisEnabled) {
         // Debounce analysis to avoid excessive computation
         if (analysisTimeout) {
           clearTimeout(analysisTimeout)
         }
-        
+
         analysisTimeout = setTimeout(() => {
           analyzeDocumentProsody()
         }, 1000) // Wait 1 second after user stops typing
@@ -157,7 +157,7 @@ export default function ProsodyAnalysisPlugin(): null {
       (mutatedNodes) => {
         if (prosodyAnalysisEnabled) {
           let needsReNumbering = false
-          
+
           // Check if any prosody nodes were added/removed
           for (const [nodeKey, mutation] of mutatedNodes) {
             if (mutation === 'created' || mutation === 'destroyed') {
@@ -168,7 +168,7 @@ export default function ProsodyAnalysisPlugin(): null {
               }
             }
           }
-          
+
           if (needsReNumbering) {
             // Re-number all prosody lines
             setTimeout(() => {
@@ -176,11 +176,11 @@ export default function ProsodyAnalysisPlugin(): null {
                 const root = $getRoot()
                 const children = root.getChildren()
                 let lineNumber = 1
-                
+
                 children.forEach((child) => {
                   if (child.getType() === 'paragraph') {
                     const prosodyNodes = child.getChildren().filter(node => $isProsodyLineNode(node))
-                    
+
                     prosodyNodes.forEach((prosodyNode) => {
                       if ($isProsodyLineNode(prosodyNode)) {
                         prosodyNode.setLineNumber(lineNumber)
@@ -202,7 +202,7 @@ export default function ProsodyAnalysisPlugin(): null {
       removeToggleCommand()
       removeContentListener()
       removeMutationListener()
-      
+
       if (analysisTimeout) {
         clearTimeout(analysisTimeout)
       }

@@ -4,19 +4,22 @@ Provides accurate syllable and stress information for multi-syllable words.
 """
 
 import re
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from functools import lru_cache
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
 
 @dataclass
 class StressPattern:
     """Represents stress pattern information for a word."""
+
     word: str
     syllables: List[str]
     stress_pattern: List[int]  # 0=unstressed, 1=primary stress, 2=secondary stress
     phonemes: List[str]
     confidence: float = 1.0  # CMU dictionary entries have high confidence
+
 
 class CMUDictionary:
     """CMU Pronouncing Dictionary parser and lookup service."""
@@ -24,7 +27,9 @@ class CMUDictionary:
     def __init__(self, dict_path: Optional[str] = None):
         if dict_path is None:
             # Default path relative to backend root
-            dict_path = Path(__file__).parent.parent / "dictionary" / "cmu_raw" / "cmudict-0.7b"
+            dict_path = (
+                Path(__file__).parent.parent / "dictionary" / "cmu_raw" / "cmudict-0.7b"
+            )
 
         self.dict_path = Path(dict_path)
         self._dictionary: Dict[str, StressPattern] = {}
@@ -39,12 +44,12 @@ class CMUDictionary:
 
         entries_loaded = 0
 
-        with open(self.dict_path, 'r', encoding='latin-1') as file:
+        with open(self.dict_path, "r", encoding="latin-1") as file:
             for line in file:
                 line = line.strip()
 
                 # Skip comments and empty lines
-                if not line or line.startswith(';;;'):
+                if not line or line.startswith(";;;"):
                     continue
 
                 # Parse dictionary entry: WORD  PHONEME1 PHONEME2 ...
@@ -56,7 +61,7 @@ class CMUDictionary:
                 phonemes = parts[1:]
 
                 # Skip variant pronunciations (e.g., WORD(1), WORD(2))
-                if '(' in word:
+                if "(" in word:
                     continue
 
                 # Convert to lowercase for consistent lookup
@@ -70,7 +75,7 @@ class CMUDictionary:
                     word=word_key,
                     syllables=syllables,
                     stress_pattern=stress_pattern,
-                    phonemes=phonemes
+                    phonemes=phonemes,
                 )
 
                 entries_loaded += 1
@@ -99,16 +104,16 @@ class CMUDictionary:
 
         # For common words, use known syllable patterns to match natural pronunciation
         known_patterns = {
-            'accomplished': ['ac', 'com', 'plished'],
-            'beautiful': ['beau', 'ti', 'ful'],
-            'yesterday': ['yes', 'ter', 'day'],
-            'walking': ['walk', 'ing'],
-            'amazing': ['a', 'maz', 'ing'],
-            'wonderful': ['won', 'der', 'ful'],
-            'understand': ['un', 'der', 'stand'],
-            'generation': ['gen', 'er', 'a', 'tion'],
-            'education': ['ed', 'u', 'ca', 'tion'],
-            'information': ['in', 'for', 'ma', 'tion'],
+            "accomplished": ["ac", "com", "plished"],
+            "beautiful": ["beau", "ti", "ful"],
+            "yesterday": ["yes", "ter", "day"],
+            "walking": ["walk", "ing"],
+            "amazing": ["a", "maz", "ing"],
+            "wonderful": ["won", "der", "ful"],
+            "understand": ["un", "der", "stand"],
+            "generation": ["gen", "er", "a", "tion"],
+            "education": ["ed", "u", "ca", "tion"],
+            "information": ["in", "for", "ma", "tion"],
         }
 
         if word in known_patterns:
@@ -118,7 +123,7 @@ class CMUDictionary:
         word_length = len(word)
 
         # Find vowel positions in the word (approximate)
-        vowel_letters = 'aeiouy'
+        vowel_letters = "aeiouy"
         vowel_positions = []
         for i, char in enumerate(word):
             if char in vowel_letters:
@@ -137,12 +142,12 @@ class CMUDictionary:
                         syllables.append(word)
                 elif i == vowel_count - 1:
                     # Last syllable: from previous split to end
-                    prev_split = (vowel_positions[i-1] + vowel_positions[i]) // 2 + 1
+                    prev_split = (vowel_positions[i - 1] + vowel_positions[i]) // 2 + 1
                     syllables.append(word[prev_split:])
                 else:
                     # Middle syllables
-                    prev_split = (vowel_positions[i-1] + vowel_positions[i]) // 2 + 1
-                    next_split = (vowel_positions[i] + vowel_positions[i+1]) // 2 + 1
+                    prev_split = (vowel_positions[i - 1] + vowel_positions[i]) // 2 + 1
+                    next_split = (vowel_positions[i] + vowel_positions[i + 1]) // 2 + 1
                     syllables.append(word[prev_split:next_split])
 
             return [s for s in syllables if s]  # Filter empty strings
@@ -176,11 +181,17 @@ class CMUDictionary:
         """Get dictionary statistics."""
         return {
             "total_words": len(self._dictionary),
-            "words_with_stress": sum(1 for p in self._dictionary.values() if any(s > 0 for s in p.stress_pattern))
+            "words_with_stress": sum(
+                1
+                for p in self._dictionary.values()
+                if any(s > 0 for s in p.stress_pattern)
+            ),
         }
+
 
 # Global dictionary instance
 _cmu_dict: Optional[CMUDictionary] = None
+
 
 def get_cmu_dictionary() -> CMUDictionary:
     """Get or create the global CMU dictionary instance."""
@@ -189,9 +200,11 @@ def get_cmu_dictionary() -> CMUDictionary:
         _cmu_dict = CMUDictionary()
     return _cmu_dict
 
+
 def lookup_stress_pattern(word: str) -> Optional[StressPattern]:
     """Convenience function to lookup stress pattern."""
     return get_cmu_dictionary().lookup(word)
+
 
 def analyze_contextual_stress(word: str, context: str, position: int) -> Optional[bool]:
     """
@@ -209,80 +222,80 @@ def analyze_contextual_stress(word: str, context: str, position: int) -> Optiona
 
     # Define contextual words and their stress patterns based on grammatical function
     contextual_patterns = {
-        'there': {
-            'stressed_patterns': [
+        "there": {
+            "stressed_patterns": [
                 # Locative/demonstrative: "over there", "there it is", "there's the"
-                r'\b(?:over|right|up|down|out)\s+there\b',  # "over there", "right there"
-                r'\bthere\s+(?:it|he|she|they|are|is|was|were)\b',  # "there it is", "there are"
-                r'\bthere\'s\s+(?:the|a|an|my|your|his|her|our|their)\b',  # "there's the house"
+                r"\b(?:over|right|up|down|out)\s+there\b",  # "over there", "right there"
+                r"\bthere\s+(?:it|he|she|they|are|is|was|were)\b",  # "there it is", "there are"
+                r"\bthere\'s\s+(?:the|a|an|my|your|his|her|our|their)\b",  # "there's the house"
                 # Interjection: "there, there"
-                r'\bthere\s*,\s*there\b',
+                r"\bthere\s*,\s*there\b",
                 # Emphatic: "there you go"
-                r'\bthere\s+you\s+go\b',
+                r"\bthere\s+you\s+go\b",
             ],
-            'unstressed_patterns': [
+            "unstressed_patterns": [
                 # Expletive/dummy subject: "there is/are", "there was/were", "there will be"
-                r'^there\s+(?:is|are|was|were|will|would|could|should|might|may)\b',  # Start of sentence
-                r'[\.!?]\s+there\s+(?:is|are|was|were|will|would|could|should|might|may)\b',  # After punctuation
+                r"^there\s+(?:is|are|was|were|will|would|could|should|might|may)\b",  # Start of sentence
+                r"[\.!?]\s+there\s+(?:is|are|was|were|will|would|could|should|might|may)\b",  # After punctuation
                 # "There" + be verb + indefinite article: "there is a", "there are some"
-                r'\bthere\s+(?:is|are|was|were)\s+(?:a|an|some|many|few|several|no)\b',
-            ]
+                r"\bthere\s+(?:is|are|was|were)\s+(?:a|an|some|many|few|several|no)\b",
+            ],
         },
-        'here': {
-            'stressed_patterns': [
+        "here": {
+            "stressed_patterns": [
                 # Locative: "over here", "right here", "here it is"
-                r'\b(?:over|right|up|down|out)\s+here\b',
-                r'\bhere\s+(?:it|he|she|they|are|is|was|were)\b',
-                r'\bcome\s+here\b',  # "come here"
-                r'\bhere\s+you\s+go\b',  # "here you go"
+                r"\b(?:over|right|up|down|out)\s+here\b",
+                r"\bhere\s+(?:it|he|she|they|are|is|was|were)\b",
+                r"\bcome\s+here\b",  # "come here"
+                r"\bhere\s+you\s+go\b",  # "here you go"
             ],
-            'unstressed_patterns': [
+            "unstressed_patterns": [
                 # Less common but can be unstressed in rapid speech
-                r'\bhere\s+and\s+there\b',  # "here and there" (both often unstressed)
-            ]
+                r"\bhere\s+and\s+there\b",  # "here and there" (both often unstressed)
+            ],
         },
-        'where': {
-            'stressed_patterns': [
+        "where": {
+            "stressed_patterns": [
                 # Interrogative and relative pronoun (usually stressed)
-                r'\bwhere\s+(?:is|are|was|were|do|does|did|will|would|can|could)\b',  # "where is", "where are"
-                r'\bwhere\s+you\b',  # "where you going"
+                r"\bwhere\s+(?:is|are|was|were|do|does|did|will|would|can|could)\b",  # "where is", "where are"
+                r"\bwhere\s+you\b",  # "where you going"
             ],
-            'unstressed_patterns': [
+            "unstressed_patterns": [
                 # Rare, usually stressed
-            ]
+            ],
         },
-        'when': {
-            'stressed_patterns': [
+        "when": {
+            "stressed_patterns": [
                 # Interrogative and temporal conjunction (usually stressed)
-                r'\bwhen\s+(?:is|are|was|were|do|does|did|will|would|can|could)\b',
-                r'\bwhen\s+you\b',
+                r"\bwhen\s+(?:is|are|was|were|do|does|did|will|would|can|could)\b",
+                r"\bwhen\s+you\b",
             ],
-            'unstressed_patterns': []
+            "unstressed_patterns": [],
         },
-        'what': {
-            'stressed_patterns': [
+        "what": {
+            "stressed_patterns": [
                 # Interrogative (usually stressed)
-                r'\bwhat\s+(?:is|are|was|were|do|does|did|will|would|can|could)\b',
-                r'\bwhat\s+(?:a|an|the)\b',  # "what a day"
+                r"\bwhat\s+(?:is|are|was|were|do|does|did|will|would|can|could)\b",
+                r"\bwhat\s+(?:a|an|the)\b",  # "what a day"
             ],
-            'unstressed_patterns': []
+            "unstressed_patterns": [],
         },
-        'how': {
-            'stressed_patterns': [
+        "how": {
+            "stressed_patterns": [
                 # Interrogative and adverb (usually stressed)
-                r'\bhow\s+(?:is|are|was|were|do|does|did|will|would|can|could)\b',
-                r'\bhow\s+(?:much|many|long|far|often)\b',
+                r"\bhow\s+(?:is|are|was|were|do|does|did|will|would|can|could)\b",
+                r"\bhow\s+(?:much|many|long|far|often)\b",
             ],
-            'unstressed_patterns': []
+            "unstressed_patterns": [],
         },
-        'why': {
-            'stressed_patterns': [
+        "why": {
+            "stressed_patterns": [
                 # Interrogative (usually stressed)
-                r'\bwhy\s+(?:is|are|was|were|do|does|did|will|would|can|could)\b',
-                r'\bwhy\s+not\b',
+                r"\bwhy\s+(?:is|are|was|were|do|does|did|will|would|can|could)\b",
+                r"\bwhy\s+not\b",
             ],
-            'unstressed_patterns': []
-        }
+            "unstressed_patterns": [],
+        },
     }
 
     if word_lower not in contextual_patterns:
@@ -293,24 +306,25 @@ def analyze_contextual_stress(word: str, context: str, position: int) -> Optiona
 
     # Check for unstressed patterns first (more specific)
     import re
-    for pattern in patterns['unstressed_patterns']:
+
+    for pattern in patterns["unstressed_patterns"]:
         if re.search(pattern, context_lower):
             return False
 
     # Check for stressed patterns
-    for pattern in patterns['stressed_patterns']:
+    for pattern in patterns["stressed_patterns"]:
         if re.search(pattern, context_lower):
             return True
 
     # Default behavior based on word type
     defaults = {
-        'there': True,   # Locative/demonstrative is more common in lyrics
-        'here': True,    # Locative is more common in lyrics
-        'where': True,   # Usually stressed
-        'when': True,    # Usually stressed
-        'what': True,    # Usually stressed
-        'how': True,     # Usually stressed
-        'why': True,     # Usually stressed
+        "there": True,  # Locative/demonstrative is more common in lyrics
+        "here": True,  # Locative is more common in lyrics
+        "where": True,  # Usually stressed
+        "when": True,  # Usually stressed
+        "what": True,  # Usually stressed
+        "how": True,  # Usually stressed
+        "why": True,  # Usually stressed
     }
 
     return defaults.get(word_lower, True)

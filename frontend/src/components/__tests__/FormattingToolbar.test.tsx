@@ -258,7 +258,7 @@ describe('FormattingToolbar', () => {
 
         expect(screen.getByTitle(expectedTooltip)).toBeInTheDocument()
         expect(screen.getByText(expectedText)).toBeInTheDocument()
-        
+
         unmount()
       })
     })

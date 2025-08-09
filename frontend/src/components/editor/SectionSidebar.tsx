@@ -99,7 +99,7 @@ export const SectionSidebar: React.FC<SectionSidebarProps> = ({
           </button>
         )}
       </div>
-      
+
       {/* Section List */}
       <div className="overflow-y-auto flex-1">
         <div className="p-2 space-y-1">
@@ -108,7 +108,7 @@ export const SectionSidebar: React.FC<SectionSidebarProps> = ({
             const lineCount = section.content.split('\n').filter(line => line.trim()).length
             const icon = getSectionIcon(section.name)
             const colorClasses = getSectionColor(section.name)
-            
+
             return (
               <div
                 key={`${section.name}-${index}`}
@@ -179,13 +179,13 @@ export const SectionSidebar: React.FC<SectionSidebarProps> = ({
                     </div>
                   </button>
                 )}
-                
+
                 {/* Action buttons - show on hover or when renaming */}
                 <div className={`absolute top-2 right-2 transition-opacity duration-200 flex gap-1 ${
                   renamingSection === section.name ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                 }`}>
                   {onRenameSection && (
-                    <>                    
+                    <>
                       {renamingSection === section.name ? (
                         <div className="flex gap-1">
                           <button
@@ -249,7 +249,7 @@ export const SectionSidebar: React.FC<SectionSidebarProps> = ({
           })}
         </div>
       </div>
-      
+
       {/* Color Legend and Instructions */}
       <div className="p-4 border-t border-white/30">
         <div className="text-xs text-neutral-500 space-y-2">
@@ -280,7 +280,7 @@ export const SectionSidebar: React.FC<SectionSidebarProps> = ({
               <span>Outro</span>
             </div>
           </div>
-          
+
           <div className="border-t border-white/20 pt-2 mt-3">
             <div className="font-medium text-neutral-600 mb-1">Quick Actions:</div>
             <div className="space-y-1">

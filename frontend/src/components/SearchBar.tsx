@@ -50,7 +50,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     setQuery(newQuery)
     const newFilters = { ...filters, query: newQuery }
     setFilters(newFilters)
-    
+
     // Debounce the actual search call
     debouncedSearch(newFilters)
   }, [filters, debouncedSearch])
@@ -77,7 +77,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const newTags = currentTags.includes(tag)
       ? currentTags.filter(t => t !== tag)
       : [...currentTags, tag]
-    
+
     handleFilterChange('tags', newTags)
   }, [filters.tags, handleFilterChange])
 
@@ -88,7 +88,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       clearTimeout(debounceTimeoutRef.current)
       debounceTimeoutRef.current = null
     }
-    
+
     // Clear query immediately
     setQuery('')
     const clearedFilters = { ...filters, query: '' }
@@ -103,7 +103,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       clearTimeout(debounceTimeoutRef.current)
       debounceTimeoutRef.current = null
     }
-    
+
     const clearedFilters: SearchFilters = {
       query: '',
       status: 'all',
@@ -138,7 +138,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [])
 
-  const hasActiveFilters = filters.status !== 'all' || 
+  const hasActiveFilters = filters.status !== 'all' ||
                           (filters.tags && filters.tags.length > 0) ||
                           filters.sortBy !== 'relevance'
 
@@ -187,7 +187,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
       {/* Advanced Filters Panel */}
       {showFilters && (
-        <div 
+        <div
           ref={filtersPanelRef}
           className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-neutral-200/50 rounded-xl shadow-strong p-6 z-50 animate-slide-up"
         >

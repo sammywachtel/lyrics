@@ -5,10 +5,10 @@ import {
   type LexicalCommand,
   type LexicalNode
 } from 'lexical'
-import { 
-  $isSectionParagraphNode, 
+import {
+  $isSectionParagraphNode,
   $convertToSectionParagraph,
-  SectionParagraphNode 
+  SectionParagraphNode
 } from '../nodes/SectionParagraphNode'
 
 // Custom commands for section formatting
@@ -29,19 +29,19 @@ function $getSelectedParagraphs() {
     // For cursor position, get the paragraph containing the anchor node
     const anchorNode = selection.anchor.getNode()
     let currentNode: LexicalNode | null = anchorNode
-    
+
     // Find the paragraph that contains the cursor
     while (currentNode && currentNode.getType() !== 'section-paragraph' && currentNode.getType() !== 'paragraph') {
       currentNode = currentNode.getParent()
     }
-    
+
     if (currentNode) {
       paragraphs.push(currentNode)
     }
   } else {
     // For text selections, use the existing logic to collect all intersected paragraphs
     const nodes = selection.getNodes()
-    
+
     // Collect all paragraph nodes (including ancestors)
     nodes.forEach(node => {
       // Get the paragraph that contains this node
@@ -49,10 +49,10 @@ function $getSelectedParagraphs() {
       while (currentNode && currentNode.getType() !== 'section-paragraph' && currentNode.getType() !== 'paragraph') {
         currentNode = currentNode.getParent()
       }
-      
+
       if (currentNode && !seen.has(currentNode.getKey())) {
         seen.add(currentNode.getKey())
-        
+
         // Just collect the paragraphs, don't convert them yet
         // Conversion will happen in $applySectionFormatting
         paragraphs.push(currentNode)
@@ -66,7 +66,7 @@ function $getSelectedParagraphs() {
 // Helper function to apply section formatting to selected paragraphs
 export function $applySectionFormatting(sectionType: string | null) {
   const selectedParagraphs = $getSelectedParagraphs()
-  
+
   if (selectedParagraphs.length === 0) {
     return
   }
@@ -91,7 +91,7 @@ export function $applySectionFormatting(sectionType: string | null) {
 // Helper function to get the current section type of the selection
 export function $getCurrentSectionType(): string | null {
   const selectedParagraphs = $getSelectedParagraphs()
-  
+
   if (selectedParagraphs.length === 0) {
     return null
   }
@@ -99,12 +99,12 @@ export function $getCurrentSectionType(): string | null {
   // Check if all selected paragraphs have the same section type
   const firstParagraph = selectedParagraphs[0]
   const firstSectionType = $isSectionParagraphNode(firstParagraph) ? firstParagraph.getSectionType() : null
-  
+
   const allSameType = selectedParagraphs.every(p => {
     const sectionType = $isSectionParagraphNode(p) ? p.getSectionType() : null
     return sectionType === firstSectionType
   })
-  
+
   return allSameType ? firstSectionType : null
 }
 

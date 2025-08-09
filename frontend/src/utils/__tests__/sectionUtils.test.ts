@@ -66,21 +66,21 @@ Second verse line 1`
 
       const sections = parseSections(lyrics)
       expect(sections).toHaveLength(3)
-      
+
       expect(sections[0]).toEqual({
         name: 'Verse 1',
         startLine: 0,
         endLine: 3,
         content: 'First verse line 1\nFirst verse line 2'
       })
-      
+
       expect(sections[1]).toEqual({
         name: 'Chorus',
         startLine: 4,
         endLine: 7,
         content: 'Chorus line 1\nChorus line 2'
       })
-      
+
       expect(sections[2]).toEqual({
         name: 'Verse 2',
         startLine: 8,
@@ -226,7 +226,7 @@ Chorus line 2`
       expect(getSectionAtLine(sections, 1)?.name).toBe('Verse 1') // Content line 1
       expect(getSectionAtLine(sections, 2)?.name).toBe('Verse 1') // Content line 2
       expect(getSectionAtLine(sections, 3)?.name).toBe('Verse 1') // Empty line
-      
+
       expect(getSectionAtLine(sections, 4)?.name).toBe('Chorus') // Section tag line
       expect(getSectionAtLine(sections, 5)?.name).toBe('Chorus') // Content line 1
       expect(getSectionAtLine(sections, 6)?.name).toBe('Chorus') // Content line 2
@@ -235,7 +235,7 @@ Chorus line 2`
     it('should return null for lines outside any section', () => {
       const lyricsWithoutSections = 'Line 1\nLine 2\n[Verse 1]\nContent'
       const sectionsWithGap = parseSections(lyricsWithoutSections)
-      
+
       expect(getSectionAtLine(sectionsWithGap, 0)).toBeNull() // Before any section
       expect(getSectionAtLine(sectionsWithGap, 1)).toBeNull() // Before any section
       expect(getSectionAtLine(sectionsWithGap, 2)?.name).toBe('Verse 1') // Section line

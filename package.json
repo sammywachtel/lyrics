@@ -40,7 +40,12 @@
     "deploy": "npm run gcp:deploy",
     "precommit:install": "pre-commit install",
     "precommit:run": "pre-commit run --all-files",
-    "setup:hooks": "npm run precommit:install && echo 'Pre-commit hooks installed successfully!'"
+    "setup:hooks": "npm run precommit:install && echo 'Pre-commit hooks installed successfully!'",
+    "quality:gate": "bash scripts/quality-gate.sh",
+    "quality:frontend": "bash scripts/quality-gate.sh frontend",
+    "quality:backend": "bash scripts/quality-gate.sh backend",
+    "quality:precommit": "bash scripts/quality-gate.sh pre-commit",
+    "setup:dev": "bash setup-dev.sh"
   },
   "keywords": [
     "songwriting",

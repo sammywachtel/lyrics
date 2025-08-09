@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { 
-  $getRoot, 
+import {
+  $getRoot,
   COMMAND_PRIORITY_EDITOR,
   createCommand,
   type LexicalCommand,
@@ -8,9 +8,9 @@ import {
   // type LexicalNode unused
 } from 'lexical'
 import { useEffect, useCallback, useState } from 'react'
-import { 
-  $createRhymeSchemeNode, 
-  $isRhymeSchemeNode, 
+import {
+  $createRhymeSchemeNode,
+  $isRhymeSchemeNode,
   detectRhymeSound,
   assignRhymeLetter
 } from '../nodes/RhymeSchemeNode'
@@ -39,25 +39,25 @@ export default function RhymeSchemePlugin(): null {
 
   const extractLineEndings = useCallback((): LineEndingData[] => {
     const lineEndings: LineEndingData[] = []
-    
+
     editor.getEditorState().read(() => {
       const root = $getRoot()
       const children = root.getChildren()
       let lineNumber = 1
-      
+
       children.forEach((child) => {
         if (child.getType() === 'paragraph') {
           const textContent = child.getTextContent().trim()
-          
+
           // Skip empty lines and section tags
           if (!textContent || textContent.match(/^\[.*\]$/)) {
             return
           }
-          
+
           // Extract the last word of the line
           const words = textContent.split(/\s+/)
           const lastWord = words[words.length - 1]?.replace(/[.,!?;:]$/, '') // Remove punctuation
-          
+
           if (lastWord) {
             const rhymeSound = detectRhymeSound(lastWord)
             lineEndings.push({
@@ -67,34 +67,34 @@ export default function RhymeSchemePlugin(): null {
               paragraph: child as ElementNode
             })
           }
-          
+
           lineNumber++
         }
       })
     })
-    
+
     return lineEndings
   }, [editor])
 
   const analyzeRhymeScheme = useCallback(() => {
     const lineEndings = extractLineEndings()
     const newRhymeMap = new Map<string, string>()
-    
+
     // Group lines by rhyme sound and assign letters
     const rhymeSoundGroups = new Map<string, LineEndingData[]>()
-    
+
     lineEndings.forEach(line => {
       if (!rhymeSoundGroups.has(line.rhymeSound)) {
         rhymeSoundGroups.set(line.rhymeSound, [])
       }
       rhymeSoundGroups.get(line.rhymeSound)!.push(line)
     })
-    
+
     // Assign rhyme letters based on first appearance
     const sortedGroups = Array.from(rhymeSoundGroups.entries()).sort(
       ([, a], [, b]) => a[0].lineNumber - b[0].lineNumber
     )
-    
+
     sortedGroups.forEach(([rhymeSound, lines]) => {
       // Only assign letters to sounds that appear in multiple lines
       if (lines.length > 1) {
@@ -102,18 +102,18 @@ export default function RhymeSchemePlugin(): null {
         newRhymeMap.set(rhymeSound, rhymeLetter)
       }
     })
-    
+
     setRhymeMap(newRhymeMap)
-    
+
     // Update the editor with rhyme scheme nodes
     editor.update(() => {
       lineEndings.forEach((line) => {
         const rhymeLetter = newRhymeMap.get(line.rhymeSound)
-        
+
         if (rhymeLetter) {
           // Check if this paragraph already has a rhyme scheme node
           const hasRhymeNode = line.paragraph.getChildren().some((node) => $isRhymeSchemeNode(node))
-          
+
           if (!hasRhymeNode) {
             // Add rhyme scheme node to the end of the paragraph
             const rhymeNode = $createRhymeSchemeNode(rhymeLetter, line.rhymeSound)
@@ -128,7 +128,7 @@ export default function RhymeSchemePlugin(): null {
     editor.update(() => {
       const root = $getRoot()
       const children = root.getChildren()
-      
+
       children.forEach((child) => {
         if (child.getType() === 'paragraph') {
           const rhymeNodes = child.getChildren().filter((node) => $isRhymeSchemeNode(node))
@@ -138,7 +138,7 @@ export default function RhymeSchemePlugin(): null {
         }
       })
     })
-    
+
     setRhymeMap(new Map())
   }, [editor])
 
@@ -159,13 +159,13 @@ export default function RhymeSchemePlugin(): null {
       () => {
         const newEnabled = !rhymeSchemeEnabled
         setRhymeSchemeEnabled(newEnabled)
-        
+
         if (newEnabled) {
           analyzeRhymeScheme()
         } else {
           removeRhymeScheme()
         }
-        
+
         return true
       },
       COMMAND_PRIORITY_EDITOR
@@ -184,14 +184,14 @@ export default function RhymeSchemePlugin(): null {
 
     // Auto-analyze rhyme scheme when content changes (debounced)
     let rhymeAnalysisTimeout: NodeJS.Timeout | null = null
-    
+
     const removeContentListener = editor.registerTextContentListener(() => {
       if (rhymeSchemeEnabled) {
         // Debounce analysis to avoid excessive computation
         if (rhymeAnalysisTimeout) {
           clearTimeout(rhymeAnalysisTimeout)
         }
-        
+
         rhymeAnalysisTimeout = setTimeout(() => {
           // Remove existing rhyme nodes first
           removeRhymeScheme()
@@ -208,7 +208,7 @@ export default function RhymeSchemePlugin(): null {
       removeToggleCommand()
       removeAssignCommand()
       removeContentListener()
-      
+
       if (rhymeAnalysisTimeout) {
         clearTimeout(rhymeAnalysisTimeout)
       }

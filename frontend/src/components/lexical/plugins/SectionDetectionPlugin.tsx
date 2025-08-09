@@ -17,17 +17,17 @@ export function SectionDetectionPlugin(): null {
         const children = root.getChildren()
         for (let i = 0; i < children.length; i++) {
           const child = children[i]
-          
+
           if (child instanceof ParagraphNode) {
             const textContent = child.getTextContent().trim()
-            
+
             // Check if this paragraph matches a section tag pattern
             const match = textContent.match(SECTION_TAG_REGEX)
-            
+
             if (match) {
               const sectionName = match[1]
               const sectionType = getSectionType(sectionName) || 'Section'
-              
+
               // Check if this is already a section node
               const nextSibling = child.getNextSibling()
               if (!(nextSibling instanceof SectionNode)) {

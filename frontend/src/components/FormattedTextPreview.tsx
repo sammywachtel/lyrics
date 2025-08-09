@@ -22,16 +22,16 @@ export const FormattedTextPreview: React.FC<FormattedTextPreviewProps> = ({
     }
 
     const segments = parseFormattedText(line)
-    
+
     return (
       <div key={lineIndex} className="leading-relaxed">
         {segments.map((segment, segmentIndex) => {
           let className = ''
-          
+
           if (segment.bold) className += 'font-bold '
           if (segment.italic) className += 'italic '
           if (segment.underline) className += 'underline '
-          
+
           return (
             <span key={segmentIndex} className={className.trim()}>
               {segment.text}

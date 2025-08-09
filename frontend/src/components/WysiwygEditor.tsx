@@ -22,14 +22,14 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   const [isSourceMode, setIsSourceMode] = useState(false)
   const [sourceText, setSourceText] = useState(value || '')
   const lastValueRef = useRef(value || '')
-  
+
   // Debug logging
   console.log('WysiwygEditor render:', { value, sourceText, isSourceMode })
 
   // Convert markdown to HTML for WYSIWYG display
   const convertToHtml = useCallback((markdown: string) => {
     if (!markdown) return ''
-    
+
     console.log('Converting to HTML:', markdown)
     const html = formatTextToHtml(markdown)
     const result = html.replace(/\n/g, '<br>')
@@ -40,7 +40,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   // Convert HTML back to markdown
   const convertToMarkdown = useCallback((html: string) => {
     if (!html) return ''
-    
+
     const markdown = html
       // Convert <br> tags back to line breaks
       .replace(/<br\s*\/?>/gi, '\n')
@@ -58,7 +58,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
-    
+
     return markdown
   }, [])
 
@@ -95,15 +95,15 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   // Handle content changes in WYSIWYG mode
   const handleWysiwygChange = useCallback(() => {
     if (!editorRef.current) return
-    
+
     const html = editorRef.current.innerHTML
     const markdown = convertToMarkdown(html)
-    
+
     if (markdown !== lastValueRef.current) {
       lastValueRef.current = markdown
       onChange(markdown)
     }
-    
+
     if (onSelectionChange) {
       onSelectionChange()
     }
@@ -139,7 +139,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   // Format selected text
   const formatSelection = useCallback((command: string, value?: string) => {
     if (isSourceMode || !editorRef.current) return
-    
+
     document.execCommand(command, false, value)
     handleWysiwygChange()
     editorRef.current.focus()
@@ -153,7 +153,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   // Handle keyboard shortcuts
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (isSourceMode) return
-    
+
     if (e.metaKey || e.ctrlKey) {
       switch (e.key.toLowerCase()) {
         case 'b':
@@ -192,7 +192,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
           <span className="text-sm font-medium text-neutral-700 mr-3">
             {isSourceMode ? 'Source:' : 'Format:'}
           </span>
-          
+
           {!isSourceMode && (
             <>
               <button
@@ -250,7 +250,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
               </span>
             )}
           </button>
-          
+
           {!isSourceMode && (
             <div className="hidden sm:flex items-center space-x-3 text-xs text-neutral-500">
               <span className="px-2 py-1 bg-neutral-100 rounded-md font-mono">**bold**</span>
@@ -295,10 +295,10 @@ Use **bold**, *italic*, and _underline_ for formatting!`}
             suppressContentEditableWarning={true}
           />
         )}
-        
+
         {/* Placeholder for WYSIWYG mode */}
         {!isSourceMode && !value && (
-          <div 
+          <div
             className="absolute inset-0 px-6 py-6 text-lyrics font-mono text-neutral-400 leading-relaxed pointer-events-none"
             style={{ minHeight }}
           >

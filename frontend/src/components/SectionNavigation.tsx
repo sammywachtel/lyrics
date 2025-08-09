@@ -46,12 +46,12 @@ export const SectionNavigation: React.FC<SectionNavigationProps> = ({
           ✕
         </button>
       </div>
-      
+
       <div className="space-y-1">
         {sections.map((section, index) => {
           const isActive = currentSection === section.name
           const lineCount = section.content.split('\n').filter(line => line.trim()).length
-          
+
           return (
             <button
               key={`${section.name}-${index}`}
@@ -73,7 +73,7 @@ export const SectionNavigation: React.FC<SectionNavigationProps> = ({
           )
         })}
       </div>
-      
+
       <div className="mt-3 pt-3 border-t border-gray-200">
         <div className="text-xs text-gray-500">
           Click any section to jump to it in the editor

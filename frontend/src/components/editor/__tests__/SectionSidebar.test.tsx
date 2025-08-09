@@ -70,7 +70,7 @@ describe('SectionSidebar', () => {
     // Check that we have two sections with 2 lines each
     const twoLinesElements = screen.getAllByText('2 lines')
     expect(twoLinesElements).toHaveLength(2) // Verse 1 and Chorus both have 2 lines
-    
+
     // Check specific line references
     expect(screen.getByText('Line 1')).toBeInTheDocument() // Verse 1 line reference
     expect(screen.getByText('Line 4')).toBeInTheDocument() // Chorus line reference

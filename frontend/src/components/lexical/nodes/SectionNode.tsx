@@ -117,7 +117,7 @@ const SectionComponent: React.FC<SectionComponentProps> = ({
           {sectionName}
         </span>
       </div>
-      
+
       <div className="flex items-center gap-2 text-xs text-neutral-500">
         <span className="px-2 py-1 bg-white/60 rounded-md border border-neutral-200/50">
           {sectionType}

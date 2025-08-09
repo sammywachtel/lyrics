@@ -121,7 +121,7 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
       tooltip: activeSection === 'outro' ? 'Remove Outro formatting' : 'Mark as Outro (click again to remove)'
     },
     {
-      type: 'hook' as const,  
+      type: 'hook' as const,
       icon: '🎣',
       label: 'Hook',
       isActive: activeSection === 'hook',
@@ -138,7 +138,7 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
 
   // Generate contextual clear button text and tooltip
   const clearButtonText = activeSection ? `Clear ${getFormattedSectionName(activeSection)}` : 'Clear Section'
-  const clearButtonTooltip = activeSection 
+  const clearButtonTooltip = activeSection
     ? `Clear ${getFormattedSectionName(activeSection)} formatting from current line/selection (Ctrl/Cmd + Shift + X)`
     : 'Clear section formatting from current line/selection (Ctrl/Cmd + Shift + X)'
 
@@ -158,8 +158,8 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
           type="button"
         >
           <span className={`${
-            button.type === 'bold' ? 'font-bold' : 
-            button.type === 'italic' ? 'italic' : 
+            button.type === 'bold' ? 'font-bold' :
+            button.type === 'italic' ? 'italic' :
             button.type === 'underline' ? 'underline' :
             button.type === 'strikethrough' ? 'line-through' : ''
           }`}>

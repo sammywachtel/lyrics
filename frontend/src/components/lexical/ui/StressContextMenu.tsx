@@ -18,12 +18,12 @@ interface ContextMenuState {
   nodeKey?: string
 }
 
-export default function StressContextMenu({ 
-  x, 
-  y, 
-  word, 
-  syllableIndex, 
-  onClose 
+export default function StressContextMenu({
+  x,
+  y,
+  word,
+  syllableIndex,
+  onClose
 }: StressContextMenuProps) {
   const [editor] = useLexicalComposerContext()
   const [contextState, setContextState] = useState<ContextMenuState>({ word })
@@ -36,7 +36,7 @@ export default function StressContextMenu({
       if (!$isRangeSelection(selection)) return
 
       const anchorNode = selection.anchor.getNode()
-      
+
       // Find the StressedTextNode that contains this word
       let textNode = anchorNode
       while (textNode && !$isStressedTextNode(textNode)) {
@@ -44,7 +44,7 @@ export default function StressContextMenu({
         if (!parent) break
         textNode = parent
       }
-      
+
       if (textNode && $isStressedTextNode(textNode)) {
         const pattern = textNode.getStressPattern(word)
         setContextState({
@@ -89,7 +89,7 @@ export default function StressContextMenu({
         node.toggleSyllableStress(word, syllableIdx)
       }
     })
-    
+
     onClose()
   }, [editor, word, contextState.nodeKey, onClose])
 
@@ -102,7 +102,7 @@ export default function StressContextMenu({
         node.setStressPattern(word, pattern)
       }
     })
-    
+
     onClose()
   }, [editor, word, contextState.nodeKey, onClose])
 
@@ -115,7 +115,7 @@ export default function StressContextMenu({
         node.clearStressPattern(word)
       }
     })
-    
+
     onClose()
   }, [editor, word, contextState.nodeKey, onClose])
 
@@ -139,7 +139,7 @@ export default function StressContextMenu({
 
     const newSyllables = contextState.stressPattern.syllables.map((syl, idx) => {
       let stressed = false
-      
+
       switch (patternType) {
         case 'trochee': // Strong-weak (1-0-1-0...)
           stressed = idx % 2 === 0
@@ -154,7 +154,7 @@ export default function StressContextMenu({
           stressed = idx % 3 === 2
           break
       }
-      
+
       return {
         ...syl,
         stressed,
@@ -190,7 +190,7 @@ export default function StressContextMenu({
       <div className="stress-context-menu-item" style={{ padding: '8px 12px', background: '#f9fafb', fontWeight: 600, fontSize: '12px', textTransform: 'uppercase', color: '#6b7280', letterSpacing: '0.05em' }}>
         {word} ({syllableCount} syllable{syllableCount !== 1 ? 's' : ''})
       </div>
-      
+
       <div className="stress-context-menu-divider" />
 
       {/* Individual Syllable Controls */}
@@ -240,7 +240,7 @@ export default function StressContextMenu({
           <div style={{ padding: '4px 12px', fontSize: '11px', color: '#6b7280', fontWeight: 500 }}>
             Apply pattern:
           </div>
-          
+
           {syllableCount >= 2 && (
             <>
               <button
@@ -259,7 +259,7 @@ export default function StressContextMenu({
               </button>
             </>
           )}
-          
+
           {syllableCount >= 3 && (
             <>
               <button
@@ -278,7 +278,7 @@ export default function StressContextMenu({
               </button>
             </>
           )}
-          
+
           <div className="stress-context-menu-divider" />
         </>
       )}
@@ -292,9 +292,9 @@ export default function StressContextMenu({
         <span className="icon">🗑</span>
         Clear stress pattern
       </button>
-      
+
       <div className="stress-context-menu-divider" />
-      
+
       <button
         className="stress-context-menu-item"
         onClick={onClose}

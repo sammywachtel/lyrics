@@ -1,14 +1,12 @@
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
-import { $getRoot, $createTextNode } from 'lexical'
-import { $createSectionParagraphNode } from '../lexical/nodes/SectionParagraphNode'
+import { SectionParagraphNode } from '../lexical/nodes/SectionParagraphNode'
 import { SectionTagNode } from '../nodes/SectionTagNode'
 import SectionHeaderPlugin from '../plugins/SectionHeaderPlugin'
-import { SectionParagraphNode } from '../lexical/nodes/SectionParagraphNode'
 
 // Mock theme for testing
 const theme = {
@@ -22,7 +20,7 @@ const theme = {
 }
 
 // Test component wrapper
-function TestEditor({ initialContent }: { initialContent?: () => void }) {
+function TestEditor() {
   const initialConfig = {
     namespace: 'TestEditor',
     theme,
@@ -34,7 +32,7 @@ function TestEditor({ initialContent }: { initialContent?: () => void }) {
     <LexicalComposer initialConfig={initialConfig}>
       <RichTextPlugin
         contentEditable={
-          <ContentEditable 
+          <ContentEditable
             data-testid="editor-content"
             className="editor-content"
           />
@@ -54,21 +52,21 @@ describe('SectionHeaderPlugin', () => {
 
   it('should create visual section headers for section-formatted paragraphs', async () => {
     const { container } = render(<TestEditor />)
-    
+
     // The plugin should be registered and ready to create headers
     // when section paragraphs are added to the editor
     expect(container).toBeInTheDocument()
-    
+
     // Note: Full integration testing would require more complex setup
     // to simulate actual section paragraph creation and header generation
   })
 
   it('should handle different section types correctly', () => {
     const sectionTypes = ['verse', 'chorus', 'pre-chorus', 'bridge', 'intro', 'outro', 'hook']
-    
+
     sectionTypes.forEach(type => {
       const displayName = type === 'pre-chorus' ? 'PRE-CHORUS' : type.toUpperCase()
-      expect(displayName).toMatch(/^[A-Z\-]+$/)
+      expect(displayName).toMatch(/^[A-Z-]+$/)
     })
   })
 })

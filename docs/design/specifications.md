@@ -73,7 +73,7 @@ interface SettingsPanelProps {
 }
 
 .field-input {
-  @apply w-full p-3 border border-gray-200 rounded-lg 
+  @apply w-full p-3 border border-gray-200 rounded-lg
          focus:ring-2 focus:ring-blue-500 focus:border-transparent
          transition-all duration-200;
 }
@@ -129,13 +129,13 @@ interface SettingsPanelProps {
 }
 
 .friend-card {
-  @apply bg-gradient-to-br from-purple-50 to-pink-50 
+  @apply bg-gradient-to-br from-purple-50 to-pink-50
          rounded-lg p-3 border border-purple-200
          hover:shadow-md transition-all duration-200;
 }
 
 .friend-icon {
-  @apply w-8 h-8 bg-purple-100 rounded-full 
+  @apply w-8 h-8 bg-purple-100 rounded-full
          flex items-center justify-center mb-2;
 }
 
@@ -149,7 +149,7 @@ interface SettingsPanelProps {
 #### 4. Prosody Configuration
 ```css
 .prosody-controls {
-  @apply bg-gradient-to-r from-amber-50 to-orange-50 
+  @apply bg-gradient-to-r from-amber-50 to-orange-50
          rounded-xl p-4 border border-amber-200;
 }
 
@@ -284,7 +284,7 @@ interface ProsodyIndicators {
 }
 
 .editor-toolbar {
-  @apply flex items-center justify-between p-3 
+  @apply flex items-center justify-between p-3
          bg-gray-50 border-b border-gray-200;
 }
 
@@ -625,7 +625,7 @@ const sectionTypes = [
 
 ```css
 .section-toolbar {
-  @apply flex flex-wrap gap-2 p-4 bg-gradient-to-r 
+  @apply flex flex-wrap gap-2 p-4 bg-gradient-to-r
          from-gray-50 to-gray-100 rounded-lg border border-gray-200;
 }
 
@@ -910,7 +910,7 @@ const VirtualizedEditor: React.FC<VirtualizedEditorProps> = ({
 }) => {
   const lines = useMemo(() => lyrics.split('\n'), [lyrics])
   const visibleLines = Math.ceil(containerHeight / lineHeight) + 2
-  
+
   // Implementation details...
 }
 ```
