@@ -68,9 +68,12 @@ export function AutoStressDetectionPlugin({
 
                 // Only analyze if no user overrides exist
                 const writableNode = node.getWritable()
-                writableNode.autoDetectStress()
-                console.log(`🎯 AUTO-DETECT: Detected stress for: "${node.getTextContent().substring(0, 15)}..."`)
-                console.log(`📊 AUTO-DETECT: Patterns:`, writableNode.getAllStressPatterns().size)
+                writableNode.autoDetectStress().then(() => {
+                  console.log(`🎯 AUTO-DETECT: Detected stress for: "${node.getTextContent().substring(0, 15)}..."`)
+                  console.log(`📊 AUTO-DETECT: Patterns:`, writableNode.getAllStressPatterns().size)
+                }).catch(error => {
+                  console.warn('Auto stress detection failed for node:', error)
+                })
               } catch (error) {
                 console.warn('Auto stress detection failed for node:', error)
               }

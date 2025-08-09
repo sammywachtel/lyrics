@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from .config import settings
 from .auth import create_auth_dependency
 from .songs import create_songs_router
+from .dictionary import get_cmu_dictionary, lookup_stress_pattern, StressPattern
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -125,6 +126,52 @@ async def health_check() -> Dict[str, Any]:
             "framework": "FastAPI",
             "message": "API is running but database is unavailable"
         }
+
+
+# Dictionary API endpoints
+@app.get("/api/dictionary/stress/{word}")
+async def get_word_stress(word: str) -> Dict[str, Any]:
+    """Get stress pattern for a word from CMU dictionary."""
+    try:
+        pattern = lookup_stress_pattern(word)
+        
+        if pattern is None:
+            return {
+                "word": word,
+                "found": False,
+                "message": "Word not found in CMU dictionary"
+            }
+        
+        return {
+            "word": word,
+            "found": True,
+            "syllables": pattern.syllables,
+            "stress_pattern": pattern.stress_pattern,
+            "phonemes": pattern.phonemes,
+            "confidence": pattern.confidence
+        }
+    
+    except Exception as e:
+        logger.error(f"Dictionary lookup error for '{word}': {e}")
+        raise HTTPException(status_code=500, detail=f"Dictionary lookup failed: {str(e)}")
+
+
+@app.get("/api/dictionary/stats")
+async def get_dictionary_stats() -> Dict[str, Any]:
+    """Get CMU dictionary statistics."""
+    try:
+        dict_service = get_cmu_dictionary()
+        stats = dict_service.get_stats()
+        
+        return {
+            "status": "loaded",
+            "statistics": stats,
+            "message": "CMU Pronouncing Dictionary ready"
+        }
+    
+    except Exception as e:
+        logger.error(f"Dictionary stats error: {e}")
+        raise HTTPException(status_code=500, detail=f"Dictionary stats failed: {str(e)}")
 
 
 @app.get("/api/test")

@@ -170,19 +170,20 @@ export class StressedTextNode extends TextNode {
   }
 
   // Auto-detect stress patterns for all words in the text
-  autoDetectStress(): this {
+  async autoDetectStress(): Promise<this> {
     if (!this.__autoDetectionEnabled) return this
 
     const self = this.getWritable()
     const words = this.__text.split(/\s+/).filter(word => word.length > 0)
 
-    words.forEach(word => {
+    // Process words asynchronously to allow dictionary lookups
+    const wordPromises = words.map(async (word) => {
       const cleanWord = word.replace(/[^\w']/g, '') // Remove punctuation but keep apostrophes
       const lowerWord = cleanWord.toLowerCase()
 
       if (cleanWord && !self.__stressPatterns.has(lowerWord)) {
         // Only analyze words that don't already have patterns
-        const pattern = analyzeWordStress(cleanWord)
+        const pattern = await analyzeWordStress(cleanWord)
         if (pattern) {
           self.__stressPatterns.set(lowerWord, pattern)
         }
@@ -195,6 +196,9 @@ export class StressedTextNode extends TextNode {
         }
       }
     })
+
+    // Wait for all word analyses to complete
+    await Promise.all(wordPromises)
 
     return self
   }
@@ -306,8 +310,9 @@ function isWordStressed(word: string): boolean {
 /**
  * Analyze a word and return its stress pattern
  * Uses function-based detection for single-syllable words (songwriting pedagogy)
+ * Uses CMU dictionary lookup for multi-syllable words
  */
-function analyzeWordStress(word: string): StressPattern | null {
+async function analyzeWordStress(word: string): Promise<StressPattern | null> {
   if (!word || word.length === 0) return null
 
   const syllables = syllabify(word)
@@ -315,7 +320,35 @@ function analyzeWordStress(word: string): StressPattern | null {
 
   const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '')
 
-  // Stress detection based on syllable count and word function
+  // For multi-syllable words, try dictionary lookup first
+  if (syllables.length > 1) {
+    try {
+      const response = await fetch(`http://localhost:8001/api/dictionary/stress/${encodeURIComponent(cleanWord)}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.found && data.syllables && data.stress_pattern) {
+          // Convert dictionary response to our StressPattern format
+          const dictionarySyllables: Syllable[] = data.syllables.map((syllableText: string, index: number) => ({
+            text: syllableText,
+            stressed: data.stress_pattern[index] > 0, // CMU uses 0=unstressed, 1=primary, 2=secondary
+            confidence: data.confidence || 1.0,
+            position: index,
+            overridden: false,
+          }))
+
+          return {
+            syllables: dictionarySyllables,
+            overridden: false,
+          }
+        }
+      }
+    } catch (error) {
+      console.warn(`Dictionary lookup failed for '${cleanWord}':`, error)
+      // Fall back to heuristic method below
+    }
+  }
+
+  // Fallback: original heuristic-based stress detection
   const stressedSyllables: Syllable[] = syllables.map((syl, index) => {
     let stressed = false
     let confidence = 0.6 // Default confidence
@@ -326,14 +359,13 @@ function analyzeWordStress(word: string): StressPattern | null {
       confidence = stressed ? 0.9 : 0.8 // High confidence for function-based detection
     } else if (syllables.length === 2) {
       // For two-syllable words, stress the first syllable by default
-      // TODO: Use dictionary-based stress patterns in future
       stressed = index === 0
-      confidence = 0.7
+      confidence = 0.5 // Lower confidence for heuristic
     } else {
       // For longer words, stress typically falls on antepenultimate or penultimate
       const stressIndex = Math.max(0, syllables.length - 2)
       stressed = index === stressIndex
-      confidence = 0.6
+      confidence = 0.4 // Lower confidence for heuristic
     }
 
     return {
