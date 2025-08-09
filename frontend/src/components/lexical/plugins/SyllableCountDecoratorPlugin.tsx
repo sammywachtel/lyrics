@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useEffect, useState, useCallback } from 'react'
-import { $getRoot, $isParagraphNode } from 'lexical'
+import { $getRoot, $isParagraphNode, type LexicalNode, $isElementNode } from 'lexical'
 import { $isSectionParagraphNode } from '../nodes/SectionParagraphNode'
 import { createPortal } from 'react-dom'
 
@@ -138,8 +138,8 @@ export function SyllableCountDecoratorPlugin({
         console.log('📈 SYLLABLE-DECORATOR: Reading editor content...')
 
         // Process all paragraph nodes (both section and regular paragraphs)
-        function processNode(node: unknown) {
-          console.log('📈 SYLLABLE-DECORATOR: Processing node:', node.getType?.() || 'unknown', 'isParagraph:', $isParagraphNode(node), 'isSection:', $isSectionParagraphNode(node))
+        function processNode(node: LexicalNode) {
+          console.log('📈 SYLLABLE-DECORATOR: Processing node:', node.getType(), 'isParagraph:', $isParagraphNode(node), 'isSection:', $isSectionParagraphNode(node))
           if ($isSectionParagraphNode(node) || $isParagraphNode(node)) {
             const textContent = node.getTextContent().trim()
             console.log('📈 SYLLABLE-DECORATOR: Node text content:', textContent)
@@ -173,8 +173,10 @@ export function SyllableCountDecoratorPlugin({
           }
 
           // Recurse through children
-          const children = node.getChildren?.() || []
-          children.forEach(processNode)
+          if ($isElementNode(node)) {
+            const children = node.getChildren()
+            children.forEach(processNode)
+          }
         }
 
         console.log('📈 SYLLABLE-DECORATOR: Starting to process root node')

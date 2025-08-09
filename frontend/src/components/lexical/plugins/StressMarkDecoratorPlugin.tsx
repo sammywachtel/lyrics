@@ -10,7 +10,7 @@ import {
   type StressPattern,
 } from '../nodes/StressedTextNode'
 import { $isSectionParagraphNode } from '../nodes/SectionParagraphNode'
-import { $getRoot } from 'lexical'
+import { $getRoot, type LexicalNode, $isElementNode } from 'lexical'
 
 interface StressMarkDecoratorPluginProps {
   enabled?: boolean
@@ -107,26 +107,26 @@ export function StressMarkDecoratorPlugin({
           editor.getEditorState().read(() => {
             const root = $getRoot()
 
-            function processNode(node: unknown) {
+            function processNode(node: LexicalNode) {
               if ($isSectionParagraphNode(node)) {
                 const children = node.getChildren()
-                children.forEach((child: unknown) => {
+                children.forEach((child: LexicalNode) => {
                   processTextChild(child)
                 })
-              } else if (node?.getType?.() === 'paragraph') {
+              } else if (node.getType() === 'paragraph' && $isElementNode(node)) {
                 // Also process regular Lexical paragraphs (unsectioned text)
                 const children = node.getChildren()
-                children.forEach((child: unknown) => {
+                children.forEach((child: LexicalNode) => {
                   processTextChild(child)
                 })
-              } else {
-                const children = node.getChildren?.() || []
+              } else if ($isElementNode(node)) {
+                const children = node.getChildren()
                 children.forEach(processNode)
               }
             }
 
-            function processTextChild(child: unknown) {
-                  const text = child?.getTextContent?.() || 'N/A'
+            function processTextChild(child: LexicalNode) {
+                  const text = child.getTextContent() || 'N/A'
                   if ($isStressedTextNode(child)) {
                     const stressPatterns = child.getAllStressPatterns()
                     console.log(`✅ FOUND: StressedTextNode "${text}" with ${stressPatterns.size} patterns`)
@@ -416,7 +416,7 @@ function createStressMarkSpan(
         position: 'fixed', // Fixed positioning relative to viewport
         left: `${x}px`,
         top: `${y}px`,
-        fontSize: '14px',
+        fontSize: '12px', // Slightly larger for better visibility
         fontWeight: 'bold',
         color: syllable.stressed ? '#dc2626' : '#6b7280', // Red for stressed, gray for unstressed
         pointerEvents: 'auto',
@@ -426,8 +426,7 @@ function createStressMarkSpan(
         textAlign: 'center',
         transform: 'translateX(-50%)', // Center horizontally on the x coordinate
         backgroundColor: 'transparent', // No background for cleaner look
-        textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)', // White shadow for visibility on dark backgrounds
-        fontSize: '12px' // Slightly larger for better visibility
+        textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)' // White shadow for visibility on dark backgrounds
       }}
       onContextMenu={(e) => {
         e.preventDefault() // Prevent browser context menu
