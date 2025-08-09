@@ -1,10 +1,29 @@
-fastapi==0.116.1
-uvicorn[standard]==0.35.0
-pydantic==2.11.7
-pydantic-settings==2.10.1
-supabase==2.17.0
-httpx==0.28.1
-python-multipart==0.0.6
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-python-dotenv==1.0.0
+# Production Python dependencies for the Backend (FastAPI)
+#
+# Guidelines:
+# - Keep versions pinned to ensure reproducible builds.
+# - Grouped by functional area; add short inline comments for context.
+# - Development and testing tools belong in requirements-dev.txt (which includes this file).
+# - When upgrading, update CHANGELOG/PR notes with rationale and breaking changes.
+#
+# Python version: see tool configs in pyproject.toml (target: 3.11)
+
+# --- Web framework & ASGI server ---
+fastapi==0.116.1                 # Core web framework (APIs, DI, OpenAPI)
+uvicorn[standard]==0.35.0        # ASGI server (with extras: uvloop, httptools, etc.)
+
+# --- Validation & configuration ---
+pydantic==2.11.7                 # Data validation & serialization (v2)
+pydantic-settings==2.10.1        # Settings management via Pydantic
+python-dotenv==1.0.0             # Load environment variables from .env files
+
+# --- Auth & security ---
+python-jose[cryptography]==3.3.0 # JWT handling/signing (uses cryptography)
+passlib[bcrypt]==1.7.4           # Password hashing utilities (bcrypt)
+
+# --- HTTP & request parsing ---
+httpx==0.28.1                    # Async HTTP client for external API calls
+python-multipart==0.0.6          # Form-data parsing (file uploads) for FastAPI
+
+# --- External services ---
+supabase==2.17.0                 # Supabase client (Auth, DB, Storage)

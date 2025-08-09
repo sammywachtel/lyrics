@@ -3,7 +3,7 @@ Brief description of the changes made in this PR.
 
 ## Changes Made
 - [ ] Feature/enhancement description
-- [ ] Bug fix description  
+- [ ] Bug fix description
 - [ ] Test coverage improvements
 - [ ] Documentation updates
 
