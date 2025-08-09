@@ -30,3 +30,34 @@ repos:
       #   language: system
       #   files: ^frontend/.*\.(js|jsx|ts|tsx)$
       #   pass_filenames: false
+
+  # Backend Python hooks
+  - repo: local
+    hooks:
+      - id: python-black
+        name: Python Black Formatting
+        entry: bash -c 'cd backend && black .'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+
+      - id: python-isort
+        name: Python isort (import sorting)
+        entry: bash -c 'cd backend && isort .'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+
+      - id: python-flake8
+        name: Python flake8 (linting)
+        entry: bash -c 'cd backend && flake8'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+
+      - id: python-mypy
+        name: Python MyPy (type checking)
+        entry: bash -c 'cd backend && mypy .'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
