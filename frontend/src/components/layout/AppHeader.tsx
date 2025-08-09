@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { 
-  Bars3Icon, 
+import {
+  Bars3Icon,
   MagnifyingGlassIcon,
   Cog6ToothIcon,
   PencilIcon,
@@ -54,10 +54,10 @@ const SAVE_STATUS_CONFIG = {
   }
 }
 
-export function AppHeader({ 
-  panelState, 
-  currentSong, 
-  onSearch, 
+export function AppHeader({
+  panelState,
+  currentSong,
+  onSearch,
   // onViewChange is unused in this component but required by interface
   saveStatus = undefined,
   isEditorMode = false,
@@ -68,7 +68,7 @@ export function AppHeader({
   isSaving = false,
   autoSaveStatus = 'saved'
 }: AppHeaderProps) {
-  
+
   // Debug logging for header state (only when changes occur)
   if (typeof window !== 'undefined' && window.location.search.includes('debug')) {
     console.log('🎯 AppHeader render:', {
@@ -86,12 +86,12 @@ export function AppHeader({
   const [editArtist, setEditArtist] = useState('')
   const [editStatus, setEditStatus] = useState<Song['status']>('draft')
   const [editTags, setEditTags] = useState('')
-  
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSearch?.(searchQuery)
   }
-  
+
   const handleEditMetadata = () => {
     if (currentSong) {
       setEditTitle(currentSong.title)
@@ -102,7 +102,7 @@ export function AppHeader({
       setShowSongMeta(true)
     }
   }
-  
+
   const handleSaveMetadata = () => {
     if (onSongUpdate) {
       onSongUpdate({
@@ -115,15 +115,15 @@ export function AppHeader({
     setIsEditingMeta(false)
     setShowSongMeta(false)
   }
-  
+
   const handleCancelEdit = () => {
     setIsEditingMeta(false)
     setShowSongMeta(false)
   }
-  
+
   const saveConfig = saveStatus ? SAVE_STATUS_CONFIG[saveStatus] : null
   const SaveIcon = saveConfig?.icon
-  
+
   return (
     <header className="h-16 bg-white/80 backdrop-blur-md border-b border-neutral-200/50 shadow-soft">
       <div className="h-full px-4 flex items-center justify-between">
@@ -140,7 +140,7 @@ export function AppHeader({
               <span className="font-medium hidden sm:inline">Back</span>
             </button>
           )}
-          
+
           {/* Mobile Menu Button */}
           {panelState.isMobile && (
             <button
@@ -151,7 +151,7 @@ export function AppHeader({
               <Bars3Icon className="w-5 h-5 text-neutral-700" />
             </button>
           )}
-          
+
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-creative-500 flex items-center justify-center">
@@ -162,7 +162,7 @@ export function AppHeader({
               <p className="text-xs text-neutral-500 -mt-1">AI-Assisted Writing</p>
             </div>
           </div>
-          
+
           {/* Song Metadata (Enhanced for Editor Mode) */}
           {currentSong && isEditorMode && (
             <div className="hidden md:flex items-center gap-2 ml-4 pl-4 border-l border-neutral-200">
@@ -193,7 +193,7 @@ export function AppHeader({
               </button>
             </div>
           )}
-          
+
           {/* Song Metadata (Simple for Non-Editor Mode) */}
           {currentSong && !isEditorMode && (
             <div className="hidden md:flex items-center gap-2 ml-4 pl-4 border-l border-neutral-200">
@@ -214,7 +214,7 @@ export function AppHeader({
             </div>
           )}
         </div>
-        
+
         {/* Center Section - Search */}
         <div className="hidden sm:flex items-center flex-1 max-w-md mx-8">
           <form onSubmit={handleSearchSubmit} className="w-full">
@@ -230,7 +230,7 @@ export function AppHeader({
             </div>
           </form>
         </div>
-        
+
         {/* Right Section - View Controls & Status */}
         <div className="flex items-center gap-4">
           {/* Google Docs Style Save Button (Editor Mode Only) */}
@@ -246,14 +246,14 @@ export function AppHeader({
                   : 'bg-white text-neutral-500 border border-neutral-200 shadow-soft cursor-default'
               }`}
               title={
-                isSaving 
-                  ? 'Saving changes...' 
+                isSaving
+                  ? 'Saving changes...'
                   : autoSaveStatus === 'saving' && hasUnsavedChanges
                   ? 'Auto-saving...'
                   : hasUnsavedChanges && autoSaveStatus === 'pending'
                   ? 'Click to save now or wait for auto-save'
-                  : hasUnsavedChanges 
-                  ? 'Click to save changes now' 
+                  : hasUnsavedChanges
+                  ? 'Click to save changes now'
                   : 'All changes saved'
               }
             >
@@ -289,7 +289,7 @@ export function AppHeader({
               </span>
             </button>
           )}
-          
+
           {/* Save Status (Non-Editor Mode) */}
           {!isEditorMode && saveConfig && SaveIcon && (
             <div className="hidden sm:flex items-center gap-2 text-xs">
@@ -297,7 +297,7 @@ export function AppHeader({
               <span className={saveConfig.className}>{saveConfig.text}</span>
             </div>
           )}
-          
+
           {/* View Toggle Buttons - Tablet/Desktop */}
           {!panelState.isMobile && (
             <div className="flex items-center bg-neutral-100 rounded-lg p-1">
@@ -336,7 +336,7 @@ export function AppHeader({
               </button>
             </div>
           )}
-          
+
           {/* Panel Toggle Buttons - Tablet Only */}
           {panelState.isTablet && (
             <div className="flex items-center gap-1">
@@ -366,7 +366,7 @@ export function AppHeader({
           )}
         </div>
       </div>
-      
+
       {/* Mobile Search Bar */}
       {panelState.isMobile && (
         <div className="px-4 pb-3 border-b border-neutral-200/50 sm:hidden">
@@ -384,7 +384,7 @@ export function AppHeader({
           </form>
         </div>
       )}
-      
+
       {/* Mobile Tab Navigation */}
       {panelState.isMobile && (
         <div className="flex items-center bg-white border-b border-neutral-200/50">
@@ -420,7 +420,7 @@ export function AppHeader({
           </button>
         </div>
       )}
-      
+
       {/* Enhanced Song Metadata Dropdown */}
       {showSongMeta && currentSong && (
         <div className="absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-neutral-200 shadow-lg z-50 md:left-auto md:right-auto md:w-96 md:ml-64 md:rounded-b-xl md:border md:shadow-medium">
@@ -440,7 +440,7 @@ export function AppHeader({
                     <XMarkIcon className="w-4 h-4 text-neutral-500" />
                   </button>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Title</label>
                   <input
@@ -451,7 +451,7 @@ export function AppHeader({
                     placeholder="Enter song title..."
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Artist</label>
                   <input
@@ -462,7 +462,7 @@ export function AppHeader({
                     placeholder="Enter artist name..."
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-neutral-700 mb-2">Status</label>
@@ -488,7 +488,7 @@ export function AppHeader({
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex gap-3 pt-2">
                   <button
                     onClick={handleSaveMetadata}
@@ -522,7 +522,7 @@ export function AppHeader({
                     </button>
                   )}
                 </div>
-                
+
                 <div>
                   <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Title</label>
                   <div className="text-sm text-neutral-900 font-medium">{currentSong.title || 'Untitled Song'}</div>

@@ -145,7 +145,7 @@ describe('ProsodyIndicators', () => {
 
       const svg = container.querySelector('.rhyme-connections')
       expect(svg).toBeInTheDocument()
-      
+
       const paths = svg?.querySelectorAll('path')
       expect(paths).toHaveLength(1) // One connection between lines 0 and 1
     })
@@ -164,7 +164,7 @@ describe('ProsodyIndicators', () => {
 
       const lineIndicator = container.querySelector('.line-number-indicator')
       expect(lineIndicator).toHaveAttribute('title')
-      
+
       const title = lineIndicator?.getAttribute('title')
       expect(title).toContain('Line 1: neutral ending')
       expect(title).toContain('Syllables: 5')
@@ -182,7 +182,7 @@ describe('ProsodyIndicators', () => {
 
       const rhymeBadge = container.querySelector('.rhyme-badge')
       expect(rhymeBadge).toHaveAttribute('title')
-      
+
       const title = rhymeBadge?.getAttribute('title')
       expect(title).toContain('Perfect rhyme with line')
     })
@@ -294,7 +294,7 @@ describe('ClicheHighlight', () => {
 
   it('should call onReplace when suggestion clicked', () => {
     const mockReplace = jest.fn()
-    
+
     render(
       <ClicheHighlight
         phrase="tears fall like rain"

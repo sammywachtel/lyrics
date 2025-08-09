@@ -1,10 +1,8 @@
-import React from 'react'
-import { render } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { 
-  $createRangeSelection, 
-  $setSelection, 
-  $getRoot, 
+import {
+  $createRangeSelection,
+  $setSelection,
+  $getRoot,
   $createTextNode,
   $getSelection,
   $isRangeSelection,
@@ -12,10 +10,10 @@ import {
   type LexicalEditor
 } from 'lexical'
 import { $createSectionParagraphNode, SectionParagraphNode } from '../../nodes/SectionParagraphNode'
-import { 
-  $getCurrentSectionType, 
-  $applySectionFormatting, 
-  $clearSectionFormatting 
+import {
+  $getCurrentSectionType,
+  $applySectionFormatting,
+  $clearSectionFormatting
 } from '../SectionFormattingCommands'
 
 describe('SectionFormattingCommands', () => {
@@ -433,7 +431,7 @@ describe('SectionFormattingCommands', () => {
         selection.anchor.set(unformattedText.getKey(), 0, 'text')
         selection.focus.set(unformattedText.getKey(), 10, 'text')
         $setSelection(selection)
-        
+
         $applySectionFormatting('outro')
         expect($getCurrentSectionType()).toBe('outro')
       })

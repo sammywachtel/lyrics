@@ -8,22 +8,22 @@ interface EditorPanelProps {
 }
 
 export function EditorPanel({ panelState, children, className = '' }: EditorPanelProps) {
-  const isVisible = panelState.isMobile 
+  const isVisible = panelState.isMobile
     ? panelState.activeTab === 'editor'
     : true // Always visible on tablet/desktop
-  
+
   if (!isVisible) return null
-  
+
   const panelClasses = [
     // Base styles
     'bg-white/80 backdrop-blur-md flex flex-col',
     // Responsive width and positioning
-    panelState.isMobile 
+    panelState.isMobile
       ? 'absolute inset-0 z-10'
       : 'flex-1 min-w-0', // flex-1 makes it take remaining space, min-w-0 allows shrinking
     className
   ].join(' ')
-  
+
   return (
     <div className={panelClasses}>
       {/* Editor Content - Full Height */}
@@ -44,7 +44,7 @@ export function EditorPanel({ panelState, children, className = '' }: EditorPane
                       Professional WYSIWYG Editor
                     </h3>
                     <p className="text-neutral-600 max-w-md">
-                      Your song editor will appear here with real-time prosody analysis, 
+                      Your song editor will appear here with real-time prosody analysis,
                       section tagging, and AI-assisted writing tools.
                     </p>
                   </div>

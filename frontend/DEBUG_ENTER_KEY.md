@@ -34,34 +34,34 @@ I've added comprehensive debugging to help us identify the Enter key issue. Here
 
 ### What Each Message Tells Us:
 
-**🔍 KeyDown Debug**: 
+**🔍 KeyDown Debug**:
 - Confirms the keydown event is triggered
 - Check `isSourceMode: false` (should be false for WYSIWYG)
 - Check `key: "Enter"` (confirms Enter was pressed)
 
-**🔑 Enter key pressed**: 
+**🔑 Enter key pressed**:
 - Confirms we entered the Enter handling code
 
-**✅ Default prevented**: 
+**✅ Default prevented**:
 - Confirms `e.preventDefault()` worked
 
-**📍 Selection**: 
+**📍 Selection**:
 - `rangeCount: 1` means we have a valid selection
 - If `rangeCount: 0`, there's no cursor/selection
 
-**📏 Range before**: 
+**📏 Range before**:
 - Shows where the cursor was positioned
 - `startContainer` and `endContainer` show the DOM nodes
 - `startOffset` shows cursor position
 
-**📝 Created new div**: 
+**📝 Created new div**:
 - Shows the div element we're trying to insert
 - Check `className` to see if prosody analysis affects it
 
-**✅ Inserted div successfully**: 
+**✅ Inserted div successfully**:
 - Confirms DOM insertion worked
 
-**🏗️ Final DOM state**: 
+**🏗️ Final DOM state**:
 - Shows the final HTML content
 - Check if the new div actually appears in `editorHTML`
 

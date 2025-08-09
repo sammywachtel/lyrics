@@ -44,42 +44,42 @@ const TOOL_SECTIONS = [
 
 export function ToolsPanel({ panelState, children, className = '' }: ToolsPanelProps) {
   const [activeToolSection, setActiveToolSection] = useState<string>('rhyme-workshop')
-  
-  const isVisible = panelState.isMobile 
+
+  const isVisible = panelState.isMobile
     ? panelState.activeTab === 'tools'
     : panelState.panels.right
-  
+
   if (!isVisible) return null
-  
+
   const panelClasses = [
     // Base styles
     'bg-white/90 backdrop-blur-md border-l border-neutral-200/50 shadow-soft',
     // Desktop styles
     'lg:relative lg:flex lg:flex-col',
     // Mobile/Tablet styles
-    panelState.isMobile 
+    panelState.isMobile
       ? 'absolute inset-0 z-40 flex flex-col'
       : panelState.isTablet
       ? 'absolute right-0 top-0 bottom-0 z-30 w-96 flex flex-col shadow-strong'
       : 'w-96 flex-shrink-0',
     className
   ].join(' ')
-  
+
   return (
     <>
       {/* Overlay for tablet/mobile */}
       {(panelState.isMobile || panelState.isTablet) && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-20"
           onClick={() => panelState.closePanel('right')}
         />
       )}
-      
+
       <div className={panelClasses}>
         {/* Panel Header */}
         <div className="flex items-center justify-between p-4 border-b border-neutral-200/50">
           <h2 className="text-lg font-semibold text-neutral-900">Writing Tools</h2>
-          
+
           {/* Close button for mobile/tablet */}
           {!panelState.isDesktop && (
             <button
@@ -91,7 +91,7 @@ export function ToolsPanel({ panelState, children, className = '' }: ToolsPanelP
             </button>
           )}
         </div>
-        
+
         {/* Tool Section Navigation */}
         <div className="border-b border-neutral-200/50">
           <div className="p-2">
@@ -119,7 +119,7 @@ export function ToolsPanel({ panelState, children, className = '' }: ToolsPanelP
             </nav>
           </div>
         </div>
-        
+
         {/* Tool Content */}
         <div className="flex-1 overflow-y-auto">
           {children || (
@@ -141,7 +141,7 @@ export function ToolsPanel({ panelState, children, className = '' }: ToolsPanelP
                   </div>
                 </div>
               )}
-              
+
               {activeToolSection === 'thesaurus' && (
                 <div className="space-y-4">
                   <div>
@@ -159,7 +159,7 @@ export function ToolsPanel({ panelState, children, className = '' }: ToolsPanelP
                   </div>
                 </div>
               )}
-              
+
               {activeToolSection === 'ai-assistant' && (
                 <div className="space-y-4">
                   <div className="p-4 bg-gradient-to-br from-primary-50 to-creative-50 rounded-lg border border-primary-200">
@@ -168,13 +168,13 @@ export function ToolsPanel({ panelState, children, className = '' }: ToolsPanelP
                       <h3 className="text-sm font-medium text-primary-900">AI Assistant</h3>
                     </div>
                     <p className="text-sm text-primary-700">
-                      Your AI writing assistant will provide real-time suggestions, 
+                      Your AI writing assistant will provide real-time suggestions,
                       cliché detection, and creative feedback.
                     </p>
                   </div>
                 </div>
               )}
-              
+
               {activeToolSection === 'prosody-analysis' && (
                 <div className="space-y-4">
                   <div>
@@ -187,7 +187,7 @@ export function ToolsPanel({ panelState, children, className = '' }: ToolsPanelP
                   </div>
                 </div>
               )}
-              
+
               {activeToolSection === 'section-navigator' && (
                 <div className="space-y-4">
                   <div>
@@ -203,7 +203,7 @@ export function ToolsPanel({ panelState, children, className = '' }: ToolsPanelP
             </div>
           )}
         </div>
-        
+
         {/* Panel Footer */}
         <div className="p-4 border-t border-neutral-200/50 bg-neutral-50/50">
           <p className="text-xs text-neutral-500 text-center">

@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { 
+import {
   $getSelection,
   $isRangeSelection,
   $createTextNode,
@@ -8,10 +8,10 @@ import {
   type LexicalCommand
 } from 'lexical'
 import { useEffect } from 'react'
-import { 
-  $createSyllableMarkNode, 
-  $isSyllableMarkNode, 
-  breakIntoSyllables 
+import {
+  $createSyllableMarkNode,
+  $isSyllableMarkNode,
+  breakIntoSyllables
 } from '../nodes/SyllableMarkNode'
 
 // Command to toggle syllable marking for selected text
@@ -32,11 +32,11 @@ export default function SyllableMarkingPlugin(): null {
           const selection = $getSelection()
           if ($isRangeSelection(selection) && !selection.isCollapsed()) {
             const selectedText = selection.getTextContent()
-            
+
             // Check if selection contains syllable marked nodes
             const nodes = selection.getNodes()
             const hasSyllableMarks = nodes.some(node => $isSyllableMarkNode(node))
-            
+
             if (hasSyllableMarks) {
               // Remove syllable marking - convert back to plain text
               nodes.forEach(node => {
@@ -49,7 +49,7 @@ export default function SyllableMarkingPlugin(): null {
               // Add syllable marking
               const words = selectedText.split(/(\s+)/)
               const syllableNodes: import('lexical').LexicalNode[] = []
-              
+
               words.forEach(word => {
                 if (word.trim()) {
                   // Break word into syllables
@@ -61,7 +61,7 @@ export default function SyllableMarkingPlugin(): null {
                   syllableNodes.push($createSyllableMarkNode([word]))
                 }
               })
-              
+
               // Replace selection with syllable nodes
               selection.removeText()
               selection.insertNodes(syllableNodes)
@@ -80,7 +80,7 @@ export default function SyllableMarkingPlugin(): null {
         editor.update(() => {
           const syllables = breakIntoSyllables(word)
           const syllableNode = $createSyllableMarkNode(syllables)
-          
+
           const selection = $getSelection()
           if ($isRangeSelection(selection)) {
             selection.insertNodes([syllableNode])
@@ -103,13 +103,13 @@ export default function SyllableMarkingPlugin(): null {
         if (rootElement) {
           const handleDoubleClick = (event: MouseEvent) => {
             const target = event.target as HTMLElement
-            
+
             // Check if double-clicked on a word (not already syllable-marked)
             if (target.textContent && !target.closest('.syllable-mark-node')) {
               const selection = window.getSelection()
               if (selection && selection.toString().trim()) {
                 const selectedWord = selection.toString().trim()
-                
+
                 // Only proceed if it's a single word
                 if (selectedWord && !selectedWord.includes(' ')) {
                   editor.update(() => {
@@ -127,9 +127,9 @@ export default function SyllableMarkingPlugin(): null {
               }
             }
           }
-          
+
           rootElement.addEventListener('dblclick', handleDoubleClick)
-          
+
           return () => {
             rootElement.removeEventListener('dblclick', handleDoubleClick)
           }

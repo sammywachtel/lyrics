@@ -49,7 +49,7 @@ export function AuthForm({ mode, onModeChange }: AuthFormProps) {
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-creative from-primary-300/30 to-creative-300/30 rounded-full blur-3xl -translate-y-48 translate-x-48"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-creative from-creative-300/25 to-warm-300/25 rounded-full blur-3xl translate-y-48 -translate-x-48"></div>
       </div>
-      
+
       <div className="max-w-md w-full space-y-8 relative z-10">
         {/* Logo/Brand Header */}
         <div className="text-center">
@@ -64,11 +64,11 @@ export function AuthForm({ mode, onModeChange }: AuthFormProps) {
           </h1>
           <p className="text-neutral-600 font-medium">AI-Powered Songwriting</p>
         </div>
-        
+
         <div className="bg-white/80 backdrop-blur-xl shadow-strong rounded-3xl border border-white/50 p-8 overflow-hidden relative">
           {/* Card background decoration */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-creative from-primary-300/15 to-creative-300/15 rounded-full blur-2xl -translate-y-16 translate-x-16"></div>
-          
+
           <div className="relative">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-neutral-900 mb-2">
@@ -78,7 +78,7 @@ export function AuthForm({ mode, onModeChange }: AuthFormProps) {
                 {mode === 'signin' ? 'Continue your creative journey' : 'Start your songwriting adventure'}
               </p>
             </div>
-            
+
             <div className="text-center mb-6">
               <p className="text-sm text-neutral-600">
                 {mode === 'signin' ? (
@@ -104,7 +104,7 @@ export function AuthForm({ mode, onModeChange }: AuthFormProps) {
                 )}
               </p>
             </div>
-            
+
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div>

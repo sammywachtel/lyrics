@@ -118,7 +118,7 @@ function SyllableMarkComponent({ syllables }: SyllableMarkComponentProps): React
   const stressPattern = getStressPattern(syllables)
 
   return (
-    <span 
+    <span
       className="syllable-mark-node inline-flex items-baseline relative cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -127,18 +127,18 @@ function SyllableMarkComponent({ syllables }: SyllableMarkComponentProps): React
     >
       {syllables.map((syllable, index) => (
         <React.Fragment key={index}>
-          <span 
+          <span
             className={`syllable relative transition-all duration-200 ${
-              stressPattern[index] === 'stressed' 
-                ? 'font-semibold text-primary-700' 
+              stressPattern[index] === 'stressed'
+                ? 'font-semibold text-primary-700'
                 : 'text-neutral-700'
             }`}
           >
             {syllable}
-            
+
             {/* Stress indicator */}
             {isHovered && (
-              <span 
+              <span
                 className={`absolute -top-2 left-1/2 transform -translate-x-1/2 text-xs transition-opacity duration-200 ${
                   stressPattern[index] === 'stressed'
                     ? 'text-primary-500'
@@ -149,12 +149,12 @@ function SyllableMarkComponent({ syllables }: SyllableMarkComponentProps): React
               </span>
             )}
           </span>
-          
+
           {/* Syllable separator */}
           {index < syllables.length - 1 && (
             <span className={`syllable-separator mx-0.5 text-xs transition-all duration-200 ${
-              isHovered 
-                ? 'text-creative-500 opacity-100' 
+              isHovered
+                ? 'text-creative-500 opacity-100'
                 : 'text-neutral-300 opacity-60'
             }`}>
               •
@@ -162,7 +162,7 @@ function SyllableMarkComponent({ syllables }: SyllableMarkComponentProps): React
           )}
         </React.Fragment>
       ))}
-      
+
       {/* Syllable count badge */}
       {isHovered && (
         <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 px-1.5 py-0.5 bg-creative-100 text-creative-700 text-xs rounded border border-creative-200 shadow-soft whitespace-nowrap">
@@ -188,11 +188,11 @@ export function breakIntoSyllables(text: string): string[] {
   const vowels = 'aeiouyAEIOUY'
   const syllables: string[] = []
   let currentSyllable = ''
-  
+
   for (let i = 0; i < text.length; i++) {
     const char = text[i]
     currentSyllable += char
-    
+
     // Very basic rule: break after a vowel if the next character is a consonant
     if (vowels.includes(char) && i < text.length - 1 && !vowels.includes(text[i + 1])) {
       // Look ahead to see if we should break here
@@ -202,10 +202,10 @@ export function breakIntoSyllables(text: string): string[] {
       }
     }
   }
-  
+
   if (currentSyllable) {
     syllables.push(currentSyllable)
   }
-  
+
   return syllables.length > 0 ? syllables : [text]
 }

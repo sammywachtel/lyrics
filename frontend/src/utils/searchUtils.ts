@@ -48,10 +48,10 @@ export function normalizeSearchText(text: string): string {
  */
 export function textContainsQuery(text: string, query: string): boolean {
   if (!query.trim()) return true
-  
+
   const normalizedText = normalizeSearchText(text)
   const normalizedQuery = normalizeSearchText(query)
-  
+
   // Support phrase searching with quotes
   if (normalizedQuery.includes('"')) {
     const phrases = normalizedQuery.match(/"([^"]+)"/g) || []
@@ -60,7 +60,7 @@ export function textContainsQuery(text: string, query: string): boolean {
       return normalizedText.includes(cleanPhrase)
     })
   }
-  
+
   // Support multiple search terms (AND logic)
   const terms = normalizedQuery.split(' ').filter(term => term.length > 0)
   return terms.every(term => normalizedText.includes(term))
@@ -71,11 +71,11 @@ export function textContainsQuery(text: string, query: string): boolean {
  */
 export function findMatchingSegments(text: string, query: string): string[] {
   if (!query.trim()) return []
-  
+
   const normalizedText = normalizeSearchText(text)
   const normalizedQuery = normalizeSearchText(query)
   const matches: string[] = []
-  
+
   // Find phrase matches
   if (normalizedQuery.includes('"')) {
     const phrases = normalizedQuery.match(/"([^"]+)"/g) || []
@@ -94,7 +94,7 @@ export function findMatchingSegments(text: string, query: string): string[] {
       }
     })
   }
-  
+
   return matches
 }
 
@@ -103,23 +103,23 @@ export function findMatchingSegments(text: string, query: string): string[] {
  */
 export function calculateRelevanceScore(song: Song, query: string): number {
   if (!query.trim()) return 0
-  
+
   let score = 0
   const normalizedQuery = normalizeSearchText(query)
   const queryLength = normalizedQuery.length
-  
+
   // Title matches (highest weight)
   if (song.title && textContainsQuery(song.title, query)) {
     const titleWeight = normalizeSearchText(song.title).length / queryLength
     score += Math.min(titleWeight * 100, 100)
   }
-  
+
   // Artist matches (high weight)
   if (song.artist && textContainsQuery(song.artist, query)) {
     const artistWeight = normalizeSearchText(song.artist).length / queryLength
     score += Math.min(artistWeight * 80, 80)
   }
-  
+
   // Tag matches (medium weight)
   if (song.tags && song.tags.length > 0) {
     song.tags.forEach(tag => {
@@ -128,7 +128,7 @@ export function calculateRelevanceScore(song: Song, query: string): number {
       }
     })
   }
-  
+
   // Lyrics matches (lower weight but important for content search)
   if (song.lyrics && textContainsQuery(song.lyrics, query)) {
     const plainLyrics = formatTextToPlain(song.lyrics)
@@ -136,7 +136,7 @@ export function calculateRelevanceScore(song: Song, query: string): number {
     const lyricsWeight = Math.min(lyricsLength / queryLength, 10)
     score += lyricsWeight * 5
   }
-  
+
   return score
 }
 
@@ -145,23 +145,23 @@ export function calculateRelevanceScore(song: Song, query: string): number {
  */
 export function filterSongs(songs: Song[], filters: SearchFilters): SearchResult[] {
   let filteredSongs = [...songs]
-  
+
   // Apply status filter
   if (filters.status && filters.status !== 'all') {
     filteredSongs = filteredSongs.filter(song => song.status === filters.status)
   }
-  
+
   // Apply tag filter
   if (filters.tags && filters.tags.length > 0) {
-    filteredSongs = filteredSongs.filter(song => 
-      song.tags && song.tags.some(tag => 
-        filters.tags!.some(filterTag => 
+    filteredSongs = filteredSongs.filter(song =>
+      song.tags && song.tags.some(tag =>
+        filters.tags!.some(filterTag =>
           normalizeSearchText(tag).includes(normalizeSearchText(filterTag))
         )
       )
     )
   }
-  
+
   // Apply date range filter
   if (filters.dateRange) {
     const { start, end } = filters.dateRange
@@ -172,10 +172,10 @@ export function filterSongs(songs: Song[], filters: SearchFilters): SearchResult
       return true
     })
   }
-  
+
   // Apply text search and calculate relevance
   const results: SearchResult[] = []
-  
+
   filteredSongs.forEach(song => {
     if (!filters.query.trim()) {
       // No query, include all filtered songs
@@ -187,34 +187,34 @@ export function filterSongs(songs: Song[], filters: SearchFilters): SearchResult
     } else {
       // Calculate relevance score
       const score = calculateRelevanceScore(song, filters.query)
-      
+
       if (score > 0) {
         // Find matches for highlighting
         const matches: SearchResult['matches'] = {}
-        
+
         if (song.title && textContainsQuery(song.title, filters.query)) {
           matches.title = findMatchingSegments(song.title, filters.query)
         }
-        
+
         if (song.artist && textContainsQuery(song.artist, filters.query)) {
           matches.artist = findMatchingSegments(song.artist, filters.query)
         }
-        
+
         if (song.lyrics && textContainsQuery(song.lyrics, filters.query)) {
           matches.lyrics = findMatchingSegments(song.lyrics, filters.query)
         }
-        
+
         if (song.tags && song.tags.length > 0) {
-          const matchingTags = song.tags.filter(tag => 
+          const matchingTags = song.tags.filter(tag =>
             textContainsQuery(tag, filters.query)
           )
           if (matchingTags.length > 0) {
-            matches.tags = matchingTags.flatMap(tag => 
+            matches.tags = matchingTags.flatMap(tag =>
               findMatchingSegments(tag, filters.query)
             )
           }
         }
-        
+
         results.push({
           song,
           score,
@@ -223,14 +223,14 @@ export function filterSongs(songs: Song[], filters: SearchFilters): SearchResult
       }
     }
   })
-  
+
   // Sort results
   const sortBy = filters.sortBy || 'relevance'
   const sortOrder = filters.sortOrder || 'desc'
-  
+
   results.sort((a, b) => {
     let comparison = 0
-    
+
     switch (sortBy) {
       case 'title':
         comparison = (a.song.title || '').localeCompare(b.song.title || '')
@@ -242,7 +242,7 @@ export function filterSongs(songs: Song[], filters: SearchFilters): SearchResult
         comparison = new Date(a.song.created_at).getTime() - new Date(b.song.created_at).getTime()
         break
       case 'updated_at':
-        comparison = new Date(a.song.updated_at || a.song.created_at).getTime() - 
+        comparison = new Date(a.song.updated_at || a.song.created_at).getTime() -
                     new Date(b.song.updated_at || b.song.created_at).getTime()
         break
       case 'relevance':
@@ -250,10 +250,10 @@ export function filterSongs(songs: Song[], filters: SearchFilters): SearchResult
         comparison = a.score - b.score
         break
     }
-    
+
     return sortOrder === 'asc' ? comparison : -comparison
   })
-  
+
   return results
 }
 
@@ -262,13 +262,13 @@ export function filterSongs(songs: Song[], filters: SearchFilters): SearchResult
  */
 export function extractUniqueTags(songs: Song[]): string[] {
   const tagSet = new Set<string>()
-  
+
   songs.forEach(song => {
     if (song.tags) {
       song.tags.forEach(tag => tagSet.add(tag))
     }
   })
-  
+
   return Array.from(tagSet).sort()
 }
 
@@ -277,42 +277,42 @@ export function extractUniqueTags(songs: Song[]): string[] {
  */
 export function highlightMatches(text: string, matches: string[]): string {
   if (!matches.length) return text
-  
+
   // Sort matches by length (longest first) to handle overlapping matches correctly
   const sortedMatches = [...matches].sort((a, b) => b.length - a.length)
-  
+
   // Track which parts of the text have already been highlighted
   const highlights: { start: number, end: number, match: string }[] = []
-  
+
   sortedMatches.forEach(match => {
     const normalizedMatch = normalizeSearchText(match)
     const normalizedText = normalizeSearchText(text)
-    
+
     let startIndex = 0
     let matchIndex: number
-    
+
     // Find all occurrences of this match
     while ((matchIndex = normalizedText.indexOf(normalizedMatch, startIndex)) !== -1) {
       const endIndex = matchIndex + normalizedMatch.length
-      
+
       // Check if this area is already highlighted by a longer match
-      const isOverlapping = highlights.some(h => 
+      const isOverlapping = highlights.some(h =>
         (matchIndex >= h.start && matchIndex < h.end) ||
         (endIndex > h.start && endIndex <= h.end) ||
         (matchIndex <= h.start && endIndex >= h.end)
       )
-      
+
       if (!isOverlapping) {
         highlights.push({ start: matchIndex, end: endIndex, match })
       }
-      
+
       startIndex = matchIndex + 1
     }
   })
-  
+
   // Sort highlights by position
   highlights.sort((a, b) => a.start - b.start)
-  
+
   // Apply highlights from right to left to preserve indices
   let result = text
   for (let i = highlights.length - 1; i >= 0; i--) {
@@ -320,9 +320,9 @@ export function highlightMatches(text: string, matches: string[]): string {
     const beforeHighlight = result.substring(0, highlight.start)
     const highlightText = result.substring(highlight.start, highlight.end)
     const afterHighlight = result.substring(highlight.end)
-    
+
     result = beforeHighlight + `<mark>${highlightText}</mark>` + afterHighlight
   }
-  
+
   return result
 }

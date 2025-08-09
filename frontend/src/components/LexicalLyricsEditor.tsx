@@ -42,13 +42,13 @@ const theme = {
 }
 
 // Plugin to handle initial content and external value changes
-function ValueSyncPlugin({ 
-  value, 
+function ValueSyncPlugin({
+  value,
   onChange,
   onAutoSave,
   autoSaveDelay = 10000,
   enableAutoSave = true
-}: { 
+}: {
   value: string
   onChange: (value: string) => void
   onAutoSave?: (currentContent?: string) => Promise<void>
@@ -62,18 +62,18 @@ function ValueSyncPlugin({
   const lastChangeTimeRef = useRef<number>(0)
   const initialValueRef = useRef(value)
   const lastSavedContentRef = useRef('')
-  
+
   // Initialize editor with value
   useEffect(() => {
     if (!isInitialized.current) {
       isUpdatingFromProps.current = true
       initialValueRef.current = value
       lastSavedContentRef.current = value
-      
+
       editor.update(() => {
         const root = $getRoot()
         root.clear()
-        
+
         if (value) {
           // Split by lines and create paragraph nodes
           const lines = value.split('\n')
@@ -89,7 +89,7 @@ function ValueSyncPlugin({
           root.append(emptyParagraph)
         }
       })
-      
+
       isInitialized.current = true
       // Wait longer before allowing changes to be detected
       setTimeout(() => {
@@ -97,7 +97,7 @@ function ValueSyncPlugin({
       }, 200)
     }
   }, [editor, value])
-  
+
   // Update editor when external value changes (but not during initialization)
   useEffect(() => {
     if (isInitialized.current && !isUpdatingFromProps.current && value !== initialValueRef.current) {
@@ -111,15 +111,15 @@ function ValueSyncPlugin({
           return child.getTextContent()
         }).join('\n')
       })
-      
+
       if (currentText !== value) {
         isUpdatingFromProps.current = true
         lastSavedContentRef.current = value
-        
+
         editor.update(() => {
           const root = $getRoot()
           root.clear()
-          
+
           if (value) {
             const lines = value.split('\n')
             lines.forEach((line) => {
@@ -133,20 +133,20 @@ function ValueSyncPlugin({
             root.append(emptyParagraph)
           }
         })
-        
+
         setTimeout(() => {
           isUpdatingFromProps.current = false
         }, 100)
       }
     }
   }, [editor, value])
-  
+
   // Handle editor content changes
   const handleEditorChange = useCallback(() => {
     if (isUpdatingFromProps.current) {
       return
     }
-    
+
     // Use Lexical's update mechanism to ensure proper scheduling
     // This ensures content is read after Lexical has fully processed the change
     editor.update(() => {
@@ -159,22 +159,22 @@ function ValueSyncPlugin({
         }
         return child.getTextContent()
       }).join('\n')
-      
+
       // Only process if content actually changed from the last saved version
       if (textContent === lastSavedContentRef.current) {
         return
       }
-      
+
       // Update parent component with new content
       onChange(textContent)
       lastChangeTimeRef.current = Date.now()
-      
+
       // Setup debounced auto-save
       if (enableAutoSave && onAutoSave) {
         if (autoSaveTimeoutRef.current) {
           clearTimeout(autoSaveTimeoutRef.current)
         }
-        
+
         autoSaveTimeoutRef.current = setTimeout(() => {
           const timeSinceLastChange = Date.now() - lastChangeTimeRef.current
           if (timeSinceLastChange >= autoSaveDelay - 100) {
@@ -189,19 +189,19 @@ function ValueSyncPlugin({
                 }
                 return child.getTextContent()
               }).join('\n')
-              
+
               console.log('📝 Auto-save content check:', {
                 capturedAtChange: textContent.length,
                 currentAtSave: currentContent.length,
                 content: currentContent.slice(-10) // Last 10 chars
               })
-              
+
               // Always ensure React state is synchronized
               if (currentContent !== textContent) {
                 console.log('🔧 React state behind Lexical - updating immediately')
                 onChange(currentContent)
               }
-              
+
               lastSavedContentRef.current = currentContent
               onAutoSave(currentContent).catch(error => {
                 console.error('Auto-save failed:', error)
@@ -212,7 +212,7 @@ function ValueSyncPlugin({
       }
     })
   }, [editor, onChange, onAutoSave, enableAutoSave, autoSaveDelay])
-  
+
   // Cleanup auto-save timeout on unmount
   useEffect(() => {
     return () => {
@@ -221,22 +221,22 @@ function ValueSyncPlugin({
       }
     }
   }, [])
-  
+
   return <OnChangePlugin onChange={handleEditorChange} />
 }
 
 // Auto-focus plugin
 function AutoFocusPlugin() {
   const [editor] = useLexicalComposerContext()
-  
+
   useEffect(() => {
     const timer = setTimeout(() => {
       editor.focus()
     }, 300)
-    
+
     return () => clearTimeout(timer)
   }, [editor])
-  
+
   return null
 }
 
@@ -254,8 +254,8 @@ const LexicalLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, LexicalLyri
     const [isSourceMode, setIsSourceMode] = useState(false)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const editorRef = useRef<LexicalEditor | null>(null)
-    
-    // Lexical configuration  
+
+    // Lexical configuration
     const initialConfig = React.useMemo(() => ({
       namespace: 'LexicalLyricsEditor',
       theme,
@@ -263,17 +263,17 @@ const LexicalLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, LexicalLyri
         console.error('Lexical error:', error)
       },
     }), [])
-    
+
     // Handle source mode changes
     const handleSourceChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
       onChange(e.target.value)
     }, [onChange])
-    
+
     // Toggle between modes
     const toggleMode = useCallback(() => {
       setIsSourceMode(!isSourceMode)
     }, [isSourceMode])
-    
+
     // Expose methods via ref
     useImperativeHandle(ref, () => ({
       getTextareaElement: () => textareaRef.current,
@@ -327,9 +327,9 @@ const LexicalLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, LexicalLyri
       },
       isSourceMode: () => isSourceMode,
     }), [isSourceMode, value, onChange])
-    
+
     const minHeight = `${rows * 1.5}rem`
-    
+
     return (
       <div className={`lexical-lyrics-editor h-full flex flex-col relative ${className}`}>
         {/* Editor Content - Full Height with Internal Scrolling */}
@@ -342,7 +342,7 @@ const LexicalLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, LexicalLyri
                 onChange={handleSourceChange}
                 placeholder={placeholder}
                 className={`w-full h-full border-0 px-6 py-6 text-lyrics focus:outline-none font-mono resize-none transition-all duration-200 text-neutral-900 bg-transparent leading-relaxed ${className}`}
-                style={{ 
+                style={{
                   minHeight,
                   fontFamily: 'JetBrains Mono, Fira Code, Monaco, Cascadia Code, Roboto Mono, monospace'
                 }}
@@ -356,14 +356,14 @@ const LexicalLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, LexicalLyri
                     contentEditable={
                       <ContentEditable
                         className={`lexical-editor w-full min-h-full border-0 px-6 py-6 text-lyrics focus:outline-none font-mono resize-none transition-all duration-200 text-neutral-900 bg-transparent leading-relaxed ${className}`}
-                        style={{ 
+                        style={{
                           minHeight,
                           fontFamily: 'JetBrains Mono, Fira Code, Monaco, Cascadia Code, Roboto Mono, monospace',
                           whiteSpace: 'pre-wrap'
                         }}
                         aria-placeholder={placeholder}
                         placeholder={
-                          <div 
+                          <div
                             className="absolute top-6 left-6 text-neutral-400 pointer-events-none select-none font-mono"
                             style={{
                               fontFamily: 'JetBrains Mono, Fira Code, Monaco, Cascadia Code, Roboto Mono, monospace'
@@ -377,11 +377,11 @@ const LexicalLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, LexicalLyri
                     ErrorBoundary={({ children }) => <div>{children}</div>}
                   />
                 </div>
-                
+
                 <HistoryPlugin />
-                <ValueSyncPlugin 
-                  value={value} 
-                  onChange={onChange} 
+                <ValueSyncPlugin
+                  value={value}
+                  onChange={onChange}
                   onAutoSave={onAutoSave}
                   autoSaveDelay={autoSaveDelay}
                   enableAutoSave={enableAutoSave}
@@ -391,7 +391,7 @@ const LexicalLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, LexicalLyri
             </LexicalComposer>
           )}
         </div>
-        
+
         {/* Mode Toggle - Floating Button */}
         <button
           onClick={toggleMode}

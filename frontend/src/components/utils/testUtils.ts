@@ -18,7 +18,7 @@ export function createTestEditor(): LexicalEditor {
       throw error
     }
   })
-  
+
   return editor
 }
 

@@ -182,21 +182,21 @@ CREATE OR REPLACE FUNCTION create_song_version_on_change()
 RETURNS TRIGGER AS $$
 BEGIN
     -- Create version if title or content changed significantly
-    IF (OLD.title != NEW.title OR 
-        LENGTH(OLD.content) != LENGTH(NEW.content) OR 
+    IF (OLD.title != NEW.title OR
+        LENGTH(OLD.content) != LENGTH(NEW.content) OR
         OLD.content != NEW.content) THEN
-        
+
         INSERT INTO song_versions (
-            song_id, user_id, version_number, title, content, 
+            song_id, user_id, version_number, title, content,
             metadata, settings, prosody_config, change_summary
         )
-        SELECT 
+        SELECT
             OLD.id,
             OLD.user_id,
             COALESCE(
-                (SELECT MAX(version_number) + 1 
-                 FROM song_versions 
-                 WHERE song_id = OLD.id), 
+                (SELECT MAX(version_number) + 1
+                 FROM song_versions
+                 WHERE song_id = OLD.id),
                 1
             ),
             OLD.title,
@@ -204,13 +204,13 @@ BEGIN
             OLD.metadata,
             OLD.settings,
             OLD.prosody_config,
-            CASE 
+            CASE
                 WHEN OLD.title != NEW.title THEN 'Title changed'
                 WHEN OLD.content != NEW.content THEN 'Content updated'
                 ELSE 'Song updated'
             END;
     END IF;
-    
+
     RETURN NEW;
 END;
 $$ language 'plpgsql';
@@ -241,7 +241,7 @@ BEGIN
             'manual'
         );
     END IF;
-    
+
     RETURN NEW;
 END;
 $$ language 'plpgsql';

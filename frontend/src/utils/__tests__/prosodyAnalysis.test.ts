@@ -156,7 +156,7 @@ Nothing goes wrong`
       expect(result[0].name).toBe('Verse 1')
       expect(result[0].lineCount).toBe(2)
       expect(result[0].rhymeScheme).toBe('AA')
-      
+
       expect(result[1].name).toBe('Chorus')
       expect(result[1].lineCount).toBe(4)
       expect(result[1].rhymeScheme).toBe('AAAA')
@@ -222,7 +222,7 @@ Love is blind they say`
       expect(result[0].phrase).toBe('heart on fire')
       expect(result[0].lineNumber).toBe(1)
       expect(result[0].suggestion).toBeDefined()
-      
+
       expect(result[1].phrase).toBe('love is blind')
       expect(result[1].lineNumber).toBe(2)
     })

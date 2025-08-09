@@ -42,7 +42,7 @@ export const SectionToolbar: React.FC<SectionToolbarProps> = ({
         <span className="w-2 h-2 rounded-full bg-gradient-creative from-primary-400 to-creative-500"></span>
         <span className="text-sm font-semibold text-neutral-700">Quick Insert:</span>
       </div>
-      
+
       <div className="flex flex-wrap gap-2">
         {availableSections.slice(0, 6).map((section) => {
           // Smart auto-numbering display: show number only when multiples exist
@@ -50,7 +50,7 @@ export const SectionToolbar: React.FC<SectionToolbarProps> = ({
             const type = getSectionType(s.name)
             return type === section.type
           }).length
-          
+
           // Determine display name - show numbers intelligently
           let displayName: string = section.type
           if (existingOfType > 0) {
@@ -62,7 +62,7 @@ export const SectionToolbar: React.FC<SectionToolbarProps> = ({
               displayName = `${section.type} ${existingOfType + 1}`
             }
           }
-          
+
           return (
             <button
               key={section.type}
@@ -87,9 +87,9 @@ export const SectionToolbar: React.FC<SectionToolbarProps> = ({
           )
         })}
       </div>
-      
+
       <div className="flex-1" />
-      
+
       {hasExistingSections && (
         <div className="flex items-center gap-2">
           {onToggleSidebar && !showSidebar && (

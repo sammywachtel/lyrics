@@ -83,16 +83,16 @@ export class RhymeNode extends TextNode {
   createDOM(config: EditorConfig, editor?: LexicalEditor): HTMLElement {
     const element = super.createDOM(config, editor)
     element.classList.add('rhyme-node')
-    
+
     // Add rhyme scheme class for coloring
     if (this.__rhymeScheme) {
       element.classList.add(`rhyme-${this.__rhymeScheme.toLowerCase()}`)
     }
-    
+
     // Add data attributes
     element.setAttribute('data-rhyme-scheme', this.__rhymeScheme)
     element.setAttribute('data-rhyme-group', this.__rhymeGroup)
-    
+
     return element
   }
 
@@ -109,12 +109,12 @@ export class RhymeNode extends TextNode {
           dom.classList.add(`rhyme-${this.__rhymeScheme.toLowerCase()}`)
         }
       }
-      
+
       // Update data attributes
       dom.setAttribute('data-rhyme-scheme', this.__rhymeScheme)
       dom.setAttribute('data-rhyme-group', this.__rhymeGroup)
     }
-    
+
     return super.updateDOM(prevNode as this, dom, config)
   }
 }

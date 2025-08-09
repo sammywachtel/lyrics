@@ -183,7 +183,7 @@ function SectionTagComponent({ sectionName, nodeKey, editor }: SectionTagCompone
               />
             </div>
           ) : (
-            <div 
+            <div
               className="section-tag-label cursor-pointer"
               onClick={handleEdit}
               title="Click to edit section name"
@@ -192,11 +192,11 @@ function SectionTagComponent({ sectionName, nodeKey, editor }: SectionTagCompone
               <span>{sectionName}</span>
             </div>
           )}
-          
+
           {/* Decorative Line */}
           <div className="section-decorative-line"></div>
         </div>
-        
+
         {/* Section Actions */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button

@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 
 // Simple fallback to avoid Jest parsing issues with import.meta
-const API_BASE_URL = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' 
+const API_BASE_URL = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
   ? 'http://localhost:8001'  // Test environment
   : import.meta.env.VITE_API_URL || 'http://localhost:8001'  // Use environment variable or fallback to local
 
@@ -65,24 +65,24 @@ export interface SongSettings {
   narrative_pov: NarrativePOV
   central_theme?: string
   six_best_friends: SixBestFriends
-  
+
   // Structure
   structural_boxes: StructuralBox[]
   section_structure: SectionStructure[]
-  
+
   // Rhyme and Prosody
   rhyme_preferences: RhymePreferences
   prosody_settings: ProsodySettings
-  
+
   // Content and Style
   keyword_settings: KeywordSettings
   style_guide: StyleGuide
-  
+
   // Global Targets
   target_duration_minutes?: number
   overall_mood?: string
   energy_level: number
-  
+
   // AI Assistance
   ai_creativity_level: number
   preserve_user_phrases: boolean
@@ -149,28 +149,28 @@ export interface SongResponse {
 class ApiClient {
   private async getAuthHeaders(): Promise<Record<string, string>> {
     const { data: { session }, error } = await supabase.auth.getSession()
-    
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     }
-    
+
     if (error) {
       console.warn('Error getting session:', error)
     }
-    
+
     if (session?.access_token) {
       headers['Authorization'] = `Bearer ${session.access_token}`
     }
-    
+
     return headers
   }
 
   private async request<T>(
-    endpoint: string, 
+    endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
     let headers = await this.getAuthHeaders()
-    
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers: {
@@ -183,13 +183,13 @@ class ApiClient {
       // Handle 401 Unauthorized responses
       if (response.status === 401) {
         console.warn('Received 401, attempting to refresh session...')
-        
+
         // Try to refresh the session
         const { data: { session }, error } = await supabase.auth.refreshSession()
-        
+
         if (session && !error) {
           console.log('Session refreshed successfully, retrying request')
-          
+
           // Retry with new token
           headers = await this.getAuthHeaders()
           const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -199,18 +199,18 @@ class ApiClient {
               ...options.headers,
             },
           })
-          
+
           if (retryResponse.ok) {
             return retryResponse.json()
           }
         }
-        
+
         // If refresh failed or retry still got 401, sign out
         console.warn('Session refresh failed or retry unsuccessful, signing out user')
         await supabase.auth.signOut()
         throw new Error('Session expired. Please log in again.')
       }
-      
+
       const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
       throw new Error(error.detail || `HTTP ${response.status}`)
     }
@@ -231,15 +231,15 @@ class ApiClient {
   }
 
   async listSongs(
-    page: number = 1, 
-    perPage: number = 10, 
+    page: number = 1,
+    perPage: number = 10,
     status?: string
   ): Promise<SongListResponse> {
     const params = new URLSearchParams({
       page: page.toString(),
       per_page: perPage.toString(),
     })
-    
+
     if (status) {
       params.append('status', status)
     }
@@ -286,11 +286,11 @@ export const createDefaultSettings = (): SongSettings => ({
   narrative_pov: 'first_person',
   central_theme: undefined,
   six_best_friends: {},
-  
+
   // Structure
   structural_boxes: [],
   section_structure: [],
-  
+
   // Rhyme and Prosody
   rhyme_preferences: {
     primary_types: [],
@@ -303,7 +303,7 @@ export const createDefaultSettings = (): SongSettings => ({
     syllable_emphasis: true,
     meter_consistency: 5,
   },
-  
+
   // Content and Style
   keyword_settings: {
     primary_keywords: [],
@@ -317,10 +317,10 @@ export const createDefaultSettings = (): SongSettings => ({
     avoid_cliches: true,
     innovation_level: 5,
   },
-  
+
   // Global Targets
   energy_level: 5,
-  
+
   // AI Assistance
   ai_creativity_level: 5,
   preserve_user_phrases: true,

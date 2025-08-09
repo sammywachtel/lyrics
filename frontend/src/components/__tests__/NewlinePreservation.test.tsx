@@ -18,7 +18,7 @@ jest.mock('../../lib/api', () => ({
 jest.mock('../LexicalLyricsEditor', () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react')
-  
+
   const MockEditor = React.forwardRef(({ value, onChange, placeholder }, ref) => {
     React.useImperativeHandle(ref, () => ({
       isSourceMode: () => false,
@@ -31,7 +31,7 @@ jest.mock('../LexicalLyricsEditor', () => {
       wrapSelectedText: () => {},
       insertTextAtCursor: () => {}
     }))
-    
+
     return (
       <textarea
         data-testid="lyrics-editor"
@@ -42,7 +42,7 @@ jest.mock('../LexicalLyricsEditor', () => {
       />
     )
   })
-  
+
   MockEditor.displayName = 'MockLexicalLyricsEditor'
   return MockEditor
 })
@@ -112,7 +112,7 @@ describe('Newline Preservation', () => {
         lyrics: '[Verse 1]\nFirst line\nSecond line\n\n[Chorus]\nChorus line\nAnother line'
       },
       {
-        name: 'double newlines between sections', 
+        name: 'double newlines between sections',
         lyrics: '[Verse 1]\nVerse content\n\n[Chorus]\nChorus content\n\n[Bridge]\nBridge content'
       },
       {
@@ -136,7 +136,7 @@ describe('Newline Preservation', () => {
     for (const testCase of testCases) {
       // Clear mocks for each test case
       jest.clearAllMocks()
-      
+
       const originalSong = {
         ...mockSong,
         lyrics: testCase.lyrics
@@ -145,7 +145,7 @@ describe('Newline Preservation', () => {
       // Mock getSong to return our test lyrics
       mockApiClient.getSong.mockResolvedValue({ message: 'Success', song: originalSong })
 
-      // Render the component  
+      // Render the component
       const { unmount } = render(<SongEditor songId={`test-${testCase.name.replace(/\s+/g, '-')}`} />)
 
       // Wait for component to load
@@ -160,7 +160,7 @@ describe('Newline Preservation', () => {
 
       // Get the editor and verify the initial content matches exactly
       const editor = screen.getByTestId('lyrics-editor') as HTMLTextAreaElement
-      
+
       // This is the critical test: the editor should display exactly what was stored
       if (editor.value !== testCase.lyrics) {
         throw new Error(`Newlines were not preserved correctly on load for test case: ${testCase.name}
@@ -178,7 +178,7 @@ describe('Newline Preservation', () => {
   it('should preserve newlines in text statistics', async () => {
     // Test that line counting is accurate with various newline patterns
     const lyricsWithNewlines = '[Verse 1]\nLine 1\nLine 2\n\n[Chorus]\nChorus line\n'
-    
+
     const songWithNewlines = {
       ...mockSong,
       lyrics: lyricsWithNewlines
@@ -225,7 +225,7 @@ describe('Newline Preservation', () => {
 
     for (const testCase of edgeCases) {
       jest.clearAllMocks()
-      
+
       const testSong = {
         ...mockSong,
         lyrics: testCase.lyrics

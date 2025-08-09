@@ -9,7 +9,7 @@ The song settings system provides a complete backend foundation for AI-assisted 
 1. **Foundation** - Core narrative elements (who, to whom, why, point of view)
 2. **Structure** - Song organization and timing
 3. **Sound** - Rhyme schemes and prosody settings
-4. **Style** - Genre and artistic direction  
+4. **Style** - Genre and artistic direction
 5. **Content** - Keywords, metaphors, and content guidelines
 6. **AI** - AI assistance configuration
 
@@ -21,13 +21,13 @@ The song settings system provides a complete backend foundation for AI-assisted 
 {
   "foundation": {
     "who_is_talking": "string|null",
-    "to_whom": "string|null", 
+    "to_whom": "string|null",
     "why_message": "string|null",
     "point_of_view": "first_person|second_person|third_person|direct_address",
     "central_theme": "string|null",
     "six_best_friends": {
       "who": "string|null",
-      "what": "string|null", 
+      "what": "string|null",
       "when": "string|null",
       "where": "string|null",
       "why": "string|null",
@@ -111,7 +111,7 @@ Returns the current settings for a song.
 }
 ```
 
-#### Update All Settings  
+#### Update All Settings
 ```http
 PUT /api/songs/{song_id}/settings
 ```
@@ -247,7 +247,7 @@ Reset all settings to defaults.
 - `central_theme`: Max 500 characters
 - `point_of_view`: Must be valid enum value
 
-### Structure Tab  
+### Structure Tab
 - `target_duration_minutes`: 0.5 - 15.0 minutes
 - `section_structure`: Max 20 sections
 - `line_count_target`: 1 - 50 lines
@@ -368,7 +368,7 @@ const validateSettings = async (settings) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(settings)
   });
-  
+
   return response.json();
 };
 ```

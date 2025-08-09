@@ -83,7 +83,7 @@ export class SyllableNode extends TextNode {
   createDOM(config: EditorConfig, editor?: LexicalEditor): HTMLElement {
     const element = super.createDOM(config, editor)
     element.classList.add('syllable-node')
-    
+
     // Add stress class for styling
     switch (this.__stress) {
       case 'stressed':
@@ -96,11 +96,11 @@ export class SyllableNode extends TextNode {
         element.classList.add('syllable-unstressed')
         break
     }
-    
+
     // Add data attributes
     element.setAttribute('data-syllable-count', this.__syllableCount.toString())
     element.setAttribute('data-stress', this.__stress)
-    
+
     return element
   }
 
@@ -121,12 +121,12 @@ export class SyllableNode extends TextNode {
             break
         }
       }
-      
+
       // Update data attributes
       dom.setAttribute('data-syllable-count', this.__syllableCount.toString())
       dom.setAttribute('data-stress', this.__stress)
     }
-    
+
     return super.updateDOM(prevNode as this, dom, config)
   }
 }

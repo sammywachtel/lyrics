@@ -29,7 +29,7 @@ This document summarizes the comprehensive backend support for the song settings
 
 #### `song_settings_history` Table
 ```sql
-- id UUID (Primary Key)  
+- id UUID (Primary Key)
 - song_id UUID (Foreign Key to songs)
 - user_id UUID (Foreign Key to users)
 - settings_before JSONB
@@ -58,24 +58,24 @@ class SongSettings(BaseModel):
     narrative_pov: NarrativePOV = "first_person"
     central_theme: Optional[str] = None
     six_best_friends: SixBestFriends = Field(default_factory=SixBestFriends)
-    
+
     # Structure tab
     structural_boxes: List[StructuralBox] = Field(default_factory=list)
     section_structure: List[SectionStructure] = Field(default_factory=list)
-    
+
     # Sound tab (Rhyme & Prosody)
     rhyme_preferences: RhymePreferences = Field(default_factory=RhymePreferences)
     prosody_settings: ProsodySettings = Field(default_factory=ProsodySettings)
-    
+
     # Style & Content tabs
     keyword_settings: KeywordSettings = Field(default_factory=KeywordSettings)
     style_guide: StyleGuide = Field(default_factory=StyleGuide)
-    
+
     # Global Targets
     target_duration_minutes: Optional[float] = None
     overall_mood: Optional[str] = None
     energy_level: int = 5  # 1-10 scale
-    
+
     # AI tab
     ai_creativity_level: int = 5  # 1-10 scale
     preserve_user_phrases: bool = True
@@ -144,7 +144,7 @@ PUT    /api/songs/{id}/settings          - Update complete settings
 PATCH  /api/songs/{id}/settings          - Partial update (auto-save)
 ```
 
-### 2. Prosody Configuration  
+### 2. Prosody Configuration
 ```
 GET    /api/songs/{id}/prosody-config    - Get prosody config
 PUT    /api/songs/{id}/prosody-config    - Update prosody config
@@ -192,7 +192,7 @@ GET    /api/songs/{id}/settings/history  - Get settings change history
 
 ### 1. Tab Structure Mapping
 - **Narrative tab** → `narrative_pov`, `central_theme`, `six_best_friends`
-- **Structure tab** → `structural_boxes`, `section_structure`  
+- **Structure tab** → `structural_boxes`, `section_structure`
 - **Rhyme tab** → `rhyme_preferences`
 - **Prosody tab** → `prosody_settings` + `prosody_config`
 - **Keywords tab** → `keyword_settings`
@@ -291,7 +291,7 @@ GET    /api/songs/{id}/settings/history  - Get settings change history
 The comprehensive song settings backend now provides:
 
 ✅ **Complete frontend support** - All 6 settings tabs fully supported
-✅ **Advanced prosody control** - Detailed rhythm and meter configuration  
+✅ **Advanced prosody control** - Detailed rhythm and meter configuration
 ✅ **Version history** - Full version control with change tracking
 ✅ **Auto-save functionality** - Partial updates for seamless UX
 ✅ **Change audit trail** - Complete history of all modifications

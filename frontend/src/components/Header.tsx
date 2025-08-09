@@ -10,7 +10,7 @@ export function Header() {
   return (
           <header className="relative bg-white backdrop-blur-xl border-b border-neutral-200 shadow-soft">
       {/* No background gradient */}
-      
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center space-x-4">
@@ -30,7 +30,7 @@ export function Header() {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-6">
             {user && (
               <>

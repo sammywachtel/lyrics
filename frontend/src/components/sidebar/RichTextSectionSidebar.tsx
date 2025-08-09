@@ -125,7 +125,7 @@ const RichTextSectionSidebar: React.FC<RichTextSectionSidebarProps> = ({
             <span className="text-lg">✕</span>
           </button>
         </div>
-        
+
         {/* Quick Stats */}
         <div className="flex items-center justify-between text-sm text-neutral-600">
           <span>{sections.length} section{sections.length !== 1 ? 's' : ''}</span>
@@ -151,7 +151,7 @@ const RichTextSectionSidebar: React.FC<RichTextSectionSidebarProps> = ({
             ⌄
           </span>
         </button>
-        
+
         {showAdvancedFeatures && (
           <div className="mt-3 space-y-2">
             <button
@@ -170,7 +170,7 @@ const RichTextSectionSidebar: React.FC<RichTextSectionSidebarProps> = ({
                 {syllableMarkingEnabled ? 'ON' : 'OFF'}
               </span>
             </button>
-            
+
             <button
               onClick={onToggleProsody}
               className={`w-full flex items-center justify-between p-2 text-sm rounded-lg transition-all duration-200 ${
@@ -187,7 +187,7 @@ const RichTextSectionSidebar: React.FC<RichTextSectionSidebarProps> = ({
                 {prosodyEnabled ? 'ON' : 'OFF'}
               </span>
             </button>
-            
+
             <button
               onClick={onToggleRhymeScheme}
               className={`w-full flex items-center justify-between p-2 text-sm rounded-lg transition-all duration-200 ${
@@ -231,7 +231,7 @@ const RichTextSectionSidebar: React.FC<RichTextSectionSidebarProps> = ({
             {sections.map((section) => {
               const isActive = currentSection === section.name
               const isEditing = editingSection === section.name
-              
+
               return (
                 <div
                   key={section.name}
@@ -266,10 +266,10 @@ const RichTextSectionSidebar: React.FC<RichTextSectionSidebarProps> = ({
                             </button>
                           )}
                         </div>
-                        
+
                         <SectionStats section={section} isActive={isActive} />
                       </div>
-                      
+
                       {/* Section Actions */}
                       <div className={`flex items-center gap-1 transition-opacity duration-200 ${
                         isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
@@ -291,7 +291,7 @@ const RichTextSectionSidebar: React.FC<RichTextSectionSidebarProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Active section indicator */}
                   {isActive && (
                     <div className="absolute inset-0 bg-gradient-creative from-primary-50/50 to-creative-50/50 opacity-50 pointer-events-none"></div>

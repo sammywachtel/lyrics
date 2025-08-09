@@ -26,15 +26,15 @@ export const SECTION_TAG_REGEX = /^\[([^\]]+)\]$/
 // Parse lyrics and extract sections
 export function parseSections(lyrics: string): SongSection[] {
   if (!lyrics.trim()) return []
-  
+
   const lines = lyrics.split('\n')
   const sections: SongSection[] = []
   let currentSection: { name: string; startLine: number } | undefined = undefined
-  
+
   lines.forEach((line, index) => {
     const trimmedLine = line.trim()
     const match = trimmedLine.match(SECTION_TAG_REGEX)
-    
+
     if (match) {
       // End previous section if it exists
       if (currentSection) {
@@ -50,7 +50,7 @@ export function parseSections(lyrics: string): SongSection[] {
           content
         })
       }
-      
+
       // Start new section
       currentSection = {
         name: match[1],
@@ -58,7 +58,7 @@ export function parseSections(lyrics: string): SongSection[] {
       }
     }
   })
-  
+
   // Close the last section
   if (currentSection !== undefined) {
     const section = currentSection as { name: string; startLine: number }
@@ -74,7 +74,7 @@ export function parseSections(lyrics: string): SongSection[] {
       content
     })
   }
-  
+
   return sections
 }
 
@@ -86,50 +86,50 @@ export function insertSectionAtPosition(
 ): { newLyrics: string; newPosition: number } {
   const before = lyrics.substring(0, position)
   const after = lyrics.substring(position)
-  
+
   // Find which line the cursor is on
   const beforeLines = before.split('\n')
   const currentLineIndex = beforeLines.length - 1
   const currentLineText = beforeLines[currentLineIndex]
-  
+
   // If we're at the start of a line or the line is empty, insert section here
   // Otherwise, create a new line above
   const isAtLineStart = currentLineText === ''
   const shouldInsertAbove = !isAtLineStart && currentLineText.trim() !== ''
-  
+
   if (shouldInsertAbove) {
     // Insert section tag on a new line above current content
     const lineStartPosition = position - currentLineText.length
     const beforeLine = lyrics.substring(0, lineStartPosition)
     const currentLineAndAfter = lyrics.substring(lineStartPosition)
-    
+
     const needsSpacing = beforeLine && !beforeLine.endsWith('\n')
     const prefix = needsSpacing ? '\n\n' : '\n'
-    
+
     const insertion = `${prefix}${sectionTag}\n`
     const newLyrics = beforeLine + insertion + currentLineAndAfter
     const newPosition = beforeLine.length + insertion.length
-    
+
     return { newLyrics, newPosition }
   } else {
     // Insert at current position with proper spacing
     const beforeHasNewline = before.endsWith('\n') || before === ''
     const afterHasNewline = after.startsWith('\n') || after === ''
-    
+
     const prefix = beforeHasNewline ? '' : '\n'
     const suffix = afterHasNewline ? '' : '\n'
-    
+
     const insertion = `${prefix}${sectionTag}${suffix}`
     const newLyrics = before + insertion + after
     const newPosition = position + insertion.length
-    
+
     return { newLyrics, newPosition }
   }
 }
 
 // Get section at a specific line number
 export function getSectionAtLine(sections: SongSection[], lineNumber: number): SongSection | null {
-  return sections.find(section => 
+  return sections.find(section =>
     lineNumber >= section.startLine && lineNumber <= section.endLine
   ) || null
 }
@@ -138,14 +138,14 @@ export function getSectionAtLine(sections: SongSection[], lineNumber: number): S
 export function getPositionOfSection(lyrics: string, sectionName: string): number | null {
   const lines = lyrics.split('\n')
   const targetTag = `[${sectionName}]`
-  
+
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].trim() === targetTag) {
       // Return position at start of the line
       return lines.slice(0, i).join('\n').length + (i > 0 ? 1 : 0)
     }
   }
-  
+
   return null
 }
 
@@ -170,32 +170,32 @@ export function wrapTextWithSection(
   const before = lyrics.substring(0, startPosition)
   const selectedText = lyrics.substring(startPosition, endPosition)
   const after = lyrics.substring(endPosition)
-  
+
   // Ensure the selected text is properly formatted
   const cleanSelectedText = selectedText.trim()
-  
+
   // Add proper spacing around the section
   const beforeTrimmed = before.trimEnd()
   const afterTrimmed = after.trimStart()
-  
+
   const needsNewlineBefore = beforeTrimmed && !beforeTrimmed.endsWith('\n')
   const needsDoubleNewlineBefore = beforeTrimmed && beforeTrimmed.split('\n').pop()?.trim() !== ''
   const needsNewlineAfter = afterTrimmed && !afterTrimmed.startsWith('\n')
-  
+
   // Build the wrapped content with proper spacing
   let prefix = ''
   if (needsNewlineBefore) {
     prefix = needsDoubleNewlineBefore ? '\n\n' : '\n'
   }
-  
+
   const suffix = needsNewlineAfter ? '\n' : ''
-  
+
   const wrappedText = `${prefix}${sectionTag}\n${cleanSelectedText}${suffix}`
   const newLyrics = before + wrappedText + after
-  
+
   const newStartPosition = startPosition + prefix.length
   const newEndPosition = newStartPosition + sectionTag.length + 1 + cleanSelectedText.length
-  
+
   return { newLyrics, newStartPosition, newEndPosition }
 }
 
@@ -221,12 +221,12 @@ export function getNextSectionNumber(sections: SongSection[], sectionType: Secti
     const type = getSectionType(section.name)
     return type === sectionType
   })
-  
+
   // For unique sections (Intro, Outro, Bridge), don't add numbers unless multiples exist
   if (['Intro', 'Outro', 'Bridge', 'Hook', 'Pre-Chorus'].includes(sectionType)) {
     return existingSections.length > 0 ? existingSections.length + 1 : 1
   }
-  
+
   // For verses and choruses, always use numbers
   return existingSections.length + 1
 }
@@ -237,14 +237,14 @@ export function generateSectionTag(sections: SongSection[], sectionType: Section
     const type = getSectionType(section.name)
     return type === sectionType
   })
-  
+
   const nextNumber = existingSections.length + 1
-  
+
   // For single sections like Bridge, Intro, Outro - don't add number unless there are multiples
   if (['Intro', 'Outro', 'Bridge', 'Hook', 'Pre-Chorus'].includes(sectionType) && nextNumber === 1) {
     return `[${sectionType}]`
   }
-  
+
   return `[${sectionType} ${nextNumber}]`
 }
 
@@ -252,13 +252,13 @@ export function generateSectionTag(sections: SongSection[], sectionType: Section
 export function renumberSections(lyrics: string): string {
   const sections = parseSections(lyrics)
   if (sections.length === 0) return lyrics
-  
+
   const lines = lyrics.split('\n')
   const renumberedLines = [...lines]
-  
+
   // Group sections by type
   const sectionsByType = new Map<SectionType, Array<{ section: SongSection; index: number }>>()
-  
+
   sections.forEach((section, index) => {
     const type = getSectionType(section.name)
     if (type) {
@@ -268,16 +268,16 @@ export function renumberSections(lyrics: string): string {
       sectionsByType.get(type)!.push({ section, index })
     }
   })
-  
+
   // Renumber each type based on text order
   sectionsByType.forEach((typeSections, sectionType) => {
     // Sort by start line to maintain text order
     typeSections.sort((a, b) => a.section.startLine - b.section.startLine)
-    
+
     typeSections.forEach((item, typeIndex) => {
       const { section } = item
       const newNumber = typeIndex + 1
-      
+
       // Generate new section name
       let newSectionName: string
       if (['Intro', 'Outro', 'Bridge', 'Hook', 'Pre-Chorus'].includes(sectionType) && typeSections.length === 1) {
@@ -285,26 +285,26 @@ export function renumberSections(lyrics: string): string {
       } else {
         newSectionName = `${sectionType} ${newNumber}`
       }
-      
+
       // Update the line with the new section tag
       renumberedLines[section.startLine] = `[${newSectionName}]`
     })
   })
-  
+
   return renumberedLines.join('\n')
 }
 
 // Get available section types for quick insert with simplified display names
 export function getAvailableSectionTypes(sections: SongSection[]): Array<{ type: SectionType; tag: string; description: string }> {
   const sectionTypes: Array<{ type: SectionType; tag: string; description: string }> = []
-  
+
   // Core section types - always show with simple names
   const coreTypes: SectionType[] = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge']
-  
+
   coreTypes.forEach(type => {
     const existingCount = sections.filter(s => getSectionType(s.name) === type).length
     const nextNumber = existingCount + 1
-    
+
     // Generate the actual tag with smart numbering
     let tag: string
     if (['Pre-Chorus', 'Bridge'].includes(type) && existingCount === 0) {
@@ -312,27 +312,27 @@ export function getAvailableSectionTypes(sections: SongSection[]): Array<{ type:
     } else {
       tag = `[${type} ${nextNumber}]`
     }
-    
+
     sectionTypes.push({
       type,
       tag,
       description: type // Show simple name like "Verse", "Chorus", etc.
     })
   })
-  
+
   // Additional section types
   const additionalTypes: SectionType[] = ['Intro', 'Outro', 'Hook']
-  
+
   additionalTypes.forEach(type => {
     const existingCount = sections.filter(s => getSectionType(s.name) === type).length
     const tag = existingCount > 0 ? `[${type} ${existingCount + 1}]` : `[${type}]`
-    
+
     sectionTypes.push({
       type,
       tag,
       description: type // Show simple name
     })
   })
-  
+
   return sectionTypes
 }

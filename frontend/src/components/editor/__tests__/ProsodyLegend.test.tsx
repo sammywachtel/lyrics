@@ -23,7 +23,7 @@ describe('ProsodyLegend', () => {
 
   it('should show stability indicators with correct labels', () => {
     render(<ProsodyLegend show={true} onToggle={mockOnToggle} />);
-    
+
     expect(screen.getByText('Stable endings')).toBeInTheDocument();
     expect(screen.getByText('Mixed endings')).toBeInTheDocument();
     expect(screen.getByText('Unstable endings')).toBeInTheDocument();
@@ -32,7 +32,7 @@ describe('ProsodyLegend', () => {
 
   it('should show descriptions for each stability type', () => {
     render(<ProsodyLegend show={true} onToggle={mockOnToggle} />);
-    
+
     expect(screen.getByText(/Create resolution and closure/)).toBeInTheDocument();
     expect(screen.getByText(/Balance of stable and flowing/)).toBeInTheDocument();
     expect(screen.getByText(/Create movement and flow/)).toBeInTheDocument();
@@ -41,46 +41,46 @@ describe('ProsodyLegend', () => {
 
   it('should call onToggle when close button is clicked', () => {
     render(<ProsodyLegend show={true} onToggle={mockOnToggle} />);
-    
+
     const closeButton = screen.getByTitle('Hide legend');
     fireEvent.click(closeButton);
-    
+
     expect(mockOnToggle).toHaveBeenCalledTimes(1);
   });
 
   it('should expand and collapse detailed information', () => {
     render(<ProsodyLegend show={true} onToggle={mockOnToggle} />);
-    
+
     // Initially collapsed - detailed info should not be visible
     expect(screen.queryByText('Stability Examples')).not.toBeInTheDocument();
-    
+
     // Click More button to expand
     const moreButton = screen.getByText('More');
     fireEvent.click(moreButton);
-    
+
     // Should now show detailed information
     expect(screen.getByText('Stability Examples')).toBeInTheDocument();
     expect(screen.getByText('Usage Tips')).toBeInTheDocument();
     expect(screen.getByText('Analysis Features')).toBeInTheDocument();
-    
+
     // Button should now say "Less"
     expect(screen.getByText('Less')).toBeInTheDocument();
-    
+
     // Click Less button to collapse
     const lessButton = screen.getByText('Less');
     fireEvent.click(lessButton);
-    
+
     // Detailed info should be hidden again
     expect(screen.queryByText('Stability Examples')).not.toBeInTheDocument();
   });
 
   it('should show detailed examples when expanded', () => {
     render(<ProsodyLegend show={true} onToggle={mockOnToggle} />);
-    
+
     // Expand the legend
     const moreButton = screen.getByText('More');
     fireEvent.click(moreButton);
-    
+
     // Check for stability examples
     expect(screen.getByText(/Words ending in -ight, -ound, -eat, -ay/)).toBeInTheDocument();
     expect(screen.getByText(/Words ending in -ing, -er, -ly, -tion/)).toBeInTheDocument();
@@ -90,11 +90,11 @@ describe('ProsodyLegend', () => {
 
   it('should show usage tips when expanded', () => {
     render(<ProsodyLegend show={true} onToggle={mockOnToggle} />);
-    
+
     // Expand the legend
     const moreButton = screen.getByText('More');
     fireEvent.click(moreButton);
-    
+
     // Check for usage tips (text may be split across elements)
     expect(screen.getByText('stable endings')).toBeInTheDocument();
     expect(screen.getByText(/for choruses and song conclusions/)).toBeInTheDocument();
@@ -106,11 +106,11 @@ describe('ProsodyLegend', () => {
 
   it('should show analysis features when expanded', () => {
     render(<ProsodyLegend show={true} onToggle={mockOnToggle} />);
-    
+
     // Expand the legend
     const moreButton = screen.getByText('More');
     fireEvent.click(moreButton);
-    
+
     // Check for analysis features (text may be split across elements)
     expect(screen.getByText('Rhyme Detection:')).toBeInTheDocument();
     expect(screen.getByText(/Identifies perfect and near rhymes/)).toBeInTheDocument();
@@ -126,13 +126,13 @@ describe('ProsodyLegend', () => {
     const { container } = render(
       <ProsodyLegend show={true} onToggle={mockOnToggle} className="custom-class" />
     );
-    
+
     expect(container.firstChild).toHaveClass('custom-class');
   });
 
   it('should show quick info at the bottom', () => {
     render(<ProsodyLegend show={true} onToggle={mockOnToggle} />);
-    
+
     expect(screen.getByText(/Analysis updates automatically as you edit/)).toBeInTheDocument();
     expect(screen.getByText(/Green borders indicate stable line endings/)).toBeInTheDocument();
   });

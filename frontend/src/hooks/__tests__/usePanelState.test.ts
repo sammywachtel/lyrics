@@ -29,10 +29,10 @@ describe('usePanelState', () => {
     // Reset to desktop width
     Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true })
   })
-  
+
   it('should initialize with correct default state for desktop', () => {
     const { result } = renderHook(() => usePanelState())
-    
+
     expect(result.current.panels.left).toBe(true)
     expect(result.current.panels.right).toBe(true)
     expect(result.current.activeTab).toBe('editor')
@@ -41,88 +41,88 @@ describe('usePanelState', () => {
     expect(result.current.isMobile).toBe(false)
     expect(result.current.isTablet).toBe(false)
   })
-  
+
   it('should detect mobile viewport correctly', () => {
     Object.defineProperty(window, 'innerWidth', { value: 500, writable: true })
-    
+
     const { result } = renderHook(() => usePanelState())
-    
+
     expect(result.current.viewportSize).toBe('mobile')
     expect(result.current.isMobile).toBe(true)
     expect(result.current.panels.left).toBe(false)
     expect(result.current.panels.right).toBe(false)
   })
-  
+
   it('should detect tablet viewport correctly', () => {
     Object.defineProperty(window, 'innerWidth', { value: 900, writable: true })
-    
+
     const { result } = renderHook(() => usePanelState())
-    
+
     expect(result.current.viewportSize).toBe('tablet')
     expect(result.current.isTablet).toBe(true)
   })
-  
+
   it('should toggle panels correctly', () => {
     const { result } = renderHook(() => usePanelState())
-    
+
     act(() => {
       result.current.togglePanel('left')
     })
-    
+
     expect(result.current.panels.left).toBe(false)
     expect(result.current.panels.right).toBe(true)
-    
+
     act(() => {
       result.current.togglePanel('left')
     })
-    
+
     expect(result.current.panels.left).toBe(true)
   })
-  
+
   it('should open and close panels correctly', () => {
     const { result } = renderHook(() => usePanelState())
-    
+
     act(() => {
       result.current.closePanel('left')
     })
-    
+
     expect(result.current.panels.left).toBe(false)
-    
+
     act(() => {
       result.current.openPanel('left')
     })
-    
+
     expect(result.current.panels.left).toBe(true)
   })
-  
+
   it('should close all panels', () => {
     const { result } = renderHook(() => usePanelState())
-    
+
     act(() => {
       result.current.closeAllPanels()
     })
-    
+
     expect(result.current.panels.left).toBe(false)
     expect(result.current.panels.right).toBe(false)
   })
-  
+
   it('should set active tab', () => {
     const { result } = renderHook(() => usePanelState())
-    
+
     act(() => {
       result.current.setActiveTab('settings')
     })
-    
+
     expect(result.current.activeTab).toBe('settings')
   })
-  
+
   it('should handle tab switching on different viewport sizes', () => {
     // Start with desktop
     const { result } = renderHook(() => usePanelState())
-    
+
     // Switch to mobile viewport
     Object.defineProperty(window, 'innerWidth', { value: 500, writable: true })
-    
+
     // Simulate the resize event
     act(() => {
       const resizeHandler = mockAddEventListener.mock.calls.find(
@@ -132,24 +132,24 @@ describe('usePanelState', () => {
         resizeHandler()
       }
     })
-    
+
     // Switch to tools tab on mobile
     act(() => {
       result.current.switchToTab('tools')
     })
-    
+
     expect(result.current.activeTab).toBe('tools')
     expect(result.current.panels.left).toBe(false)
     expect(result.current.panels.right).toBe(false)
   })
-  
+
   it('should add and remove resize event listener', () => {
     const { unmount } = renderHook(() => usePanelState())
-    
+
     expect(mockAddEventListener).toHaveBeenCalledWith('resize', expect.any(Function))
-    
+
     unmount()
-    
+
     expect(mockRemoveEventListener).toHaveBeenCalledWith('resize', expect.any(Function))
   })
 })

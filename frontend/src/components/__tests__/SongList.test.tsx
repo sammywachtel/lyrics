@@ -40,14 +40,14 @@ jest.mock('../SearchBar', () => {
   return function SearchBar({ onSearch }: { onSearch: (query: { query: string; status: string; tags: string[]; sortBy: string; sortOrder: string }) => void }) {
     return (
       <div data-testid="search-bar">
-        <input 
+        <input
           data-testid="search-input"
-          onChange={(e) => onSearch({ 
-            query: e.target.value, 
-            status: 'all', 
-            tags: [], 
-            sortBy: 'updated_at', 
-            sortOrder: 'desc' 
+          onChange={(e) => onSearch({
+            query: e.target.value,
+            status: 'all',
+            tags: [],
+            sortBy: 'updated_at',
+            sortOrder: 'desc'
           })}
           placeholder="Search..."
         />
@@ -81,7 +81,7 @@ jest.mock('../../utils/searchUtils', () => ({
   filterSongs: jest.fn((songs, filters) => {
     if (!filters.query) return songs.map(song => ({ song, matches: [] }))
     return songs
-      .filter(song => 
+      .filter(song =>
         song.title.toLowerCase().includes(filters.query.toLowerCase()) ||
         song.artist.toLowerCase().includes(filters.query.toLowerCase())
       )
@@ -234,14 +234,14 @@ describe('SongList Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockApiClient.listSongs.mockResolvedValue({ 
-      songs: mockSongs, 
-      total: mockSongs.length, 
-      page: 1, 
-      per_page: 10 
+    mockApiClient.listSongs.mockResolvedValue({
+      songs: mockSongs,
+      total: mockSongs.length,
+      page: 1,
+      per_page: 10
     })
     mockApiClient.deleteSong.mockResolvedValue()
-    
+
     // Mock window.confirm
     global.confirm = jest.fn(() => true)
   })
@@ -253,12 +253,12 @@ describe('SongList Component', () => {
   describe('Loading State', () => {
     it('should show loading spinner while fetching songs', async () => {
       // Make API call take time
-      mockApiClient.listSongs.mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve({ 
-          songs: mockSongs, 
-          total: mockSongs.length, 
-          page: 1, 
-          per_page: 10 
+      mockApiClient.listSongs.mockImplementation(() =>
+        new Promise(resolve => setTimeout(() => resolve({
+          songs: mockSongs,
+          total: mockSongs.length,
+          page: 1,
+          per_page: 10
         }), 100))
       )
 
@@ -266,7 +266,7 @@ describe('SongList Component', () => {
 
       // Should show loading state
       expect(screen.getByText('Loading your songs...')).toBeInTheDocument()
-      // Check for loading spinner by class name since it doesn't have role="status"  
+      // Check for loading spinner by class name since it doesn't have role="status"
       expect(document.querySelector('.animate-spin')).toBeInTheDocument()
 
       // Wait for loading to complete
@@ -307,11 +307,11 @@ describe('SongList Component', () => {
     })
 
     it('should show empty state when no songs exist', async () => {
-      mockApiClient.listSongs.mockResolvedValue({ 
-        songs: [], 
-        total: 0, 
-        page: 1, 
-        per_page: 10 
+      mockApiClient.listSongs.mockResolvedValue({
+        songs: [],
+        total: 0,
+        page: 1,
+        per_page: 10
       })
 
       render(<SongList onEditSong={mockOnEditSong} />)
@@ -552,7 +552,7 @@ describe('SongList Component', () => {
       // Check that cards have animation classes
       const songCard1 = screen.getByTestId('song-card-1').closest('.animate-fade-in')
       const songCard2 = screen.getByTestId('song-card-2').closest('.animate-fade-in')
-      
+
       expect(songCard1).toBeInTheDocument()
       expect(songCard2).toBeInTheDocument()
     })

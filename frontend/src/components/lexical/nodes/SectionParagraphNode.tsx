@@ -46,7 +46,7 @@ export class SectionParagraphNode extends ParagraphNode {
   ) {
     super(key)
     this.__sectionType = sectionType
-    
+
     // Set properties directly during construction to avoid read-only mode issues
     if (format !== undefined) {
       this.__format = format
@@ -88,32 +88,32 @@ export class SectionParagraphNode extends ParagraphNode {
 
   createDOM(config: EditorConfig): HTMLElement {
     const element = super.createDOM(config)
-    
+
     if (this.__sectionType) {
       element.classList.add(`lexical-text-${this.__sectionType}`)
     }
-    
+
     return element
   }
 
   updateDOM(prevNode: SectionParagraphNode, dom: HTMLElement, config: EditorConfig): boolean {
     const isUpdated = super.updateDOM(prevNode, dom, config)
-    
+
     // Handle section type changes
     if (prevNode.__sectionType !== this.__sectionType) {
       // Remove previous section class
       if (prevNode.__sectionType) {
         dom.classList.remove(`lexical-text-${prevNode.__sectionType}`)
       }
-      
+
       // Add new section class
       if (this.__sectionType) {
         dom.classList.add(`lexical-text-${this.__sectionType}`)
       }
-      
+
       return true
     }
-    
+
     return isUpdated
   }
 
@@ -128,11 +128,11 @@ export class SectionParagraphNode extends ParagraphNode {
 
   exportDOM(editor: any): DOMExportOutput {
     const { element } = super.exportDOM(editor)
-    
+
     if (this.__sectionType && element && element instanceof HTMLElement) {
       element.classList.add(`lexical-text-${this.__sectionType}`)
     }
-    
+
     return { element }
   }
 
@@ -140,7 +140,7 @@ export class SectionParagraphNode extends ParagraphNode {
 
 function convertParagraphElement(element: HTMLElement): DOMConversionOutput {
   let sectionType: string | null = null
-  
+
   // Check for section formatting classes
   const sectionFormats = ['verse', 'chorus', 'pre-chorus', 'bridge', 'intro', 'outro', 'hook']
   for (const format of sectionFormats) {
@@ -149,7 +149,7 @@ function convertParagraphElement(element: HTMLElement): DOMConversionOutput {
       break
     }
   }
-  
+
   return {
     node: new SectionParagraphNode(sectionType),
   }
@@ -169,7 +169,7 @@ export function $convertToSectionParagraph(node: ParagraphNode, sectionType: str
   const format = node.getFormat()
   const indent = node.getIndent()
   const direction = node.getDirection()
-  
+
   // Create section paragraph with all properties passed to constructor
   const sectionParagraph = new SectionParagraphNode(
     sectionType,
@@ -177,12 +177,12 @@ export function $convertToSectionParagraph(node: ParagraphNode, sectionType: str
     indent,
     direction
   )
-  
+
   // Move all children
   const children = node.getChildren()
   for (const child of children) {
     sectionParagraph.append(child)
   }
-  
+
   return sectionParagraph
 }

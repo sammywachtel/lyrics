@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { 
-  $getRoot, 
+import {
+  $getRoot,
   $createParagraphNode,
   COMMAND_PRIORITY_EDITOR,
   KEY_ENTER_COMMAND,
@@ -46,7 +46,7 @@ export default function SectionLabelsPlugin(): null {
         // Check if user pressed Ctrl+Shift+Enter to create a new section
         if (event.ctrlKey && event.shiftKey) {
           event.preventDefault()
-          
+
           editor.update(() => {
             const selection = $getSelection()
             if ($isRangeSelection(selection)) {
@@ -54,20 +54,20 @@ export default function SectionLabelsPlugin(): null {
               const sectionNode = $createSectionTagNode('New Section')
               const paragraph = $createParagraphNode()
               paragraph.append(sectionNode)
-              
+
               // Insert the section
               selection.insertNodes([paragraph])
-              
+
               // Add an empty line after the section for content
               const contentParagraph = $createParagraphNode()
               contentParagraph.append($createTextNode(''))
               selection.insertNodes([contentParagraph])
             }
           })
-          
+
           return true
         }
-        
+
         return false
       },
       COMMAND_PRIORITY_EDITOR
@@ -78,21 +78,21 @@ export default function SectionLabelsPlugin(): null {
       // Look for patterns like [Section Name] and convert them to section nodes
       // const sectionRegex = /^\[([^\]]+)\]$/gm
       // let match
-      
+
       editor.update(() => {
         const root = $getRoot()
         const children = root.getChildren()
-        
+
         children.forEach((child) => {
           if (child.getType() === 'paragraph') {
             const textContent = child.getTextContent()
             const sectionMatch = textContent.match(/^\[([^\]]+)\]$/)
-            
+
             if (sectionMatch && !child.getChildren().some((node: LexicalNode) => $isSectionTagNode(node))) {
               // Replace text with section tag node
               const sectionName = sectionMatch[1]
               const sectionNode = $createSectionTagNode(sectionName)
-              
+
               if ('clear' in child && 'append' in child) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 ;(child as any).clear()

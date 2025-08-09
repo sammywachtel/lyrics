@@ -15,29 +15,29 @@ export interface FormattedTextSegment {
 export function parseFormattedText(text: string): FormattedTextSegment[] {
   const segments: FormattedTextSegment[] = []
   let currentIndex = 0
-  
+
   while (currentIndex < text.length) {
-    
+
     // Look for formatting markers
     const remainingText = text.substring(currentIndex)
-    
+
     // Check for bold (**text**)
     const boldMatch = remainingText.match(/^\*\*([^*]+)\*\*/)
     // Check for italic (*text* but not **text**)
     const italicMatch = remainingText.match(/^\*([^*]+)\*(?!\*)/)
     // Check for underline (_text_)
     const underlineMatch = remainingText.match(/^_([^_]+)_/)
-    
+
     // Find the nearest formatting marker
     const markers = []
     if (boldMatch) markers.push({ type: 'bold', match: boldMatch, index: currentIndex })
     if (italicMatch) markers.push({ type: 'italic', match: italicMatch, index: currentIndex })
     if (underlineMatch) markers.push({ type: 'underline', match: underlineMatch, index: currentIndex })
-    
+
     if (markers.length > 0) {
       // Found formatting, process it
       const marker = markers[0] // Take the first one
-      
+
       if (marker.type === 'bold' && boldMatch) {
         segments.push({
           text: boldMatch[1],
@@ -68,10 +68,10 @@ export function parseFormattedText(text: string): FormattedTextSegment[] {
       const nextBold = text.indexOf('**', currentIndex)
       const nextItalic = text.indexOf('*', currentIndex)
       const nextUnderline = text.indexOf('_', currentIndex)
-      
+
       const nextMarkers = [nextBold, nextItalic, nextUnderline].filter(index => index !== -1)
       const nextMarker = nextMarkers.length > 0 ? Math.min(...nextMarkers) : text.length
-      
+
       // Add plain text segment
       if (nextMarker > currentIndex) {
         segments.push({
@@ -93,7 +93,7 @@ export function parseFormattedText(text: string): FormattedTextSegment[] {
       }
     }
   }
-  
+
   return segments
 }
 
@@ -102,22 +102,22 @@ export function parseFormattedText(text: string): FormattedTextSegment[] {
  */
 export function formatTextToHtml(text: string): string {
   const segments = parseFormattedText(text)
-  
+
   return segments.map(segment => {
     let html = segment.text
-    
+
     // Escape HTML characters
     html = html.replace(/&/g, '&amp;')
               .replace(/</g, '&lt;')
               .replace(/>/g, '&gt;')
               .replace(/"/g, '&quot;')
               .replace(/'/g, '&#39;')
-    
+
     // Apply formatting
     if (segment.bold) html = `<strong>${html}</strong>`
     if (segment.italic) html = `<em>${html}</em>`
     if (segment.underline) html = `<u>${html}</u>`
-    
+
     return html
   }).join('')
 }

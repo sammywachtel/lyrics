@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state change:', event, session)
-      
+
       // Always update session and user state for all auth events
       setSession(session)
       setUser(session?.user ?? null)
@@ -73,11 +73,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut()
-      
+
       // Ensure state is cleared even if there's an error
       setSession(null)
       setUser(null)
-      
+
       return { error }
     } catch (error) {
       console.error('Error during sign out:', error)

@@ -21,7 +21,7 @@ jest.mock('@lexical/react/LexicalRichTextPlugin', () => ({
 
 jest.mock('@lexical/react/LexicalContentEditable', () => ({
   ContentEditable: ({ className, ...props }: { className?: string; placeholder?: string; [key: string]: unknown }) => (
-    <div 
+    <div
       data-testid="content-editable"
       className={className}
       {...props}

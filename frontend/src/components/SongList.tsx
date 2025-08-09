@@ -56,11 +56,11 @@ export function SongList({ onEditSong }: SongListProps) {
   const handleSearch = (filters: SearchFilters) => {
     setIsSearching(true)
     setCurrentSearch(filters)
-    
+
     // Filter songs based on search criteria
     const results = filterSongs(songs, filters)
     setSearchResults(results)
-    
+
     setTimeout(() => setIsSearching(false), 300) // Small delay for smooth UX
   }
 
@@ -152,7 +152,7 @@ export function SongList({ onEditSong }: SongListProps) {
             <div className="relative bg-white/80 backdrop-blur-xl shadow-strong rounded-3xl border border-primary-200/40 p-8 overflow-hidden">
               {/* Background decoration */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-creative from-primary-300/25 to-creative-300/25 rounded-full blur-3xl -translate-y-32 translate-x-32"></div>
-              
+
               <div className="relative">
                 <div className="flex justify-between items-start mb-8">
                   <div>
@@ -188,7 +188,7 @@ export function SongList({ onEditSong }: SongListProps) {
         <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl border border-primary-200/40 shadow-strong p-8 overflow-hidden">
           {/* Background decoration */}
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-vibrant from-creative-400/20 to-primary-400/20 rounded-full blur-3xl translate-y-48 -translate-x-48"></div>
-          
+
           <div className="relative">
             <div className="mb-8">
               <div className="flex items-center justify-between">
@@ -218,7 +218,7 @@ export function SongList({ onEditSong }: SongListProps) {
                 )}
               </div>
             </div>
-            
+
             {/* Display search results or regular song list */}
             {currentSearch.query || currentSearch.status !== 'all' || (currentSearch.tags && currentSearch.tags.length > 0) ? (
               <SearchResults

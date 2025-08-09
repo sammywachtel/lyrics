@@ -23,9 +23,9 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ text, matches, classN
   }
 
   const highlightedHtml = highlightMatches(text, matches)
-  
+
   return (
-    <span 
+    <span
       className={className}
       dangerouslySetInnerHTML={{ __html: highlightedHtml }}
       style={{
@@ -54,28 +54,28 @@ const SearchResultCard: React.FC<{
           </span>
         </div>
       )}
-      
+
       {/* Enhanced Song Card with Highlighting */}
       <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-medium border border-white/50 p-6 hover:shadow-strong transition-all duration-300 transform hover:scale-105">
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-neutral-900 mb-2 truncate">
-              <HighlightedText 
-                text={song.title || 'Untitled Song'} 
+              <HighlightedText
+                text={song.title || 'Untitled Song'}
                 matches={matches.title || []}
               />
             </h3>
-            
+
             {song.artist && (
               <p className="text-neutral-600 mb-2">
-                by <HighlightedText 
-                  text={song.artist} 
+                by <HighlightedText
+                  text={song.artist}
                   matches={matches.artist || []}
                   className="font-medium"
                 />
               </p>
             )}
-            
+
             <div className="flex items-center space-x-4 text-sm text-neutral-500">
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                 song.status === 'completed' ? 'bg-success-100 text-success-700' :
@@ -85,7 +85,7 @@ const SearchResultCard: React.FC<{
               }`}>
                 {song.status.replace('_', ' ')}
               </span>
-              
+
               <span>
                 {new Date(song.updated_at || song.created_at).toLocaleDateString()}
               </span>
@@ -112,7 +112,7 @@ const SearchResultCard: React.FC<{
                 </p>
               </div>
             )}
-            
+
             {matches.tags && matches.tags.length > 0 && (
               <div>
                 <span className="text-xs font-medium text-neutral-600 uppercase tracking-wide">
@@ -136,8 +136,8 @@ const SearchResultCard: React.FC<{
             <div className="flex flex-wrap gap-2">
               {song.tags.map((tag, index) => (
                 <span key={index} className="px-2 py-1 bg-neutral-100/80 text-neutral-700 text-xs rounded-lg border border-neutral-200/50">
-                  <HighlightedText 
-                    text={tag} 
+                  <HighlightedText
+                    text={tag}
                     matches={matches.tags?.includes(tag) ? [tag] : []}
                   />
                 </span>
@@ -151,7 +151,7 @@ const SearchResultCard: React.FC<{
           <div className="text-xs text-neutral-500">
             {song.lyrics ? `${song.lyrics.split('\n').length} lines` : 'No lyrics yet'}
           </div>
-          
+
           <div className="flex space-x-3">
             <button
               onClick={() => onEditSong(song.id)}
@@ -163,7 +163,7 @@ const SearchResultCard: React.FC<{
               </span>
               <div className="absolute inset-0 rounded-xl bg-gradient-creative from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
-            
+
             <button
               onClick={() => onDeleteSong(song.id)}
               className="text-neutral-400 hover:text-red-500 transition-colors duration-200 p-2"
@@ -208,7 +208,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           {query ? 'No songs found' : 'No songs to display'}
         </h3>
         <p className="text-neutral-600 max-w-md mx-auto">
-          {query 
+          {query
             ? `No songs match your search for "${query}". Try different keywords or check your filters.`
             : 'Start writing your first song to see it here!'
           }
@@ -242,7 +242,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             </>
           )}
         </div>
-        
+
         {query && results.length > 0 && (
           <div className="text-xs text-neutral-500">
             Sorted by {results[0].score > 0 ? 'relevance' : 'date'}

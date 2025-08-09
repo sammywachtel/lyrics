@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react'
-import type { 
-  SongSettings, 
+import type {
+  SongSettings,
   SectionStructure,
   KeywordSettings,
   StyleGuide,
@@ -137,7 +137,7 @@ export const SongSettingsPanel: React.FC<SongSettingsPanelProps> = ({
       {isVisible && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" onClick={onToggleVisibility} />
       )}
-      
+
       {/* Settings Panel */}
       <div className="fixed left-0 top-0 bottom-0 w-80 bg-white border-r-2 border-gray-300 shadow-2xl z-50 overflow-hidden flex flex-col opacity-100" style={{backgroundColor: '#ffffff'}}>
       {/* Header */}
@@ -191,7 +191,7 @@ export const SongSettingsPanel: React.FC<SongSettingsPanelProps> = ({
         {activeTab === 'narrative' && (
           <div className="space-y-4">
             <h3 className="font-medium text-gray-900">Narrative Settings</h3>
-            
+
             {/* Point of View */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

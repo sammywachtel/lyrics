@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { 
-  $getRoot, 
+import {
+  $getRoot,
   $createParagraphNode,
   type LexicalNode
 } from 'lexical'
@@ -22,28 +22,28 @@ export default function SectionHeaderPlugin(): null {
     // Function to get display name for section type with automatic numbering
     const getSectionDisplayName = (sectionType: string | null): string => {
       if (!sectionType) return 'Section'
-      
+
       const sectionMap: { [key: string]: string } = {
         'verse': 'VERSE',
-        'chorus': 'CHORUS', 
+        'chorus': 'CHORUS',
         'pre-chorus': 'PRE-CHORUS',
         'bridge': 'BRIDGE',
         'intro': 'INTRO',
         'outro': 'OUTRO',
         'hook': 'HOOK'
       }
-      
+
       const baseName = sectionMap[sectionType] || sectionType.toUpperCase()
-      
+
       // Increment count for this section type
       const currentCount = (sectionCounts.get(sectionType) || 0) + 1
       sectionCounts.set(sectionType, currentCount)
-      
+
       // Add numbering for verses and other repeatable sections
       if (['verse', 'chorus', 'bridge', 'hook'].includes(sectionType)) {
         return `${baseName} ${currentCount}`
       }
-      
+
       return baseName
     }
 
@@ -54,26 +54,26 @@ export default function SectionHeaderPlugin(): null {
         const children = root.getChildren()
         const nodesToRemove: LexicalNode[] = []
         const sectionsToAdd: Array<{ index: number; sectionType: string; displayName: string }> = []
-        
+
         // Reset section counts for this update
         sectionCounts.clear()
         let currentSectionType: string | null = null
-        
+
         // First pass: identify existing headers and collect all sections
         for (let i = 0; i < children.length; i++) {
           const child = children[i]
-          
+
           // Track existing section tag nodes for removal
           if ($isSectionTagNode(child)) {
             nodesToRemove.push(child)
             continue
           }
-          
+
           // Check if this is a section paragraph
           if ($isSectionParagraphNode(child)) {
             const sectionParagraph = child as SectionParagraphNode
             const paragraphSectionType = sectionParagraph.getSectionType()
-            
+
             if (paragraphSectionType && isValidSectionType(paragraphSectionType)) {
               // If this is the start of a new section block
               if (paragraphSectionType !== currentSectionType) {
@@ -93,18 +93,18 @@ export default function SectionHeaderPlugin(): null {
             currentSectionType = null
           }
         }
-        
+
         // Remove existing section headers
         nodesToRemove.forEach(node => {
           node.remove()
         })
-        
+
         // Add new section headers in reverse order to maintain indices
         sectionsToAdd.reverse().forEach(({ index, displayName }) => {
           const sectionTagNode = $createSectionTagNode(displayName)
           const sectionTagParagraph = $createParagraphNode()
           sectionTagParagraph.append(sectionTagNode)
-          
+
           const targetChild = root.getChildAtIndex(index)
           if (targetChild) {
             targetChild.insertBefore(sectionTagParagraph)
@@ -118,7 +118,7 @@ export default function SectionHeaderPlugin(): null {
       // Use a small delay to ensure all DOM updates are complete
       setTimeout(updateSectionHeaders, 50)
     })
-    
+
     // Initial setup
     setTimeout(updateSectionHeaders, 100)
 
