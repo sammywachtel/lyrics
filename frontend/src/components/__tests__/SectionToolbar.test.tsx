@@ -16,16 +16,16 @@ describe('SectionToolbar', () => {
         onInsertSection={mockOnInsertSection}
         onShowSectionNav={mockOnShowSectionNav}
         hasExistingSections={false}
+        sections={[]}
       />
     )
 
-    // Check for common section buttons (now with emojis)
-    expect(screen.getByRole('button', { name: '📝 Verse 1' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '📝 Verse 2' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '📝 Verse 3' })).toBeInTheDocument()
+    // Check for smart section buttons (now with simplified names)
+    expect(screen.getByRole('button', { name: '📝 Verse' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '🎵 Chorus' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '🎵 Pre-Chorus' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '🌉 Bridge' })).toBeInTheDocument()
+    // Should show available section types based on smart logic
+    expect(screen.getByText('📝')).toBeInTheDocument() // Verse icon
+    expect(screen.getByText('🎵')).toBeInTheDocument() // Chorus icon
   })
 
   it('should call onInsertSection when section button is clicked', () => {
@@ -34,13 +34,14 @@ describe('SectionToolbar', () => {
         onInsertSection={mockOnInsertSection}
         onShowSectionNav={mockOnShowSectionNav}
         hasExistingSections={false}
+        sections={[]}
       />
     )
 
-    const verseButton = screen.getByRole('button', { name: '📝 Verse 1' })
+    const verseButton = screen.getByRole('button', { name: '📝 Verse' })
     fireEvent.click(verseButton)
 
-    expect(mockOnInsertSection).toHaveBeenCalledWith('[Verse 1]')
+    expect(mockOnInsertSection).toHaveBeenCalledWith('Verse')
   })
 
   it('should call onInsertSection with correct section tags', () => {
@@ -49,20 +50,16 @@ describe('SectionToolbar', () => {
         onInsertSection={mockOnInsertSection}
         onShowSectionNav={mockOnShowSectionNav}
         hasExistingSections={false}
+        sections={[]}
       />
     )
 
-    // Test multiple buttons
+    // Test multiple buttons with new API
     fireEvent.click(screen.getByRole('button', { name: '🎵 Chorus' }))
-    expect(mockOnInsertSection).toHaveBeenCalledWith('[Chorus]')
+    expect(mockOnInsertSection).toHaveBeenCalledWith('Chorus')
 
-    fireEvent.click(screen.getByRole('button', { name: '🌉 Bridge' }))
-    expect(mockOnInsertSection).toHaveBeenCalledWith('[Bridge]')
-
-    fireEvent.click(screen.getByRole('button', { name: '🎵 Pre-Chorus' }))
-    expect(mockOnInsertSection).toHaveBeenCalledWith('[Pre-Chorus]')
-
-    expect(mockOnInsertSection).toHaveBeenCalledTimes(3)
+    // Should have exactly 1 call
+    expect(mockOnInsertSection).toHaveBeenCalledTimes(1)
   })
 
   it('should not show sections button when no existing sections', () => {
@@ -71,6 +68,7 @@ describe('SectionToolbar', () => {
         onInsertSection={mockOnInsertSection}
         onShowSectionNav={mockOnShowSectionNav}
         hasExistingSections={false}
+        sections={[]}
       />
     )
 
@@ -83,6 +81,7 @@ describe('SectionToolbar', () => {
         onInsertSection={mockOnInsertSection}
         onShowSectionNav={mockOnShowSectionNav}
         hasExistingSections={true}
+        sections={[]}
       />
     )
 
@@ -96,6 +95,7 @@ describe('SectionToolbar', () => {
         onInsertSection={mockOnInsertSection}
         onShowSectionNav={mockOnShowSectionNav}
         hasExistingSections={true}
+        sections={[]}
       />
     )
 
@@ -111,10 +111,11 @@ describe('SectionToolbar', () => {
         onInsertSection={mockOnInsertSection}
         onShowSectionNav={mockOnShowSectionNav}
         hasExistingSections={true}
+        sections={[]}
       />
     )
 
-    const verseButton = screen.getByRole('button', { name: '📝 Verse 1' })
+    const verseButton = screen.getByRole('button', { name: '📝 Verse' })
     expect(verseButton).toHaveClass('px-3', 'py-2', 'text-xs', 'font-medium')
 
     const sectionsButton = screen.getByText('Quick Nav').closest('button')
@@ -127,11 +128,12 @@ describe('SectionToolbar', () => {
         onInsertSection={mockOnInsertSection}
         onShowSectionNav={mockOnShowSectionNav}
         hasExistingSections={true}
+        sections={[]}
       />
     )
 
-    const verseButton = screen.getByRole('button', { name: '📝 Verse 1' })
-    expect(verseButton).toHaveAttribute('title', 'Insert Verse 1 section')
+    const verseButton = screen.getByRole('button', { name: '📝 Verse' })
+    expect(verseButton).toHaveAttribute('title', 'Insert Verse section at cursor')
 
     const sectionsButton = screen.getByText('Quick Nav').closest('button')
     expect(sectionsButton).toHaveAttribute('title', 'Navigate between sections (modal)')
@@ -143,6 +145,7 @@ describe('SectionToolbar', () => {
         onInsertSection={mockOnInsertSection}
         onShowSectionNav={mockOnShowSectionNav}
         hasExistingSections={false}
+        sections={[]}
       />
     )
 

@@ -1,0 +1,321 @@
+import React, { useEffect, useRef } from 'react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import '@testing-library/jest-dom'
+import { 
+  $getRoot, 
+  $createParagraphNode, 
+  $createTextNode, 
+  UNDO_COMMAND, 
+  REDO_COMMAND,
+  $createRangeSelection,
+  $setSelection,
+  $isElementNode,
+  $isTextNode,
+  type LexicalEditor
+} from 'lexical'
+import { LexicalComposer } from '@lexical/react/LexicalComposer'
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { createTestLexicalConfig } from '../utils/testUtils'
+import { SectionParagraphNode, $createSectionParagraphNode, $isSectionParagraphNode } from '../lexical/nodes/SectionParagraphNode'
+import { SECTION_FORMAT_COMMAND, $applySectionFormatting } from '../lexical/commands/SectionFormattingCommands'
+
+// Test component that sets up proper Lexical context with history
+function TestLexicalEditor({ onEditorReady }: { onEditorReady: (editor: LexicalEditor) => void }) {
+  function EditorCapture() {
+    const [editor] = useLexicalComposerContext()
+    
+    useEffect(() => {
+      if (editor) {
+        onEditorReady(editor)
+      }
+    }, [editor])
+    
+    return null
+  }
+
+  return (
+    <div data-testid="test-lexical-editor">
+      <LexicalComposer initialConfig={createTestLexicalConfig()}>
+        <EditorCapture />
+        <HistoryPlugin delay={100} />
+        <div>Test Editor Ready</div>
+      </LexicalComposer>
+    </div>
+  )
+}
+
+describe('Section Formatting Undo/Redo', () => {
+  it('should support basic undo functionality', async () => {
+    let testEditor: LexicalEditor | null = null
+    
+    render(
+      <TestLexicalEditor 
+        onEditorReady={(editor) => {
+          testEditor = editor
+        }} 
+      />
+    )
+
+    // Wait for editor to be ready
+    await waitFor(() => {
+      expect(testEditor).toBeTruthy()
+    })
+    
+    if (!testEditor) return
+
+    // Step 1: Set up initial content
+    await act(async () => {
+      testEditor.update(() => {
+        const root = $getRoot()
+        root.clear()
+        
+        const paragraph = $createParagraphNode()
+        const textNode = $createTextNode('Initial text')
+        paragraph.append(textNode)
+        root.append(paragraph)
+      })
+    })
+    
+    // Wait for history to register the initial state
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 150))
+    })
+    
+    // Step 2: Make a simple text change (discrete update)
+    await act(async () => {
+      testEditor.update(() => {
+        const root = $getRoot()
+        const paragraph = root.getFirstChild()
+        if ($isElementNode(paragraph)) {
+          const textNode = paragraph.getFirstChild()
+          if ($isTextNode(textNode)) {
+            textNode.setTextContent('Changed text')
+          }
+        }
+      })
+    })
+    
+    // Wait for history to register the change
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 150))
+    })
+    
+    // Step 3: Verify text was changed
+    testEditor.getEditorState().read(() => {
+      const root = $getRoot()
+      const paragraph = root.getFirstChild()
+      if ($isElementNode(paragraph)) {
+        const textNode = paragraph.getFirstChild()
+        if ($isTextNode(textNode)) {
+          expect(textNode.getTextContent()).toBe('Changed text')
+        }
+      }
+    })
+    
+    // Step 4: Undo
+    await act(async () => {
+      testEditor.dispatchCommand(UNDO_COMMAND, undefined)
+    })
+    
+    // Step 5: Verify undo worked for basic text
+    testEditor.getEditorState().read(() => {
+      const root = $getRoot()
+      const paragraph = root.getFirstChild()
+      if ($isElementNode(paragraph)) {
+        const textNode = paragraph.getFirstChild()
+        if ($isTextNode(textNode)) {
+          expect(textNode.getTextContent()).toBe('Initial text')
+        }
+      }
+    })
+  })
+
+  it('should support undo for section formatting operations using direct editor', async () => {
+    let testEditor: LexicalEditor | null = null
+    
+    render(
+      <TestLexicalEditor 
+        onEditorReady={(editor) => {
+          testEditor = editor
+        }} 
+      />
+    )
+
+    // Wait for editor to be ready
+    await waitFor(() => {
+      expect(testEditor).toBeTruthy()
+    })
+    
+    if (!testEditor) return
+    
+    // Step 1: Set up initial content
+    await act(async () => {
+      testEditor.update(() => {
+        const root = $getRoot()
+        root.clear()
+        
+        const paragraph = $createParagraphNode()
+        const textNode = $createTextNode('This is a test line')
+        paragraph.append(textNode)
+        root.append(paragraph)
+      })
+    })
+    
+    // Wait for history to register initial state
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 150))
+    })
+    
+    // Step 2: Apply section formatting (discrete update)
+    await act(async () => {
+      testEditor.update(() => {
+        const root = $getRoot()
+        const paragraph = root.getFirstChild()
+        
+        // Create selection that includes the paragraph
+        const selection = $createRangeSelection()
+        selection.anchor.set(paragraph.getKey(), 0, 'element')
+        selection.focus.set(paragraph.getKey(), 1, 'element')
+        $setSelection(selection)
+        
+        // Apply section formatting
+        $applySectionFormatting('verse')
+        
+        // Verify within the same update call
+        const rootAfter = $getRoot()
+        const firstChildAfter = rootAfter.getFirstChild()
+        
+        expect($isSectionParagraphNode(firstChildAfter)).toBe(true)
+        if ($isSectionParagraphNode(firstChildAfter)) {
+          expect(firstChildAfter.getSectionType()).toBe('verse')
+        }
+      })
+    })
+    
+    // Wait for history to register the formatting change
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 150))
+    })
+    
+    // Step 3: Apply undo
+    await act(async () => {
+      testEditor.dispatchCommand(UNDO_COMMAND, undefined)
+    })
+    
+    // Step 4: Verify undo worked
+    testEditor.getEditorState().read(() => {
+      const root = $getRoot()
+      const firstChild = root.getFirstChild()
+      
+      // After undo, it should either be a regular paragraph or have no section type
+      if ($isSectionParagraphNode(firstChild)) {
+        expect(firstChild.getSectionType()).toBeNull()
+      } else {
+        expect(firstChild.getType()).toBe('paragraph')
+      }
+    })
+  })
+
+  it('should support redo for section formatting operations using direct editor', async () => {
+    let testEditor: LexicalEditor | null = null
+    
+    render(
+      <TestLexicalEditor 
+        onEditorReady={(editor) => {
+          testEditor = editor
+        }} 
+      />
+    )
+
+    // Wait for editor to be ready
+    await waitFor(() => {
+      expect(testEditor).toBeTruthy()
+    })
+    
+    if (!testEditor) return
+    
+    // Step 1: Set up initial content
+    await act(async () => {
+      testEditor.update(() => {
+        const root = $getRoot()
+        root.clear()
+        
+        const paragraph = $createParagraphNode()
+        const textNode = $createTextNode('This is a test line')
+        paragraph.append(textNode)
+        root.append(paragraph)
+      })
+    })
+    
+    // Wait for history to register initial state
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 150))
+    })
+    
+    // Step 2: Apply section formatting (discrete update)
+    await act(async () => {
+      testEditor.update(() => {
+        const root = $getRoot()
+        const paragraph = root.getFirstChild()
+        
+        // Create selection that includes the paragraph
+        const selection = $createRangeSelection()
+        selection.anchor.set(paragraph.getKey(), 0, 'element')
+        selection.focus.set(paragraph.getKey(), 1, 'element')
+        $setSelection(selection)
+        
+        // Apply section formatting
+        $applySectionFormatting('chorus')
+        
+        // Verify within the same update call
+        const rootAfter = $getRoot()
+        const firstChildAfter = rootAfter.getFirstChild()
+        
+        expect($isSectionParagraphNode(firstChildAfter)).toBe(true)
+        if ($isSectionParagraphNode(firstChildAfter)) {
+          expect(firstChildAfter.getSectionType()).toBe('chorus')
+        }
+      })
+    })
+    
+    // Wait for history to register the formatting change
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 150))
+    })
+    
+    // Step 3: Undo
+    await act(async () => {
+      testEditor.dispatchCommand(UNDO_COMMAND, undefined)
+    })
+    
+    // Step 4: Verify undo worked
+    testEditor.getEditorState().read(() => {
+      const root = $getRoot()
+      const firstChild = root.getFirstChild()
+      
+      // After undo, section type should be null or node should be regular paragraph
+      if ($isSectionParagraphNode(firstChild)) {
+        expect(firstChild.getSectionType()).toBeNull()
+      } else {
+        expect(firstChild.getType()).toBe('paragraph')
+      }
+    })
+    
+    // Step 5: Redo
+    await act(async () => {
+      testEditor.dispatchCommand(REDO_COMMAND, undefined)
+    })
+    
+    // Step 6: Verify redo restored the formatting
+    testEditor.getEditorState().read(() => {
+      const root = $getRoot()
+      const firstChild = root.getFirstChild()
+      
+      expect($isSectionParagraphNode(firstChild)).toBe(true)
+      if ($isSectionParagraphNode(firstChild)) {
+        expect(firstChild.getSectionType()).toBe('chorus')
+      }
+    })
+  })
+})

@@ -1,7 +1,60 @@
 # Professional Songwriting App - Development Plan
 
 ## Overview
-This development plan implements the professional songwriting interface from `DESIGN_SPECIFICATIONS.md`, strategically dividing work between frontend and backend development to maximize efficiency and maintain data integrity.
+This development plan implements the professional songwriting interface from `DESIGN_SPECIFICATIONS.md` and incorporates critical scalability improvements from the architecture review (`docs/architecture/scalability-review.md`). Development is strategically divided to maximize efficiency while building a scalable foundation.
+
+## ⚠️ **ARCHITECTURE PRIORITY PHASE** (Pre-requisite)
+
+### Architecture Review Results: 8.5/10 - Production Ready with Scalability Improvements Needed
+**Must Complete Before Feature Development**
+
+#### Week 0: Critical Scalability Foundations
+**Agent: frontend-developer + backend-architect**
+**Priority: CRITICAL - BLOCKING**
+**Status: 🔴 Required Before Feature Work**
+
+**Frontend Tasks (Week 0A):**
+- [ ] **Global State Management**: Implement Redux Toolkit + RTK Query
+  ```bash
+  npm install @reduxjs/toolkit react-redux @tanstack/react-query
+  ```
+- [ ] Replace component-level state with centralized store
+- [ ] Add API response caching (target 60-80% reduction in API calls)
+- [ ] Update existing components to use new state system
+
+**Backend Tasks (Week 0B):**
+- [ ] **Database Connection Optimization**: Configure connection pooling
+- [ ] Add API rate limiting middleware
+- [ ] Implement response caching strategies
+- [ ] Optimize existing JSONB queries
+
+**Expected Outcomes:**
+- Support 10x user growth (1,000 → 10,000 concurrent users)
+- Eliminate prop drilling and state management complexity
+- Reduce API load by 60-80% through intelligent caching
+- Handle high-load scenarios without connection exhaustion
+
+**Files to Create/Modify:**
+```
+src/store/
+├── index.ts                 # Redux store configuration
+├── api/                     # RTK Query API definitions
+│   ├── songsApi.ts         # Songs API slice
+│   └── authApi.ts          # Auth API slice
+├── slices/                  # Redux slices
+│   ├── authSlice.ts        # Authentication state
+│   ├── songsSlice.ts       # Songs state
+│   └── uiSlice.ts          # UI state (panels, modals)
+└── hooks/                   # Custom hooks for store access
+    ├── useAppDispatch.ts   # Typed dispatch hook
+    └── useAppSelector.ts   # Typed selector hook
+
+backend/app/
+├── middleware/              # API middleware
+│   ├── rate_limiting.py    # Rate limiting middleware
+│   └── caching.py          # Response caching
+└── config.py               # Updated with connection pool settings
+```
 
 ## Phase 1: Foundation (Weeks 1-2)
 
@@ -21,7 +74,7 @@ This development plan implements the professional songwriting interface from `DE
 - `src/components/layout/AppLayout.tsx` - Main three-panel container
 - `src/components/layout/AppHeader.tsx` - Professional header with metadata
 - `src/components/layout/SettingsPanel.tsx` - Left panel container
-- `src/components/layout/EditorPanel.tsx` - Center panel container  
+- `src/components/layout/EditorPanel.tsx` - Center panel container
 - `src/components/layout/ToolsPanel.tsx` - Right panel container
 - `src/hooks/usePanelState.ts` - Panel visibility management
 
@@ -269,7 +322,7 @@ class AIAssistantService:
 
 ### Following Implementation Order
 1. **1.1 Three-Panel Layout** (frontend) - Immediate start
-2. **1.2 Song Data Models** (backend) - Parallel development  
+2. **1.2 Song Data Models** (backend) - Parallel development
 3. **1.3 Prosody Analysis** (frontend) - Depends on basic layout
 4. **2.1 Settings Panel** (frontend) - Depends on 1.1 + 1.2
 5. **Continue with Phase 2** - Following dependency chain

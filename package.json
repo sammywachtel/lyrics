@@ -18,7 +18,10 @@
     "test:watch": "cd frontend && npm run test:watch",
     "test:coverage": "cd frontend && npm run test:coverage",
     "frontend:test": "cd frontend && npm test",
+    "lint": "cd frontend && npm run lint",
+    "lint:fix": "cd frontend && npm run lint:fix",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "dev:pw": "playwright codegen --save-storage=storage.json http://localhost:3000",
     "docker:dev:build": "docker-compose -f docker-compose.dev.yml build",
     "docker:dev:up": "docker-compose -f docker-compose.dev.yml up",
     "docker:dev:down": "docker-compose -f docker-compose.dev.yml down",
@@ -34,7 +37,10 @@
     "gcp:logs:frontend": "gcloud logging read \"resource.type=cloud_run_revision AND resource.labels.service_name=lyrics-frontend\" --limit 50 --format json",
     "gcp:logs:backend": "gcloud logging read \"resource.type=cloud_run_revision AND resource.labels.service_name=lyrics-backend\" --limit 50 --format json",
     "gcp:status": "gcloud run services list --region us-central1",
-    "deploy": "npm run gcp:deploy"
+    "deploy": "npm run gcp:deploy",
+    "precommit:install": "pre-commit install",
+    "precommit:run": "pre-commit run --all-files",
+    "setup:hooks": "npm run precommit:install && echo 'Pre-commit hooks installed successfully!'"
   },
   "keywords": [
     "songwriting",
@@ -49,6 +55,6 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
-    "lint": "^0.8.19"
+    "lint": "^1.1.2"
   }
 }

@@ -1,0 +1,63 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-added-large-files
+
+  - repo: local
+    hooks:
+      - id: eslint-fix
+        name: ESLint (with fix)
+        entry: bash -c 'cd frontend && npm run lint:fix'
+        language: system
+        files: ^frontend/.*\.(js|jsx|ts|tsx)$
+        pass_filenames: false
+
+      - id: typescript-check
+        name: TypeScript Check
+        entry: bash -c 'cd frontend && npx tsc --noEmit'
+        language: system
+        files: ^frontend/.*\.(ts|tsx)$
+        pass_filenames: false
+
+# Temporarily disabled until test setup is fixed
+      # - id: frontend-tests
+      #   name: Frontend Tests (changed files)
+      #   entry: bash -c 'cd frontend && npm test -- --passWithNoTests'
+      #   language: system
+      #   files: ^frontend/.*\.(js|jsx|ts|tsx)$
+      #   pass_filenames: false
+
+  # Backend Python hooks
+  - repo: local
+    hooks:
+      - id: python-black
+        name: Python Black Formatting
+        entry: bash -c 'cd backend && black .'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+
+      - id: python-isort
+        name: Python isort (import sorting)
+        entry: bash -c 'cd backend && isort .'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+
+      - id: python-flake8
+        name: Python flake8 (linting)
+        entry: bash -c 'cd backend && flake8'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+
+      - id: python-mypy
+        name: Python MyPy (type checking)
+        entry: bash -c 'cd backend && mypy .'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false

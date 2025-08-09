@@ -1,0 +1,131 @@
+name: Code Quality Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main, feature/* ]
+
+jobs:
+  validate:
+    name: Validate Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          if [ -f "frontend/package.json" ]; then
+            cd frontend && npm ci
+          elif [ -f "package.json" ]; then
+            npm ci
+          fi
+
+      - name: Run ESLint validation
+        run: |
+          echo "📋 Validating ESLint compliance..."
+
+          if [ -f "frontend/package.json" ]; then
+            cd frontend
+          fi
+
+          if npm run lint; then
+            echo "✅ ESLint validation passed"
+          else
+            echo "❌ ESLint validation failed"
+            echo ""
+            echo "🔧 To fix these issues locally:"
+            echo "1. Run: npm run lint:fix"
+            echo "2. Commit the fixes"
+            echo "3. Push your changes"
+            echo ""
+            echo "💡 Tip: Set up pre-commit hooks to catch this earlier:"
+            echo "   ./setup-dev.sh"
+            exit 1
+          fi
+
+      - name: Run TypeScript validation
+        run: |
+          echo "🔍 Validating TypeScript compilation..."
+
+          if [ -f "frontend/tsconfig.app.json" ]; then
+            cd frontend
+            echo "Found frontend/tsconfig.app.json, running TypeScript check..."
+            if npx tsc --noEmit --project tsconfig.app.json; then
+              echo "✅ TypeScript validation passed"
+            else
+              echo "❌ TypeScript validation failed"
+              echo ""
+              echo "🔧 To fix these issues:"
+              echo "1. Fix the TypeScript errors shown above"
+              echo "2. Run: npx tsc --noEmit to verify locally"
+              echo "3. Commit and push your fixes"
+              echo ""
+              echo "💡 Tip: Set up pre-commit hooks to catch this earlier:"
+              echo "   ./setup-dev.sh"
+              exit 1
+            fi
+          elif [ -f "frontend/tsconfig.json" ]; then
+            cd frontend
+            echo "Found frontend/tsconfig.json, running TypeScript check..."
+            if npx tsc --noEmit; then
+              echo "✅ TypeScript validation passed"
+            else
+              echo "❌ TypeScript validation failed"
+              echo ""
+              echo "🔧 To fix these issues:"
+              echo "1. Fix the TypeScript errors shown above"
+              echo "2. Run: npx tsc --noEmit to verify locally"
+              echo "3. Commit and push your fixes"
+              exit 1
+            fi
+          elif [ -f "tsconfig.json" ]; then
+            echo "Found root tsconfig.json, running TypeScript check..."
+            if npx tsc --noEmit; then
+              echo "✅ TypeScript validation passed"
+            else
+              echo "❌ TypeScript validation failed"
+              echo ""
+              echo "🔧 To fix these issues:"
+              echo "1. Fix the TypeScript errors shown above"
+              echo "2. Run: npx tsc --noEmit to verify locally"
+              echo "3. Commit and push your fixes"
+              exit 1
+            fi
+          else
+            echo "❌ No TypeScript config file found"
+            exit 1
+          fi
+
+      - name: Run tests
+        run: |
+          echo "🧪 Running test suite..."
+
+          if [ -f "frontend/package.json" ]; then
+            cd frontend
+          fi
+
+          if npm test; then
+            echo "✅ All tests passed"
+          else
+            echo "❌ Tests failed"
+            echo ""
+            echo "🔧 To fix failing tests:"
+            echo "1. Run tests locally: npm test"
+            echo "2. Fix failing tests"
+            echo "3. Commit and push your fixes"
+            echo ""
+            echo "💡 Tip: Use 'npm run test:watch' for interactive development"
+            exit 1
+          fi

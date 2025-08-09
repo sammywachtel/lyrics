@@ -29,7 +29,7 @@ describe('AppLayout', () => {
     )
     
     // Check for header
-    expect(screen.getByText('Songcraft')).toBeInTheDocument()
+    expect(screen.getByText('Versifai')).toBeInTheDocument()
     
     // Check for panels
     expect(screen.getByText('Song Settings')).toBeInTheDocument()

@@ -1,267 +1,217 @@
-import React, { useState, useCallback } from 'react'
+import React from 'react'
 
 interface FormattingToolbarProps {
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>
-  onTextChange: (text: string) => void
+  isBold: boolean
+  isItalic: boolean
+  isUnderline: boolean
+  isStrikethrough: boolean
+  onBold: () => void
+  onItalic: () => void
+  onUnderline: () => void
+  onStrikethrough: () => void
+  // Section formatting
+  activeSection?: string | null
+  onVerse: () => void
+  onChorus: () => void
+  onPreChorus: () => void
+  onBridge: () => void
+  onIntro: () => void
+  onOutro: () => void
+  onHook: () => void
+  onClearSection: () => void
 }
 
 export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
-  textareaRef,
-  onTextChange
+  isBold,
+  isItalic,
+  isUnderline,
+  isStrikethrough,
+  onBold,
+  onItalic,
+  onUnderline,
+  onStrikethrough,
+  activeSection,
+  onVerse,
+  onChorus,
+  onPreChorus,
+  onBridge,
+  onIntro,
+  onOutro,
+  onHook,
+  onClearSection,
 }) => {
-  const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set())
-
-  // Get the currently selected text in the textarea
-  const getSelectedText = useCallback(() => {
-    if (!textareaRef.current) return null
-    
-    const textarea = textareaRef.current
-    const start = textarea.selectionStart
-    const end = textarea.selectionEnd
-    const selectedText = textarea.value.substring(start, end)
-    
-    return {
-      text: selectedText,
-      start,
-      end,
-      hasSelection: start !== end
-    }
-  }, [textareaRef])
-
-  // Apply formatting to selected text
-  const applyFormatting = useCallback((formatType: 'bold' | 'italic' | 'underline') => {
-    if (!textareaRef.current) return
-
-    const selection = getSelectedText()
-    if (!selection) return
-
-    const textarea = textareaRef.current
-    const { text, start, end, hasSelection } = selection
-
-    if (!hasSelection) {
-      // If no selection, just insert format markers at cursor
-      const formatMap = {
-        bold: '**',
-        italic: '*',
-        underline: '_'
-      }
-      
-      const marker = formatMap[formatType]
-      const newText = textarea.value.substring(0, start) + 
-                     marker + marker + 
-                     textarea.value.substring(start)
-      
-      onTextChange(newText)
-      
-      // Position cursor between the markers
-      setTimeout(() => {
-        textarea.focus()
-        const newPosition = start + marker.length
-        textarea.setSelectionRange(newPosition, newPosition)
-      }, 0)
-      return
-    }
-
-    // Check if text is already formatted
-    const beforeText = textarea.value.substring(0, start)
-    const afterText = textarea.value.substring(end)
-    
-    let newText: string
-    let newSelectionStart: number
-    let newSelectionEnd: number
-
-    switch (formatType) {
-      case 'bold':
-        if (text.startsWith('**') && text.endsWith('**') && text.length > 4) {
-          // Remove bold formatting
-          const unformattedText = text.substring(2, text.length - 2)
-          newText = beforeText + unformattedText + afterText
-          newSelectionStart = start
-          newSelectionEnd = start + unformattedText.length
-        } else {
-          // Add bold formatting
-          const formattedText = `**${text}**`
-          newText = beforeText + formattedText + afterText
-          newSelectionStart = start
-          newSelectionEnd = start + formattedText.length
-        }
-        break
-        
-      case 'italic':
-        if (text.startsWith('*') && text.endsWith('*') && text.length > 2 && 
-            !(text.startsWith('**') && text.endsWith('**'))) {
-          // Remove italic formatting
-          const unformattedText = text.substring(1, text.length - 1)
-          newText = beforeText + unformattedText + afterText
-          newSelectionStart = start
-          newSelectionEnd = start + unformattedText.length
-        } else {
-          // Add italic formatting
-          const formattedText = `*${text}*`
-          newText = beforeText + formattedText + afterText
-          newSelectionStart = start
-          newSelectionEnd = start + formattedText.length
-        }
-        break
-        
-      case 'underline':
-        if (text.startsWith('_') && text.endsWith('_') && text.length > 2) {
-          // Remove underline formatting
-          const unformattedText = text.substring(1, text.length - 1)
-          newText = beforeText + unformattedText + afterText
-          newSelectionStart = start
-          newSelectionEnd = start + unformattedText.length
-        } else {
-          // Add underline formatting
-          const formattedText = `_${text}_`
-          newText = beforeText + formattedText + afterText
-          newSelectionStart = start
-          newSelectionEnd = start + formattedText.length
-        }
-        break
-        
-      default:
-        return
-    }
-
-    onTextChange(newText)
-    
-    // Restore selection
-    setTimeout(() => {
-      textarea.focus()
-      textarea.setSelectionRange(newSelectionStart, newSelectionEnd)
-    }, 0)
-  }, [textareaRef, getSelectedText, onTextChange])
-
-  // Update active formats based on current selection
-  const updateActiveFormats = useCallback(() => {
-    const selection = getSelectedText()
-    if (!selection) return
-
-    const { text } = selection
-    const newActiveFormats = new Set<string>()
-
-    // Check for bold
-    if (text.startsWith('**') && text.endsWith('**') && text.length > 4) {
-      newActiveFormats.add('bold')
-    }
-    
-    // Check for italic (but not bold)
-    if (text.startsWith('*') && text.endsWith('*') && text.length > 2 && 
-        !(text.startsWith('**') && text.endsWith('**'))) {
-      newActiveFormats.add('italic')
-    }
-    
-    // Check for underline
-    if (text.startsWith('_') && text.endsWith('_') && text.length > 2) {
-      newActiveFormats.add('underline')
-    }
-
-    setActiveFormats(newActiveFormats)
-  }, [getSelectedText])
-
-  // Handle keyboard shortcuts
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.metaKey || e.ctrlKey) {
-      switch (e.key.toLowerCase()) {
-        case 'b':
-          e.preventDefault()
-          applyFormatting('bold')
-          break
-        case 'i':
-          e.preventDefault()
-          applyFormatting('italic')
-          break
-        case 'u':
-          e.preventDefault()
-          applyFormatting('underline')
-          break
-      }
-    }
-  }, [applyFormatting])
-
-  // Attach keyboard handler to textarea
-  React.useEffect(() => {
-    const textarea = textareaRef.current
-    if (!textarea) return
-
-    const handleKeyDownEvent = (e: KeyboardEvent) => {
-      handleKeyDown(e as unknown as React.KeyboardEvent<HTMLTextAreaElement>)
-    }
-
-    const handleSelectionChange = () => {
-      updateActiveFormats()
-    }
-
-    textarea.addEventListener('keydown', handleKeyDownEvent)
-    textarea.addEventListener('mouseup', handleSelectionChange)
-    textarea.addEventListener('keyup', handleSelectionChange)
-
-    return () => {
-      textarea.removeEventListener('keydown', handleKeyDownEvent)
-      textarea.removeEventListener('mouseup', handleSelectionChange)
-      textarea.removeEventListener('keyup', handleSelectionChange)
-    }
-  }, [textareaRef, handleKeyDown, updateActiveFormats])
-
   const formatButtons = [
     {
       type: 'bold' as const,
       icon: 'B',
-      label: 'Bold (Cmd+B)',
-      shortcut: '**text**'
+      label: 'Bold (Ctrl/Cmd + B)',
+      isActive: isBold,
+      onClick: onBold
     },
     {
       type: 'italic' as const,
       icon: 'I',
-      label: 'Italic (Cmd+I)',
-      shortcut: '*text*'
+      label: 'Italic (Ctrl/Cmd + I)',
+      isActive: isItalic,
+      onClick: onItalic
     },
     {
       type: 'underline' as const,
       icon: 'U',
-      label: 'Underline (Cmd+U)',
-      shortcut: '_text_'
+      label: 'Underline (Ctrl/Cmd + U)',
+      isActive: isUnderline,
+      onClick: onUnderline
+    },
+    {
+      type: 'strikethrough' as const,
+      icon: 'S',
+      label: 'Strikethrough',
+      isActive: isStrikethrough,
+      onClick: onStrikethrough
     }
   ]
 
+  const sectionButtons = [
+    {
+      type: 'verse' as const,
+      icon: '📝',
+      label: 'Verse',
+      isActive: activeSection === 'verse',
+      onClick: onVerse,
+      tooltip: activeSection === 'verse' ? 'Remove Verse formatting' : 'Mark as Verse (click again to remove)'
+    },
+    {
+      type: 'chorus' as const,
+      icon: '🎵',
+      label: 'Chorus',
+      isActive: activeSection === 'chorus',
+      onClick: onChorus,
+      tooltip: activeSection === 'chorus' ? 'Remove Chorus formatting' : 'Mark as Chorus (click again to remove)'
+    },
+    {
+      type: 'pre-chorus' as const,
+      icon: '✨',
+      label: 'Pre-Chorus',
+      isActive: activeSection === 'pre-chorus',
+      onClick: onPreChorus,
+      tooltip: activeSection === 'pre-chorus' ? 'Remove Pre-Chorus formatting' : 'Mark as Pre-Chorus (click again to remove)'
+    },
+    {
+      type: 'bridge' as const,
+      icon: '🌉',
+      label: 'Bridge',
+      isActive: activeSection === 'bridge',
+      onClick: onBridge,
+      tooltip: activeSection === 'bridge' ? 'Remove Bridge formatting' : 'Mark as Bridge (click again to remove)'
+    },
+    {
+      type: 'intro' as const,
+      icon: '🎧',
+      label: 'Intro',
+      isActive: activeSection === 'intro',
+      onClick: onIntro,
+      tooltip: activeSection === 'intro' ? 'Remove Intro formatting' : 'Mark as Intro (click again to remove)'
+    },
+    {
+      type: 'outro' as const,
+      icon: '🎼',
+      label: 'Outro',
+      isActive: activeSection === 'outro',
+      onClick: onOutro,
+      tooltip: activeSection === 'outro' ? 'Remove Outro formatting' : 'Mark as Outro (click again to remove)'
+    },
+    {
+      type: 'hook' as const,  
+      icon: '🎣',
+      label: 'Hook',
+      isActive: activeSection === 'hook',
+      onClick: onHook,
+      tooltip: activeSection === 'hook' ? 'Remove Hook formatting' : 'Mark as Hook (click again to remove)'
+    }
+  ]
+
+  // Helper function to get formatted section name
+  const getFormattedSectionName = (section: string | null): string => {
+    if (!section) return ''
+    return section.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+  }
+
+  // Generate contextual clear button text and tooltip
+  const clearButtonText = activeSection ? `Clear ${getFormattedSectionName(activeSection)}` : 'Clear Section'
+  const clearButtonTooltip = activeSection 
+    ? `Clear ${getFormattedSectionName(activeSection)} formatting from current line/selection (Ctrl/Cmd + Shift + X)`
+    : 'Clear section formatting from current line/selection (Ctrl/Cmd + Shift + X)'
+
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-neutral-50/80 to-white/60 backdrop-blur-sm border-b border-neutral-200/30">
-      <div className="flex items-center space-x-2">
-        <span className="text-sm font-medium text-neutral-700 mr-3">Format:</span>
-        {formatButtons.map((button) => (
+    <div className="bg-white/80 backdrop-blur-sm border-b border-neutral-200/50 px-4 py-2 flex items-center gap-1">
+      {/* Text formatting buttons */}
+      {formatButtons.map((button) => (
+        <button
+          key={button.type}
+          onClick={button.onClick}
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+            button.isActive
+              ? 'bg-primary-100 text-primary-800 border border-primary-200/50 shadow-soft'
+              : 'bg-white/50 text-neutral-600 hover:text-neutral-800 hover:bg-white hover:shadow-soft border border-transparent hover:border-neutral-200/50'
+          }`}
+          title={button.label}
+          type="button"
+        >
+          <span className={`${
+            button.type === 'bold' ? 'font-bold' : 
+            button.type === 'italic' ? 'italic' : 
+            button.type === 'underline' ? 'underline' :
+            button.type === 'strikethrough' ? 'line-through' : ''
+          }`}>
+            {button.icon}
+          </span>
+        </button>
+      ))}
+
+      {/* Divider */}
+      <div className="w-px h-6 bg-neutral-200/50 mx-2" />
+
+      {/* Section formatting buttons */}
+      {sectionButtons.map((button) => (
+        <button
+          key={button.type}
+          onClick={button.onClick}
+          className={`px-2 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
+            button.isActive
+              ? 'bg-creative-100 text-creative-800 border border-creative-200/50 shadow-soft'
+              : 'bg-white/50 text-neutral-600 hover:text-neutral-800 hover:bg-white hover:shadow-soft border border-transparent hover:border-neutral-200/50'
+          }`}
+          title={button.tooltip}
+          type="button"
+        >
+          <span className="text-xs">{button.icon}</span>
+          <span className="text-xs hidden sm:inline">{button.label}</span>
+        </button>
+      ))}
+
+      {/* Clear Section Button */}
+      {activeSection && (
+        <>
+          <div className="w-px h-6 bg-neutral-200/50 mx-1" />
           <button
-            key={button.type}
-            onClick={() => applyFormatting(button.type)}
-            className={`group relative flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold transition-all duration-200 border ${
-              activeFormats.has(button.type)
-                ? 'bg-indigo-600 text-white border-indigo-700 shadow-md'
-                : 'bg-white/80 text-neutral-600 border-neutral-200/50 hover:bg-white hover:text-neutral-800 hover:border-neutral-300 hover:shadow-soft'
-            }`}
-            title={button.label}
+            onClick={onClearSection}
+            className="px-2 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 bg-red-50/80 text-red-600 hover:text-red-700 hover:bg-red-50 hover:shadow-soft border border-red-200/30 hover:border-red-300/50"
+            title={clearButtonTooltip}
+            type="button"
           >
-            <span className={`${button.type === 'italic' ? 'italic' : ''} ${button.type === 'underline' ? 'underline' : ''}`}>
-              {button.icon}
+            <span className="text-xs">✕</span>
+            <span className="text-xs hidden sm:inline truncate max-w-[80px]" title={clearButtonText}>
+              {clearButtonText}
             </span>
           </button>
-        ))}
-      </div>
-      
-      <div className="flex items-center space-x-4 text-xs text-neutral-500">
-        <div className="hidden sm:flex items-center space-x-3">
-          <span className="flex items-center space-x-1">
-            <span className="px-2 py-1 bg-neutral-100 rounded-md font-mono">**bold**</span>
-          </span>
-          <span className="flex items-center space-x-1">
-            <span className="px-2 py-1 bg-neutral-100 rounded-md font-mono">*italic*</span>
-          </span>
-          <span className="flex items-center space-x-1">
-            <span className="px-2 py-1 bg-neutral-100 rounded-md font-mono">_underline_</span>
-          </span>
-        </div>
-        <div className="w-px h-4 bg-neutral-300"></div>
-        <span className="text-neutral-400">Use Cmd+B/I/U for shortcuts</span>
-      </div>
+        </>
+      )}
+
+      {/* Info Text */}
+      <div className="flex-1" />
+      <span className="text-xs text-neutral-500">
+        {activeSection ? `Section: ${getFormattedSectionName(activeSection)}` : 'Select text to format'}
+      </span>
     </div>
   )
 }

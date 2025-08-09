@@ -9,7 +9,7 @@ import type { Song, SongSettings } from '../../lib/api'
 interface AppLayoutProps {
   children?: ReactNode
   currentSong?: Song | null
-  saveStatus?: 'saved' | 'saving' | 'error' | 'offline'
+  saveStatus?: 'saved' | 'saving' | 'error' | 'offline' | undefined
   onSearch?: (query: string) => void
   onViewChange?: (view: string) => void
   
@@ -24,6 +24,7 @@ interface AppLayoutProps {
   hasUnsavedChanges?: boolean
   onSave?: () => void
   isSaving?: boolean
+  autoSaveStatus?: 'saved' | 'saving' | 'pending' | 'error'
   
   // Panel content slots
   settingsContent?: ReactNode
@@ -34,7 +35,7 @@ interface AppLayoutProps {
 export function AppLayout({
   children,
   currentSong,
-  saveStatus = 'saved',
+  saveStatus = undefined,
   onSearch,
   onViewChange,
   settings,
@@ -45,6 +46,7 @@ export function AppLayout({
   hasUnsavedChanges = false,
   onSave,
   isSaving = false,
+  autoSaveStatus = 'saved',
   settingsContent,
   editorContent,
   toolsContent
@@ -72,6 +74,7 @@ export function AppLayout({
         hasUnsavedChanges={hasUnsavedChanges}
         onSave={onSave}
         isSaving={isSaving}
+        autoSaveStatus={autoSaveStatus}
       />
       
       {/* Main Content Area */}

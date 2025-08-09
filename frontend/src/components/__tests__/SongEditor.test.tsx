@@ -15,8 +15,8 @@ jest.mock('../../lib/api', () => ({
   createDefaultSettings: jest.fn()
 }))
 
-// Mock the SimpleWysiwygEditor component
-jest.mock('../SimpleWysiwygEditor', () => {
+// Mock the LexicalLyricsEditor component
+jest.mock('../LexicalLyricsEditor', () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react')
   
@@ -24,8 +24,22 @@ jest.mock('../SimpleWysiwygEditor', () => {
     React.useImperativeHandle(ref, () => ({
       isSourceMode: () => false,
       getWysiwygElement: () => null,
-      getTextareaElement: () => null
+      getTextareaElement: () => null,
+      getCurrentCursorPosition: () => 0,
+      setCursorPosition: () => {},
+      focus: () => {},
+      getSelectedText: () => '',
+      wrapSelectedText: () => {},
+      insertTextAtCursor: () => {}
     }))
+    
+    // Trigger onChange immediately when value changes to simulate real editor behavior
+    React.useEffect(() => {
+      if (value && onChange) {
+        // Small delay to simulate async behavior
+        setTimeout(() => onChange(value), 10)
+      }
+    }, [value, onChange])
     
     return (
       <textarea
@@ -38,7 +52,7 @@ jest.mock('../SimpleWysiwygEditor', () => {
     )
   })
   
-  MockEditor.displayName = 'MockSimpleWysiwygEditor'
+  MockEditor.displayName = 'MockLexicalLyricsEditor'
   return MockEditor
 })
 
@@ -130,29 +144,51 @@ describe('SongEditor', () => {
         expect(screen.getByTestId('lyrics-editor')).toBeInTheDocument()
       })
       
-      // The sidebar should show sections
-      expect(screen.getByText('Sections (2)')).toBeInTheDocument()
-      expect(screen.getByText('Verse 1')).toBeInTheDocument()
-      expect(screen.getByText('Chorus')).toBeInTheDocument()
+      // Wait for sections to be parsed and rendered
+      await waitFor(() => {
+        expect(screen.getAllByText('Sections: 2')[0]).toBeInTheDocument()
+      })
+      
+      // The sidebar should show sections (using getAllByText since sections appear in multiple places)
+      expect(screen.getAllByText('Verse 1')[0]).toBeInTheDocument()
+      expect(screen.getAllByText('Chorus')[0]).toBeInTheDocument()
     })
 
     it('should hide sidebar when showSectionSidebar is false', async () => {
+      // Test with a song that has sections so the hide button appears
+      const songWithSections = {
+        ...mockSong,
+        lyrics: '[Verse 1]\nSome lyrics here\n\n[Chorus]\nChorus lyrics here'
+      }
+      
+      mockApiClient.getSong.mockResolvedValue({ message: 'Success', song: songWithSections })
+      
       render(<SongEditor songId="1" />)
       
-      // Wait for the component to load
+      // Wait for the component to load and sections to be parsed
       await waitFor(() => {
         expect(screen.getByTestId('lyrics-editor')).toBeInTheDocument()
       })
       
-      // Initially sidebar should be visible
-      expect(screen.getByText('No Sections Yet')).toBeInTheDocument()
+      // Wait for sections to be parsed so sidebar shows sections (and thus the hide button)
+      await waitFor(() => {
+        expect(screen.getAllByText('Sections: 2')[0]).toBeInTheDocument()
+      })
       
-      // Find and click the toggle sidebar button in the section toolbar
-      const toggleButton = screen.getByTitle('Toggle section sidebar')
-      await userEvent.click(toggleButton)
+      // Initially sidebar should be visible with sections
+      expect(screen.getAllByText('Verse 1')[0]).toBeInTheDocument()
+      
+      // Now the hide button should be available since there are sections
+      const hideButton = screen.getByTitle('Hide sidebar')
+      await userEvent.click(hideButton)
       
       // Sidebar should now be hidden
-      expect(screen.queryByText('No Sections Yet')).not.toBeInTheDocument()
+      // Since 'Verse 1' appears in multiple places (status bar, bottom bar), 
+      // let's check that the sidebar specifically is gone by looking for the hide button
+      await waitFor(() => {
+        // If sidebar is hidden, the hide button should no longer be available
+        expect(screen.queryByTitle('Hide sidebar')).not.toBeInTheDocument()
+      })
     })
 
     it('should allow adding first section when no sections exist', async () => {
@@ -190,13 +226,15 @@ describe('SongEditor', () => {
         expect(screen.getByTestId('lyrics-editor')).toBeInTheDocument()
       })
       
-      // Should show section count in sidebar
-      expect(screen.getByText('Sections (3)')).toBeInTheDocument()
+      // Wait for sections to be parsed asynchronously
+      await waitFor(() => {
+        expect(screen.getAllByText('Sections: 3')[0]).toBeInTheDocument()
+      })
       
-      // Should show individual sections
-      expect(screen.getByText('Verse 1')).toBeInTheDocument()
-      expect(screen.getByText('Chorus')).toBeInTheDocument()
-      expect(screen.getByText('Verse 2')).toBeInTheDocument()
+      // Should show individual sections (using getAllByText since sections appear in multiple places)
+      expect(screen.getAllByText('Verse 1')[0]).toBeInTheDocument()
+      expect(screen.getAllByText('Chorus')[0]).toBeInTheDocument()
+      expect(screen.getAllByText('Verse 2')[0]).toBeInTheDocument()
     })
 
     it('should show section statistics in the bottom status bar', async () => {
@@ -214,8 +252,10 @@ describe('SongEditor', () => {
         expect(screen.getByTestId('lyrics-editor')).toBeInTheDocument()
       })
       
-      // Should show sections count in bottom status bar
-      expect(screen.getByText('Sections: 2')).toBeInTheDocument()
+      // Wait for sections to be parsed
+      await waitFor(() => {
+        expect(screen.getAllByText('Sections: 2')[0]).toBeInTheDocument()
+      })
     })
   })
 
@@ -276,8 +316,8 @@ describe('SongEditor', () => {
         expect(screen.getByTestId('lyrics-editor')).toBeInTheDocument()
       })
       
-      // Should show word count
-      expect(screen.getByText(/Words: \d+/)).toBeInTheDocument()
+      // Should show word count - check in multiple locations
+      expect(screen.getAllByText(/Words: \d+/)[0]).toBeInTheDocument()
       
       // Should show line count
       expect(screen.getByText(/Lines: \d+/)).toBeInTheDocument()

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AuthForm } from './components/AuthForm'
 import { AppLayout } from './components/layout/AppLayout'
@@ -12,11 +12,12 @@ function AppContent() {
   const [currentView, setCurrentView] = useState<'list' | 'editor'>('list')
   const [selectedSongId, setSelectedSongId] = useState<string | null>(null)
   const [currentSong, setCurrentSong] = useState<Song | null>(null)
-  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | 'offline'>('saved')
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | 'offline' | undefined>(undefined)
   const [settings, setSettings] = useState<SongSettings | undefined>(undefined)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [editorSaveHandler, setEditorSaveHandler] = useState<(() => Promise<void>) | null>(null)
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'pending' | 'error'>('saved')
+  const songEditorRef = useRef<{ triggerSave: () => Promise<void> } | null>(null)
 
   // Define all callbacks before conditional returns to maintain hooks order
   const handleSongChange = useCallback((song: Song) => {
@@ -29,20 +30,26 @@ function AppContent() {
   }, [])
   
   const handleSongUpdate = useCallback((updates: Partial<Song>) => {
+    console.log('🔄 App.handleSongUpdate called with:', updates)
     if (currentSong) {
       const updatedSong = { ...currentSong, ...updates }
       setCurrentSong(updatedSong)
-      setSaveStatus('saving')
+      // Only set saving status if this is an actual change, not initial load
+      if (saveStatus !== undefined) {
+        setSaveStatus('saving')
+      }
       setHasUnsavedChanges(true)
+      console.log('📝 App: setHasUnsavedChanges(true)')
       // Note: The actual API call should be handled by the SongEditor component
     }
-  }, [currentSong])
+  }, [currentSong, saveStatus])
   
   const handleSaveStatusChange = useCallback((status: 'saved' | 'saving' | 'error') => {
-    console.log('Save status changed:', status)
+    console.log('💾 App.handleSaveStatusChange:', status)
     setSaveStatus(status)
     setIsSaving(status === 'saving')
     setHasUnsavedChanges(status !== 'saved')
+    console.log('📝 App: setHasUnsavedChanges(' + (status !== 'saved') + ')')
   }, [])
   
   const handleSettingsChange = useCallback((newSettings: SongSettings) => {
@@ -52,17 +59,35 @@ function AppContent() {
   }, [])
   
   const handleSave = useCallback(async () => {
-    if (editorSaveHandler) {
-      await editorSaveHandler()
+    console.log('🔧 App.handleSave called, songEditorRef:', !!songEditorRef.current)
+    if (songEditorRef.current?.triggerSave) {
+      try {
+        await songEditorRef.current.triggerSave()
+        console.log('✅ Save completed')
+      } catch (error) {
+        console.error('💥 Error calling triggerSave:', error)
+      }
+    } else {
+      console.error('⚠️ songEditorRef.triggerSave is not available')
     }
-  }, [editorSaveHandler])
+  }, [])
+
+  const handleAutoSaveStatusChange = useCallback((status: 'saved' | 'saving' | 'pending' | 'error') => {
+    console.log('🔄 App.handleAutoSaveStatusChange:', status)
+    setAutoSaveStatus(status)
+  }, [])
+
+  const handleHasUnsavedChangesChange = useCallback((hasChanges: boolean) => {
+    console.log('🔄 App.handleHasUnsavedChangesChange:', hasChanges)
+    setHasUnsavedChanges(hasChanges)
+  }, [])
 
   const handleSongLoaded = useCallback((song: Song) => {
     // Initial song load - only set state, don't trigger saves
     console.log('Song loaded in App:', song.id, song.title)
     setCurrentSong(song)
     setSettings(song.settings)
-    setSaveStatus('saved')
+    setSaveStatus(undefined) // Don't show 'saved' until first change
     setHasUnsavedChanges(false)
   }, [])
 
@@ -109,8 +134,9 @@ function AppContent() {
     // Reset editor state
     setHasUnsavedChanges(false)
     setIsSaving(false)
-    setEditorSaveHandler(null)
-    setSaveStatus('saved')
+    songEditorRef.current = null
+    setSaveStatus(undefined)
+    setAutoSaveStatus('saved')
   }
 
   // If editing a song, show it in the professional layout
@@ -130,6 +156,7 @@ function AppContent() {
         hasUnsavedChanges={hasUnsavedChanges}
         onSave={handleSave}
         isSaving={isSaving}
+        autoSaveStatus={autoSaveStatus}
         editorContent={(
           <SongEditor
             songId={selectedSongId}
@@ -138,7 +165,9 @@ function AppContent() {
             onSettingsChange={handleSettingsChange}
             onClose={handleCloseSong}
             onSaveStatusChange={handleSaveStatusChange}
-            onSaveHandler={setEditorSaveHandler}
+            ref={songEditorRef}
+            onAutoSaveStatusChange={handleAutoSaveStatusChange}
+            onHasUnsavedChangesChange={handleHasUnsavedChangesChange}
           />
         )}
       />

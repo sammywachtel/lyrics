@@ -1,5 +1,6 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
+import '@testing-library/jest-dom'
 import { ProsodyIndicators, SectionStabilitySummary, ClicheHighlight } from '../ProsodyIndicators'
 import { LineAnalysis, RhymeConnection } from '../../../utils/prosodyAnalysis'
 
@@ -9,6 +10,7 @@ describe('ProsodyIndicators', () => {
       text: 'Walking down the street',
       lineNumber: 1,
       syllableCount: 5,
+      stressedSyllableCount: 3,
       endingType: 'neutral',
       endingWord: 'street',
       rhymeSound: 'eet',
@@ -17,6 +19,7 @@ describe('ProsodyIndicators', () => {
       text: 'Feeling so complete',
       lineNumber: 2,
       syllableCount: 5,
+      stressedSyllableCount: 3,
       endingType: 'neutral',
       endingWord: 'complete',
       rhymeSound: 'ete',
@@ -25,6 +28,7 @@ describe('ProsodyIndicators', () => {
       text: 'The sun shines bright',
       lineNumber: 3,
       syllableCount: 4,
+      stressedSyllableCount: 2,
       endingType: 'stable',
       endingWord: 'bright',
       rhymeSound: 'ight',
@@ -65,8 +69,8 @@ describe('ProsodyIndicators', () => {
         />
       )
 
-      expect(screen.getByText('5')).toBeInTheDocument()
-      expect(screen.getByText('4')).toBeInTheDocument()
+      expect(screen.getAllByText('5')).toHaveLength(2) // Two lines have 5 syllables
+      expect(screen.getAllByText('4')).toHaveLength(1)
     })
 
     it('should highlight current line', () => {

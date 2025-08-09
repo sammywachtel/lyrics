@@ -162,7 +162,7 @@ mark {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
+  width: 3rem; /* Increased width to accommodate syllable counts */
   height: 1.5rem;
   border-left: 4px solid;
   padding-left: 0.5rem;
@@ -171,9 +171,24 @@ mark {
   transition: all 0.2s ease;
 }
 
+.line-number-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
 .line-number {
   font-family: var(--font-mono);
   font-weight: 500;
+}
+
+.syllable-count {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-neutral-400);
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 /* Line ending stability classes */
@@ -383,47 +398,485 @@ mark {
   to { transform: rotate(360deg); }
 }
 
-/* Enhanced Section Border Styles for Clean Unlabeled Separators */
-.section-border {
-  position: relative;
-  margin: 24px 0 16px 0;
-  padding: 0;
-  height: 1px;
-  border-top: 1px solid rgba(148, 163, 184, 0.3);
+
+/* Rich Text Editor Styles */
+.rich-text-editor {
+  font-family: var(--font-mono);
 }
 
-.section-border::after {
+.rich-text-content {
+  font-family: var(--font-mono) !important;
+}
+
+/* Custom Lexical Node Styles */
+.section-node {
+  display: block;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.syllable-node {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.syllable-node:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 2px;
+}
+
+.syllable-stressed {
+  font-weight: 600;
+  color: var(--color-primary-700);
+}
+
+.syllable-secondary {
+  font-weight: 500;
+  color: var(--color-primary-600);
+}
+
+.syllable-unstressed {
+  color: var(--color-neutral-600);
+}
+
+.rhyme-node {
+  position: relative;
+  font-weight: 600;
+  border-radius: 3px;
+  padding: 1px 2px;
+  transition: all 0.2s ease;
+}
+
+.rhyme-node:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Rhyme scheme colors for RhymeNode */
+.rhyme-a {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-bottom: 2px solid var(--color-primary-500);
+}
+
+.rhyme-b {
+  background-color: rgba(16, 185, 129, 0.2);
+  border-bottom: 2px solid var(--color-success-500);
+}
+
+.rhyme-c {
+  background-color: rgba(168, 85, 247, 0.2);
+  border-bottom: 2px solid var(--color-creative-500);
+}
+
+.rhyme-d {
+  background-color: rgba(245, 158, 11, 0.2);
+  border-bottom: 2px solid var(--color-warm-500);
+}
+
+.rhyme-e {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-bottom: 2px solid #ef4444;
+}
+
+.rhyme-f {
+  background-color: rgba(236, 72, 153, 0.2);
+  border-bottom: 2px solid #ec4899;
+}
+
+.rhyme-g {
+  background-color: rgba(20, 184, 166, 0.2);
+  border-bottom: 2px solid #14b8a6;
+}
+
+.rhyme-h {
+  background-color: rgba(249, 115, 22, 0.2);
+  border-bottom: 2px solid #f97316;
+}
+
+/* Formatting Toolbar Styles */
+.formatting-toolbar {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Rich Text Content Styles */
+.rich-text-content .lexical-paragraph {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.rich-text-content .lexical-paragraph:first-child {
+  margin-top: 0;
+}
+
+.rich-text-content .lexical-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Lexical theme enhancements for better paragraph control */
+.lexical-paragraph {
+  margin: 0 0 2px 0 !important;
+  line-height: 1.3 !important;
+  position: relative;
+}
+
+/* Direction classes for text alignment */
+.ltr {
+  text-align: left;
+}
+
+.rtl {
+  text-align: right;
+}
+
+/* Text formatting styles - Using correct Lexical class names from design spec */
+.lexical-text-bold {
+  font-weight: 700 !important;
+  color: var(--color-primary-800) !important;
+}
+
+.lexical-text-italic {
+  font-style: italic !important;
+  color: var(--color-creative-700) !important;
+}
+
+.lexical-text-underline {
+  text-decoration: underline !important;
+  text-decoration-color: var(--color-primary-500) !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 2px !important;
+}
+
+.lexical-text-strikethrough {
+  text-decoration: line-through !important;
+  text-decoration-color: var(--color-neutral-400) !important;
+  text-decoration-thickness: 2px !important;
+}
+
+/* Section text formatting styles - Applied to paragraph elements with cohesive grouping */
+p.lexical-text-verse,
+.lexical-text-verse {
+  background: linear-gradient(90deg, var(--color-primary-100), var(--color-primary-50)) !important;
+  padding: 2px 8px 2px 12px !important;
+  border-left: 4px solid var(--color-primary-500) !important;
+  margin-left: -8px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  border-radius: 0px !important;
+  line-height: 1.2 !important;
+}
+
+p.lexical-text-chorus,
+.lexical-text-chorus {
+  background: linear-gradient(90deg, var(--color-creative-100), var(--color-creative-50)) !important;
+  padding: 2px 8px 2px 12px !important;
+  border-left: 4px solid var(--color-creative-500) !important;
+  margin-left: -8px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  border-radius: 0px !important;
+  line-height: 1.2 !important;
+}
+
+p.lexical-text-pre-chorus,
+.lexical-text-pre-chorus {
+  background: linear-gradient(90deg, var(--color-warm-100), var(--color-warm-50)) !important;
+  padding: 2px 8px 2px 12px !important;
+  border-left: 4px solid var(--color-warm-500) !important;
+  margin-left: -8px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  border-radius: 0px !important;
+  line-height: 1.2 !important;
+}
+
+p.lexical-text-bridge,
+.lexical-text-bridge {
+  background: linear-gradient(90deg, var(--color-success-100), var(--color-success-50)) !important;
+  padding: 2px 8px 2px 12px !important;
+  border-left: 4px solid var(--color-success-500) !important;
+  margin-left: -8px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  border-radius: 0px !important;
+  line-height: 1.2 !important;
+}
+
+p.lexical-text-intro,
+.lexical-text-intro {
+  background: linear-gradient(90deg, var(--color-neutral-100), var(--color-neutral-50)) !important;
+  padding: 2px 8px 2px 12px !important;
+  border-left: 4px solid var(--color-neutral-500) !important;
+  margin-left: -8px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  border-radius: 0px !important;
+  line-height: 1.2 !important;
+}
+
+p.lexical-text-outro,
+.lexical-text-outro {
+  background: linear-gradient(90deg, var(--color-neutral-200), var(--color-neutral-100)) !important;
+  padding: 2px 8px 2px 12px !important;
+  border-left: 4px solid var(--color-neutral-600) !important;
+  margin-left: -8px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  border-radius: 0px !important;
+  line-height: 1.2 !important;
+}
+
+p.lexical-text-hook,
+.lexical-text-hook {
+  background: linear-gradient(90deg, rgba(236, 72, 153, 0.1), rgba(236, 72, 153, 0.05)) !important;
+  padding: 2px 8px 2px 12px !important;
+  border-left: 4px solid #ec4899 !important;
+  margin-left: -8px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  border-radius: 0px !important;
+  line-height: 1.2 !important;
+}
+
+/* Make section blocks look cohesive - first paragraph of each section block gets top rounded corners */
+p.lexical-text-verse:not(.lexical-text-verse + p),
+p.lexical-text-chorus:not(.lexical-text-chorus + p),
+p.lexical-text-pre-chorus:not(.lexical-text-pre-chorus + p),
+p.lexical-text-bridge:not(.lexical-text-bridge + p),
+p.lexical-text-intro:not(.lexical-text-intro + p),
+p.lexical-text-outro:not(.lexical-text-outro + p),
+p.lexical-text-hook:not(.lexical-text-hook + p) {
+  border-radius: 6px 6px 0px 0px !important;
+  margin-top: 8px !important;
+}
+
+/* Last paragraph of each section block gets bottom rounded corners */
+p.lexical-text-verse:not(:has(+ p.lexical-text-verse)),
+p.lexical-text-chorus:not(:has(+ p.lexical-text-chorus)),
+p.lexical-text-pre-chorus:not(:has(+ p.lexical-text-pre-chorus)),
+p.lexical-text-bridge:not(:has(+ p.lexical-text-bridge)),
+p.lexical-text-intro:not(:has(+ p.lexical-text-intro)),
+p.lexical-text-outro:not(:has(+ p.lexical-text-outro)),
+p.lexical-text-hook:not(:has(+ p.lexical-text-hook)) {
+  border-radius: 0px 0px 6px 6px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Single-line sections get fully rounded corners */
+p.lexical-text-verse:not(.lexical-text-verse + p):not(:has(+ p.lexical-text-verse)),
+p.lexical-text-chorus:not(.lexical-text-chorus + p):not(:has(+ p.lexical-text-chorus)),
+p.lexical-text-pre-chorus:not(.lexical-text-pre-chorus + p):not(:has(+ p.lexical-text-pre-chorus)),
+p.lexical-text-bridge:not(.lexical-text-bridge + p):not(:has(+ p.lexical-text-bridge)),
+p.lexical-text-intro:not(.lexical-text-intro + p):not(:has(+ p.lexical-text-intro)),
+p.lexical-text-outro:not(.lexical-text-outro + p):not(:has(+ p.lexical-text-outro)),
+p.lexical-text-hook:not(.lexical-text-hook + p):not(:has(+ p.lexical-text-hook)) {
+  border-radius: 6px !important;
+}
+
+/* Ensure section formatting text color is preserved for inline elements */
+.lexical-text-verse *,
+.lexical-text-chorus *,
+.lexical-text-pre-chorus *,
+.lexical-text-bridge *,
+.lexical-text-intro *,
+.lexical-text-outro *,
+.lexical-text-hook * {
+  color: inherit !important;
+}
+
+.rich-text-content .italic {
+  font-style: italic;
+}
+
+.rich-text-content .underline {
+  text-decoration: underline;
+}
+
+/* Section Navigation Highlight Effect */
+.section-navigation-highlight {
+  position: relative;
+  animation: sectionNavigationHighlight 2s ease-out;
+  box-shadow: 0 0 0 2px var(--color-primary-400) !important;
+  border-radius: 6px !important;
+  z-index: 10;
+}
+
+@keyframes sectionNavigationHighlight {
+  0% {
+    box-shadow: 0 0 0 0px var(--color-primary-400),
+                0 0 20px var(--color-primary-300) !important;
+    background-color: var(--color-primary-100) !important;
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--color-primary-400),
+                0 0 25px var(--color-primary-300) !important;
+    background-color: var(--color-primary-150) !important;
+  }
+  100% {
+    box-shadow: 0 0 0 2px var(--color-primary-400) !important;
+  }
+}
+
+/* Add a subtle glow effect during navigation */
+.section-navigation-highlight::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg,
+    var(--color-primary-300),
+    var(--color-creative-300),
+    var(--color-primary-300)
+  );
+  border-radius: 8px;
+  opacity: 0.3;
+  z-index: -1;
+  animation: sectionGlow 2s ease-out;
+}
+
+@keyframes sectionGlow {
+  0% { opacity: 0.6; transform: scale(1.05); }
+  50% { opacity: 0.4; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+.rich-text-content .line-through {
+  text-decoration: line-through;
+}
+
+/* Ensure monospace font is applied consistently */
+.rich-text-content * {
+  font-family: var(--font-mono) !important;
+}
+
+/* Section Header Styles for Visual Section Labels in Rich Mode */
+.section-tag-wrapper {
+  margin: 1.5rem 0 0.75rem 0;
+  position: relative;
+}
+
+.section-tag-wrapper:first-child {
+  margin-top: 0.5rem;
+}
+
+.section-tag-node {
+  position: relative;
+}
+
+.section-tag-node .section-tag-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  border: 1px solid;
+  backdrop-filter: blur(8px);
+  font-family: var(--font-mono);
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+/* Section-specific styling for labels */
+.section-tag-node[data-section*="VERSE"] .section-tag-label {
+  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-50));
+  border-color: var(--color-primary-300);
+  color: var(--color-primary-800);
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.1);
+}
+
+.section-tag-node[data-section*="CHORUS"] .section-tag-label {
+  background: linear-gradient(135deg, var(--color-creative-100), var(--color-creative-50));
+  border-color: var(--color-creative-300);
+  color: var(--color-creative-800);
+  box-shadow: 0 1px 3px rgba(168, 85, 247, 0.1);
+}
+
+.section-tag-node[data-section*="PRE-CHORUS"] .section-tag-label {
+  background: linear-gradient(135deg, var(--color-warm-100), var(--color-warm-50));
+  border-color: var(--color-warm-300);
+  color: var(--color-warm-800);
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.1);
+}
+
+.section-tag-node[data-section*="BRIDGE"] .section-tag-label {
+  background: linear-gradient(135deg, var(--color-success-100), var(--color-success-50));
+  border-color: var(--color-success-300);
+  color: var(--color-success-800);
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1);
+}
+
+.section-tag-node[data-section*="INTRO"] .section-tag-label,
+.section-tag-node[data-section*="OUTRO"] .section-tag-label {
+  background: linear-gradient(135deg, var(--color-neutral-100), var(--color-neutral-50));
+  border-color: var(--color-neutral-300);
+  color: var(--color-neutral-700);
+  box-shadow: 0 1px 3px rgba(115, 113, 108, 0.1);
+}
+
+.section-tag-node[data-section*="HOOK"] .section-tag-label {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(236, 72, 153, 0.05));
+  border-color: rgba(236, 72, 153, 0.3);
+  color: #be185d;
+  box-shadow: 0 1px 3px rgba(236, 72, 153, 0.1);
+}
+
+/* Hover effects for section labels */
+.section-tag-node:hover .section-tag-label {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Section decorative line */
+.section-tag-node .section-decorative-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+  z-index: -1;
+}
+
+/* Compact section headers for better text flow */
+.section-tag-wrapper + .lexical-paragraph {
+  margin-top: 0.25rem;
+}
+
+/* Enhanced section border for visual separation */
+.section-border {
+  position: relative;
+  margin: 1rem 0 0.5rem 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+}
+
+.section-border::before {
   content: '';
   position: absolute;
   top: -1px;
   left: 50%;
   transform: translateX(-50%);
   width: 40px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #3B82F6, transparent);
-  transition: width 0.2s ease;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--color-primary-400), transparent);
+  border-radius: 2px;
 }
 
-.section-border:hover::after {
-  width: 60px;
-}
-
-/* Accessibility: Ensure section borders are announced to screen readers */
-.section-border[aria-label] {
-  position: relative;
-}
-
-/* Mobile responsive section borders */
+/* Mobile responsive adjustments */
 @media (max-width: 768px) {
-  .section-border {
-    margin: 20px 0 12px 0;
+  .section-tag-node .section-tag-label {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
   }
-  
-  .section-border::after {
-    width: 30px;
-  }
-  
-  .section-border:hover::after {
-    width: 45px;
+
+  .section-tag-wrapper {
+    margin: 1rem 0 0.5rem 0;
   }
 }

@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from .config import settings
 from .auth import create_auth_dependency
 from .songs import create_songs_router
+from .dictionary import get_cmu_dictionary, lookup_stress_pattern, analyze_contextual_stress, StressPattern
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -39,19 +40,19 @@ supabase_available = False
 def initialize_supabase() -> Optional[Client]:
     """Initialize Supabase client with proper error handling."""
     global supabase_available
-    
+
     try:
         # Get credentials from environment or settings
         supabase_url = os.getenv("SUPABASE_URL") or settings.supabase_url
         supabase_key = os.getenv("SUPABASE_KEY") or settings.supabase_key
-        
+
         if not supabase_url or not supabase_key:
             logger.warning("Supabase credentials not provided. Running without database connection.")
             return None
-        
+
         # Test the credentials by creating a client
         client = create_client(supabase_url, supabase_key)
-        
+
         # Test connection with a simple query
         try:
             # This will validate the client can connect
@@ -64,7 +65,7 @@ def initialize_supabase() -> Optional[Client]:
             # Return client anyway as it might work for other operations
             supabase_available = False
             return client
-            
+
     except Exception as e:
         logger.error(f"Failed to initialize Supabase client: {e}")
         supabase_available = False
@@ -96,7 +97,7 @@ async def root() -> Dict[str, Any]:
 async def health_check() -> Dict[str, Any]:
     """Health check endpoint with database connectivity test."""
     timestamp = datetime.now(timezone.utc).isoformat()
-    
+
     if supabase is None:
         return {
             "status": "healthy",
@@ -105,11 +106,11 @@ async def health_check() -> Dict[str, Any]:
             "framework": "FastAPI",
             "message": "API is running without database connection"
         }
-    
+
     try:
         # Test database connection by querying users table
         response = supabase.table("users").select("count").limit(1).execute()
-        
+
         return {
             "status": "healthy",
             "timestamp": timestamp,
@@ -127,6 +128,89 @@ async def health_check() -> Dict[str, Any]:
         }
 
 
+# Dictionary API endpoints
+@app.get("/api/dictionary/stress/{word}")
+async def get_word_stress(word: str) -> Dict[str, Any]:
+    """Get stress pattern for a word from CMU dictionary."""
+    try:
+        pattern = lookup_stress_pattern(word)
+
+        if pattern is None:
+            return {
+                "word": word,
+                "found": False,
+                "message": "Word not found in CMU dictionary"
+            }
+
+        return {
+            "word": word,
+            "found": True,
+            "syllables": pattern.syllables,
+            "stress_pattern": pattern.stress_pattern,
+            "phonemes": pattern.phonemes,
+            "confidence": pattern.confidence
+        }
+
+    except Exception as e:
+        logger.error(f"Dictionary lookup error for '{word}': {e}")
+        raise HTTPException(status_code=500, detail=f"Dictionary lookup failed: {str(e)}")
+
+
+@app.get("/api/dictionary/stats")
+async def get_dictionary_stats() -> Dict[str, Any]:
+    """Get CMU dictionary statistics."""
+    try:
+        dict_service = get_cmu_dictionary()
+        stats = dict_service.get_stats()
+
+        return {
+            "status": "loaded",
+            "statistics": stats,
+            "message": "CMU Pronouncing Dictionary ready"
+        }
+
+    except Exception as e:
+        logger.error(f"Dictionary stats error: {e}")
+        raise HTTPException(status_code=500, detail=f"Dictionary stats failed: {str(e)}")
+
+
+@app.post("/api/dictionary/contextual-stress")
+async def analyze_word_in_context(request: Dict[str, Any]) -> Dict[str, Any]:
+    """Analyze contextual stress for a word based on its sentence context."""
+    try:
+        word = request.get("word", "").strip()
+        context = request.get("context", "").strip()
+        position = request.get("position", 0)
+        
+        if not word or not context:
+            raise HTTPException(status_code=400, detail="Both 'word' and 'context' are required")
+        
+        stress_result = analyze_contextual_stress(word, context, position)
+        
+        if stress_result is None:
+            return {
+                "word": word,
+                "context": context,
+                "is_contextual": False,
+                "message": f"'{word}' is not a contextual word"
+            }
+        
+        return {
+            "word": word,
+            "context": context,
+            "is_contextual": True,
+            "stressed": stress_result,
+            "explanation": "Determined by grammatical function analysis",
+            "confidence": 0.8  # Good confidence for rule-based analysis
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Contextual analysis error: {e}")
+        raise HTTPException(status_code=500, detail=f"Contextual analysis failed: {str(e)}")
+
+
 @app.get("/api/test")
 async def test_endpoint() -> Dict[str, Any]:
     """Test endpoint that adds a record to the database."""
@@ -136,14 +220,14 @@ async def test_endpoint() -> Dict[str, Any]:
             "framework": "FastAPI",
             "database": "not_configured"
         }
-    
+
     try:
         # Insert a test record
         response = supabase.table("test_records").insert({
             "message": "Hello from Google Cloud with FastAPI!",
             "created_at": datetime.now(timezone.utc).isoformat()
         }).execute()
-        
+
         return {
             "message": "Test successful - record added to database",
             "data": response.data,
@@ -168,7 +252,7 @@ async def test_songs_endpoint() -> Dict[str, Any]:
             "message": "Database not configured",
             "framework": "FastAPI"
         }
-    
+
     try:
         # Test song creation
         song_data = {
@@ -179,9 +263,9 @@ async def test_songs_endpoint() -> Dict[str, Any]:
             "metadata": {"artist": "Test Artist", "tags": ["test"], "status": "draft"},
             "is_archived": False
         }
-        
+
         response = supabase.table("songs").insert(song_data).execute()
-        
+
         return {
             "message": "Test song created successfully",
             "data": response.data,

@@ -54,9 +54,9 @@ describe('SectionSidebar', () => {
     )
 
     expect(screen.getByText('Sections (3)')).toBeInTheDocument()
-    expect(screen.getByText('Verse 1')).toBeInTheDocument()
-    expect(screen.getByText('Chorus')).toBeInTheDocument()
-    expect(screen.getByText('Bridge')).toBeInTheDocument()
+    expect(screen.getAllByText('Verse 1')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Chorus')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Bridge')[0]).toBeInTheDocument()
   })
 
   it('should display section statistics correctly', () => {
@@ -124,7 +124,7 @@ describe('SectionSidebar', () => {
     )
 
     // The current section should be highlighted with active styling
-    const chorusSection = screen.getByText('Chorus').closest('.group')
+    const chorusSection = screen.getAllByText('Chorus')[0].closest('.group')
     expect(chorusSection).toHaveClass('border-l-4')
     expect(chorusSection).toHaveClass('from-green-100')
   })
@@ -160,12 +160,12 @@ describe('SectionSidebar', () => {
     )
 
     // Icons should be present (we can't easily test specific emoji content, but we can verify structure)
-    expect(screen.getByText('Verse 1')).toBeInTheDocument()
-    expect(screen.getByText('Chorus')).toBeInTheDocument()
-    expect(screen.getByText('Bridge')).toBeInTheDocument()
-    expect(screen.getByText('Pre-Chorus')).toBeInTheDocument()
-    expect(screen.getByText('Intro')).toBeInTheDocument()
-    expect(screen.getByText('Outro')).toBeInTheDocument()
+    expect(screen.getAllByText('Verse 1')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Chorus')).toHaveLength(2) // One in section list, one in legend
+    expect(screen.getAllByText('Bridge')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Pre-Chorus')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Intro')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Outro')[0]).toBeInTheDocument()
   })
 
   it('should have proper accessibility and styling', () => {
@@ -192,9 +192,9 @@ describe('SectionSidebar', () => {
       />
     )
 
-    expect(screen.getByText('Section Management:')).toBeInTheDocument()
-    expect(screen.getByText('Click section to jump')).toBeInTheDocument()
-    expect(screen.getByText('Hover for edit options')).toBeInTheDocument()
+    expect(screen.getByText('Quick Actions:')).toBeInTheDocument()
+    expect(screen.getByText('Click to jump • Hover to edit')).toBeInTheDocument()
+    expect(screen.getByText('Current section highlighted')).toBeInTheDocument()
   })
 
   it('should handle empty content sections correctly', () => {

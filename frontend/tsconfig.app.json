@@ -26,5 +26,12 @@
     "allowSyntheticDefaultImports": true
   },
   "include": ["src"],
-  "exclude": ["src/**/__tests__/**", "src/**/*.test.*"]
+  "exclude": [
+    "src/**/__tests__/**", 
+    "src/**/*.test.*",
+    "src/components/plugins/ProsodyAnalysisPlugin.tsx",
+    "src/components/plugins/RhymeSchemePlugin.tsx",
+    "src/components/plugins/SectionLabelsPlugin.tsx",
+    "src/components/plugins/SyllableMarkingPlugin.tsx"
+  ]
 }

@@ -20,7 +20,7 @@ interface AppHeaderProps {
   currentSong?: Song | null
   onSearch?: (query: string) => void
   onViewChange?: (view: string) => void
-  saveStatus?: 'saved' | 'saving' | 'error' | 'offline'
+  saveStatus?: 'saved' | 'saving' | 'error' | 'offline' | undefined
   // Editor mode props
   isEditorMode?: boolean
   onBack?: () => void
@@ -28,6 +28,7 @@ interface AppHeaderProps {
   hasUnsavedChanges?: boolean
   onSave?: () => void
   isSaving?: boolean
+  autoSaveStatus?: 'saved' | 'saving' | 'pending' | 'error'
 }
 
 const SAVE_STATUS_CONFIG = {
@@ -58,14 +59,26 @@ export function AppHeader({
   currentSong, 
   onSearch, 
   // onViewChange is unused in this component but required by interface
-  saveStatus = 'saved',
+  saveStatus = undefined,
   isEditorMode = false,
   onBack,
   onSongUpdate,
   hasUnsavedChanges = false,
   onSave,
-  isSaving = false
+  isSaving = false,
+  autoSaveStatus = 'saved'
 }: AppHeaderProps) {
+  
+  // Debug logging for header state (only when changes occur)
+  if (typeof window !== 'undefined' && window.location.search.includes('debug')) {
+    console.log('🎯 AppHeader render:', {
+      isEditorMode,
+      hasUnsavedChanges,
+      isSaving,
+      autoSaveStatus,
+      saveStatus
+    })
+  }
   const [searchQuery, setSearchQuery] = useState('')
   const [showSongMeta, setShowSongMeta] = useState(false)
   const [isEditingMeta, setIsEditingMeta] = useState(false)
@@ -108,8 +121,8 @@ export function AppHeader({
     setShowSongMeta(false)
   }
   
-  const saveConfig = SAVE_STATUS_CONFIG[saveStatus]
-  const SaveIcon = saveConfig.icon
+  const saveConfig = saveStatus ? SAVE_STATUS_CONFIG[saveStatus] : null
+  const SaveIcon = saveConfig?.icon
   
   return (
     <header className="h-16 bg-white/80 backdrop-blur-md border-b border-neutral-200/50 shadow-soft">
@@ -145,7 +158,7 @@ export function AppHeader({
               <PencilIcon className="w-4 h-4 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg font-semibold text-neutral-900">Songcraft</h1>
+              <h1 className="text-lg font-semibold text-neutral-900">Versifai</h1>
               <p className="text-xs text-neutral-500 -mt-1">AI-Assisted Writing</p>
             </div>
           </div>
@@ -220,31 +233,56 @@ export function AppHeader({
         
         {/* Right Section - View Controls & Status */}
         <div className="flex items-center gap-4">
-          {/* Save Button (Editor Mode Only) */}
+          {/* Google Docs Style Save Button (Editor Mode Only) */}
           {isEditorMode && onSave && (
             <button
               onClick={onSave}
-              disabled={isSaving || !hasUnsavedChanges}
-              className={`relative overflow-hidden px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
+              disabled={!hasUnsavedChanges || isSaving}
+              className={`relative overflow-hidden px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-w-[120px] ${
                 hasUnsavedChanges && !isSaving
-                  ? 'bg-gradient-to-r from-primary-500 to-creative-600 hover:from-primary-600 hover:to-creative-700 text-white shadow-medium hover:shadow-glow-primary border border-white/20'
-                  : 'bg-neutral-100 text-neutral-500 cursor-not-allowed shadow-soft border border-neutral-200'
+                  ? 'bg-white hover:bg-neutral-50 text-primary-600 hover:text-primary-700 border border-primary-200 hover:border-primary-300 shadow-soft hover:shadow-medium'
+                  : isSaving || (autoSaveStatus === 'saving' && hasUnsavedChanges)
+                  ? 'bg-white text-neutral-600 border border-neutral-200 shadow-soft cursor-wait'
+                  : 'bg-white text-neutral-500 border border-neutral-200 shadow-soft cursor-default'
               }`}
+              title={
+                isSaving 
+                  ? 'Saving changes...' 
+                  : autoSaveStatus === 'saving' && hasUnsavedChanges
+                  ? 'Auto-saving...'
+                  : hasUnsavedChanges && autoSaveStatus === 'pending'
+                  ? 'Click to save now or wait for auto-save'
+                  : hasUnsavedChanges 
+                  ? 'Click to save changes now' 
+                  : 'All changes saved'
+              }
             >
-              <span className="relative z-10 flex items-center gap-2">
+              <span className="relative z-10 flex items-center justify-center gap-2">
                 {isSaving ? (
                   <>
-                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div className="w-3 h-3 border-2 border-neutral-300 border-t-primary-500 rounded-full animate-spin"></div>
                     <span>Saving...</span>
                   </>
-                ) : hasUnsavedChanges ? (
+                ) : autoSaveStatus === 'saving' && hasUnsavedChanges ? (
                   <>
-                    <span>💾</span>
-                    <span>Save</span>
+                    <div className="w-3 h-3 border-2 border-neutral-300 border-t-blue-500 rounded-full animate-spin"></div>
+                    <span>Auto-saving...</span>
                   </>
+                ) : hasUnsavedChanges ? (
+                  autoSaveStatus === 'pending' ? (
+                    <>
+                      <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+                      <span>Save now</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-primary-500">💾</span>
+                      <span>Save now</span>
+                    </>
+                  )
                 ) : (
                   <>
-                    <span>✓</span>
+                    <span className="text-success-500">✓</span>
                     <span>Saved</span>
                   </>
                 )}
@@ -253,7 +291,7 @@ export function AppHeader({
           )}
           
           {/* Save Status (Non-Editor Mode) */}
-          {!isEditorMode && (
+          {!isEditorMode && saveConfig && SaveIcon && (
             <div className="hidden sm:flex items-center gap-2 text-xs">
               <SaveIcon className={`w-4 h-4 ${saveConfig.className}`} />
               <span className={saveConfig.className}>{saveConfig.text}</span>
