@@ -29,7 +29,7 @@ import { StressMarkDecoratorNode } from './lexical/nodes/StressMarkDecoratorNode
 import { StressMarkDecoratorPlugin } from './lexical/plugins/StressMarkDecoratorPlugin'
 import { AutoStressDetectionPlugin } from './lexical/plugins/AutoStressDetectionPlugin'
 import { StableTextToStressedPlugin } from './lexical/plugins/StableTextToStressedPlugin'
-import { SyllableCountDecoratorPlugin } from './lexical/plugins/SyllableCountDecoratorPlugin'
+import { ComprehensiveStressPlugin } from './lexical/plugins/ComprehensiveStressPlugin'
 import StressContextMenu from './lexical/ui/StressContextMenu'
 // import SectionHeaderPlugin from './plugins/SectionHeaderPlugin' // TODO: Re-enable when test environment supports full Lexical
 // TODO: Re-enable when plugins are fully TypeScript compliant
@@ -932,7 +932,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
                 enabled={true}
                 debounceMs={3000}
               />
-              <SyllableCountDecoratorPlugin
+              <ComprehensiveStressPlugin
                 enabled={true}
               />
               {/* TODO: Re-enable when plugins are fully TypeScript compliant */}
