@@ -32,7 +32,7 @@ subsequent version. All submissions will be reviewed and approved by
 the current maintainer, Alex Rudnicky at Carnegie Mellon University.
 
 ----------------------------------------------------------------------
-The current version of cmudict is now cmudict-0.7b 
+The current version of cmudict is now cmudict-0.7b
 [First released November 19, 2014]
 
 Note that the first '.' in the file name has changed to a '-' as it

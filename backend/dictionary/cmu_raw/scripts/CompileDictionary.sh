@@ -1,6 +1,6 @@
 #!sh
 # [20080422] (air) Compile cmudict into SPHINX_40 form
-# [20100118] (air) 
+# [20100118] (air)
 
 DIR=sphinxdict
 DICT_BASE=cmudict

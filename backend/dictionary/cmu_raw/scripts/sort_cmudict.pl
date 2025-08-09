@@ -62,7 +62,7 @@ my $last = "";  # the last word processed
 foreach my $h (sort keys %header) { print OUT "$header{$h}"; }
 
 # print out each entry
-my $DELIMITER = '  ';  
+my $DELIMITER = '  ';
 foreach my $w (sort keys %dict) {
   my $var=1;  # number variants from 2 (this is different from original)
   foreach my $p ( @{$dict{$w}{VARIANT}} ) {
@@ -93,7 +93,7 @@ sub get_dict {
     if ($_ =~ /^;;; \#/) {  # save header info
 	$header{$last} .= "$_\n";
 	next;
-    } 
+    }
     elsif ( $_ =~ /^;;;/ ) { $header{$last} .= "$_\n"; next; }  # ignore plain comments
     elsif ( $_ =~ /^\s*$/ ) { $header{$last} .= "$_\n"; next; }  # ignore blank lines
 
@@ -128,7 +128,7 @@ sub get_dict {
     }
 
     # it's a new variant on an existing baseform, keep it
-    if ( $pron ne "" ) { 
+    if ( $pron ne "" ) {
 	push @{$dict->{$root}{VARIANT}}, $pron;
 	$varia++;
 	$histo{scalar @{$dict->{$root}{VARIANT}}}++;  # track variant stats

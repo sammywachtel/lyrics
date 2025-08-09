@@ -49,12 +49,12 @@
 
 #
 # correct dictionary format is:   ^WORD(\(\d\))*\tW ER\d* DD\n$
-# 
+#
 # - "W ER DD" are symbols from the legal phone set(s)
 # - no leading/trailing spaces allowed
 # - no duplicates words allowed
 # - character collating sequence enforced for baseform
-# 
+#
 # above spec should cover all (current) consumers of the dictionary file.
 # not all conventions checked however (eg, for multiple pronunciations)
 #
@@ -113,7 +113,7 @@ while (<DICT>) {
 
     # check tabbing (2 spaces)
     my @line = split (/  /,$line);
-    if ( ($line[0] ne $word) or (scalar @line ne 2) ) { 
+    if ( ($line[0] ne $word) or (scalar @line ne 2) ) {
 	print "WARNING: tabbing error (",scalar @line, ") in: $line\n";
 	$problems++;
     }
@@ -157,7 +157,7 @@ while (<DICT>) {
 	($ph,$stress,$tail) = ($s =~ /([A-Z]+)([012]*)(.*)$/);
 	$|=1;
 	#print join( '|', ($s =~ /([A-Z]+)([012]*)(.*)$/)),"\n";
-	
+
 	$legalV =  defined $phone{$ph} && ($class{$ph} eq 'vowel') && ($stress ne '') && ($tail eq '');
 	if ( not defined $phone{$ph} ) { push @errs, $s; }
 	elsif ( $legalV ) { $phone{$s}++; }  # doesn't do anything here, yet

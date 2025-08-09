@@ -46,12 +46,12 @@
 
 #
 # correct dictionary format is:   ^WORD\tW ER DD\n$
-# 
+#
 # - "W ER DD" are symbols from the legal phone set(s)
 # - no leading/trailing spaces allowed
 # - no duplicates words allowed
 # - character collating sequence enforced
-# 
+#
 # above spec should cover all (current) consumers of the dictionary file.
 # not all conventions checked however (eg, for multiple pronunciations)
 #

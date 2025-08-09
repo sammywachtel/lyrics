@@ -16,4 +16,3 @@ Note that compilation produces two (identical) files. The generic
 cmudict_SPHINX_40 is for convenience: the name is not expected to
 change as the dictionary evolves. It is (reasonably) safe to use it in
 your programs and scripts.
-

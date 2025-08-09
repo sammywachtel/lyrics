@@ -151,7 +151,7 @@ sub get_dict {
     }
 
     # it's a new variant on an existing baseform, keep it
-    if ( $pron ne "" ) { 
+    if ( $pron ne "" ) {
 	push @{$dict->{$root}}, $pron;
 	$varia++;
 	$histo{scalar @{$dict->{$root}}}++;  # track variant stats
