@@ -340,65 +340,118 @@ function StressMarkOverlay({
 
   const stressMarks = pattern.syllables.map((syllable, index) => {
     const mark = syllable.stressed ? '´' : '˘'
-    const syllableWidth = rect.width / pattern.syllables.length
-    const x = rect.left + (index * syllableWidth) + (syllableWidth / 2)
+    
+    // Calculate the actual position of the vowel within this syllable
+    const vowelPosition = findVowelPositionInWord(word, pattern.syllables, index)
+    
+    if (vowelPosition === -1) {
+      // Fallback to old method if vowel detection fails
+      const syllableWidth = rect.width / pattern.syllables.length
+      const x = rect.left + (index * syllableWidth) + (syllableWidth / 2)
+      const y = rect.top - 5
+      
+      return createStressMarkSpan(mark, x, y, syllable, index, word, overlay, onInteraction)
+    }
+    
+    // Calculate actual character position within the word
+    const charWidth = rect.width / word.length
+    const x = rect.left + (vowelPosition * charWidth) + (charWidth / 2)
     const y = rect.top - 5
 
 
-    return (
-      <span
-        key={index}
-        className="stress-mark"
-        style={{
-          position: 'fixed', // Fixed positioning relative to viewport
-          left: `${x}px`, // Back to real coordinates
-          top: `${y}px`,
-          fontSize: '14px',
-          fontWeight: 'bold',
-          color: syllable.stressed ? '#dc2626' : '#6b7280', // Red for stressed, gray for unstressed
-          pointerEvents: 'auto',
-          cursor: 'pointer',
-          zIndex: 1001,
-          userSelect: 'none',
-          textAlign: 'center',
-          transform: 'translateX(-50%)', // Center horizontally on the x coordinate
-          backgroundColor: 'transparent', // No background for cleaner look
-          textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)', // White shadow for visibility on dark backgrounds
-          // Temporary debug: add a small label to identify which word this mark belongs to
-          fontSize: '10px'
-        }}
-        onContextMenu={(e) => {
-          e.preventDefault() // Prevent browser context menu
-          if (onInteraction) {
-            // Use right-click coordinates for stress context menu
-            onInteraction({
-              word,
-              syllableIndex: index,
-              nodeKey: overlay.nodeKey,
-              x: e.clientX,
-              y: e.clientY
-            })
-          }
-        }}
-        onClick={(e) => {
-          // For debugging - left click can also trigger menu
-          if (e.shiftKey && onInteraction) {
-            onInteraction({
-              word,
-              syllableIndex: index,
-              nodeKey: overlay.nodeKey,
-              x: e.clientX,
-              y: e.clientY
-            })
-          }
-        }}
-      >
-        {mark}
-      </span>
-    )
+    return createStressMarkSpan(mark, x, y, syllable, index, word, overlay, onInteraction)
   }).filter(Boolean) // Remove null values from bounds checking
 
   return <>{stressMarks}</>
+}
+
+/**
+ * Find the position of the main vowel within a specific syllable of a word
+ */
+function findVowelPositionInWord(word: string, syllables: string[], syllableIndex: number): number {
+  if (syllableIndex >= syllables.length) return -1
+  
+  const syllable = syllables[syllableIndex]
+  if (!syllable) return -1
+  
+  // Calculate the start position of this syllable within the word
+  const syllableStartPos = syllables.slice(0, syllableIndex).reduce((pos, syl) => pos + syl.length, 0)
+  
+  // Find the primary vowel within the syllable
+  const vowelPattern = /[aeiouy]/i
+  const vowelMatch = syllable.match(vowelPattern)
+  
+  if (!vowelMatch || vowelMatch.index === undefined) {
+    return -1 // No vowel found
+  }
+  
+  // Return the absolute position within the word
+  return syllableStartPos + vowelMatch.index
+}
+
+/**
+ * Create a stress mark span element
+ */
+function createStressMarkSpan(
+  mark: string, 
+  x: number, 
+  y: number, 
+  syllable: any, 
+  index: number, 
+  word: string, 
+  overlay: StressMarkOverlay, 
+  onInteraction?: StressMarkDecoratorPluginProps['onStressMarkInteraction']
+) {
+  return (
+    <span
+      key={index}
+      className="stress-mark"
+      style={{
+        position: 'fixed', // Fixed positioning relative to viewport
+        left: `${x}px`,
+        top: `${y}px`,
+        fontSize: '14px',
+        fontWeight: 'bold',
+        color: syllable.stressed ? '#dc2626' : '#6b7280', // Red for stressed, gray for unstressed
+        pointerEvents: 'auto',
+        cursor: 'pointer',
+        zIndex: 1001,
+        userSelect: 'none',
+        textAlign: 'center',
+        transform: 'translateX(-50%)', // Center horizontally on the x coordinate
+        backgroundColor: 'transparent', // No background for cleaner look
+        textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)', // White shadow for visibility on dark backgrounds
+        fontSize: '12px' // Slightly larger for better visibility
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault() // Prevent browser context menu
+        if (onInteraction) {
+          // Use right-click coordinates for stress context menu
+          onInteraction({
+            word,
+            syllableIndex: index,
+            nodeKey: overlay.nodeKey,
+            x: e.clientX,
+            y: e.clientY
+          })
+        }
+      }}
+      onClick={(e) => {
+        // For debugging - left click can also trigger menu
+        if (e.shiftKey && onInteraction) {
+          onInteraction({
+            word,
+            syllableIndex: index,
+            nodeKey: overlay.nodeKey,
+            x: e.clientX,
+            y: e.clientY
+          })
+        }
+      }}
+    >
+      {mark}
+    </span>
+  )
 }
 
 /**

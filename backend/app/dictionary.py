@@ -97,10 +97,58 @@ class CMUDictionary:
         if vowel_count <= 1:
             return [word]
 
-        # Simple syllable approximation: divide word by vowel count
-        word_length = len(word)
-        syllable_length = word_length / vowel_count
+        # For common words, use known syllable patterns to match natural pronunciation
+        known_patterns = {
+            'accomplished': ['ac', 'com', 'plished'],
+            'beautiful': ['beau', 'ti', 'ful'],
+            'yesterday': ['yes', 'ter', 'day'],
+            'walking': ['walk', 'ing'],
+            'amazing': ['a', 'maz', 'ing'],
+            'wonderful': ['won', 'der', 'ful'],
+            'understand': ['un', 'der', 'stand'],
+            'generation': ['gen', 'er', 'a', 'tion'],
+            'education': ['ed', 'u', 'ca', 'tion'],
+            'information': ['in', 'for', 'ma', 'tion'],
+        }
 
+        if word in known_patterns:
+            return known_patterns[word]
+
+        # Improved syllable approximation using vowel positions and consonant clusters
+        word_length = len(word)
+
+        # Find vowel positions in the word (approximate)
+        vowel_letters = 'aeiouy'
+        vowel_positions = []
+        for i, char in enumerate(word):
+            if char in vowel_letters:
+                vowel_positions.append(i)
+
+        # Use actual vowel positions if we found the right number
+        if len(vowel_positions) == vowel_count:
+            syllables = []
+            for i in range(vowel_count):
+                if i == 0:
+                    # First syllable: start to midpoint between first and second vowel
+                    if len(vowel_positions) > 1:
+                        split_point = (vowel_positions[0] + vowel_positions[1]) // 2 + 1
+                        syllables.append(word[:split_point])
+                    else:
+                        syllables.append(word)
+                elif i == vowel_count - 1:
+                    # Last syllable: from previous split to end
+                    prev_split = (vowel_positions[i-1] + vowel_positions[i]) // 2 + 1
+                    syllables.append(word[prev_split:])
+                else:
+                    # Middle syllables
+                    prev_split = (vowel_positions[i-1] + vowel_positions[i]) // 2 + 1
+                    next_split = (vowel_positions[i] + vowel_positions[i+1]) // 2 + 1
+                    syllables.append(word[prev_split:next_split])
+
+            return [s for s in syllables if s]  # Filter empty strings
+
+        # Fallback to simple division if vowel detection fails
+        syllable_length = word_length / vowel_count
         syllables = []
         for i in range(vowel_count):
             start = int(i * syllable_length)
@@ -148,23 +196,23 @@ def lookup_stress_pattern(word: str) -> Optional[StressPattern]:
 def analyze_contextual_stress(word: str, context: str, position: int) -> Optional[bool]:
     """
     Analyze whether a contextual word should be stressed based on its grammatical role.
-    
+
     Args:
         word: The word to analyze (e.g., 'there')
         context: The full sentence/line containing the word
         position: Character position of the word within the context
-    
+
     Returns:
         True if stressed, False if unstressed, None if not a contextual word
     """
     word_lower = word.lower().strip()
-    
+
     # Define contextual words and their stress patterns based on grammatical function
     contextual_patterns = {
         'there': {
             'stressed_patterns': [
                 # Locative/demonstrative: "over there", "there it is", "there's the"
-                r'\b(?:over|right|up|down|out)\s+there\b',  # "over there", "right there"  
+                r'\b(?:over|right|up|down|out)\s+there\b',  # "over there", "right there"
                 r'\bthere\s+(?:it|he|she|they|are|is|was|were)\b',  # "there it is", "there are"
                 r'\bthere\'s\s+(?:the|a|an|my|your|his|her|our|their)\b',  # "there's the house"
                 # Interjection: "there, there"
@@ -229,31 +277,31 @@ def analyze_contextual_stress(word: str, context: str, position: int) -> Optiona
         },
         'why': {
             'stressed_patterns': [
-                # Interrogative (usually stressed)  
+                # Interrogative (usually stressed)
                 r'\bwhy\s+(?:is|are|was|were|do|does|did|will|would|can|could)\b',
                 r'\bwhy\s+not\b',
             ],
             'unstressed_patterns': []
         }
     }
-    
+
     if word_lower not in contextual_patterns:
         return None  # Not a contextual word
-    
+
     patterns = contextual_patterns[word_lower]
     context_lower = context.lower()
-    
+
     # Check for unstressed patterns first (more specific)
     import re
     for pattern in patterns['unstressed_patterns']:
         if re.search(pattern, context_lower):
             return False
-    
+
     # Check for stressed patterns
     for pattern in patterns['stressed_patterns']:
         if re.search(pattern, context_lower):
             return True
-    
+
     # Default behavior based on word type
     defaults = {
         'there': True,   # Locative/demonstrative is more common in lyrics
@@ -264,5 +312,5 @@ def analyze_contextual_stress(word: str, context: str, position: int) -> Optiona
         'how': True,     # Usually stressed
         'why': True,     # Usually stressed
     }
-    
+
     return defaults.get(word_lower, True)

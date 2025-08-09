@@ -174,7 +174,8 @@ export class StressedTextNode extends TextNode {
     if (!this.__autoDetectionEnabled) return this
 
     const self = this.getWritable()
-    const words = this.__text.split(/\s+/).filter(word => word.length > 0)
+    const fullText = this.__text
+    const words = fullText.split(/\s+/).filter(word => word.length > 0)
 
     // Process words asynchronously to allow dictionary lookups
     const wordPromises = words.map(async (word) => {
@@ -183,7 +184,8 @@ export class StressedTextNode extends TextNode {
 
       if (cleanWord && !self.__stressPatterns.has(lowerWord)) {
         // Only analyze words that don't already have patterns
-        const pattern = await analyzeWordStress(cleanWord)
+        // Pass the full text as context for contextual analysis
+        const pattern = await analyzeWordStress(cleanWord, fullText)
         if (pattern) {
           self.__stressPatterns.set(lowerWord, pattern)
         }
@@ -311,8 +313,9 @@ function isWordStressed(word: string): boolean {
  * Analyze a word and return its stress pattern
  * Uses function-based detection for single-syllable words (songwriting pedagogy)
  * Uses CMU dictionary lookup for multi-syllable words
+ * Uses contextual analysis for ambiguous words like "there"
  */
-async function analyzeWordStress(word: string): Promise<StressPattern | null> {
+async function analyzeWordStress(word: string, context?: string): Promise<StressPattern | null> {
   if (!word || word.length === 0) return null
 
   const syllables = syllabify(word)
@@ -345,6 +348,45 @@ async function analyzeWordStress(word: string): Promise<StressPattern | null> {
     } catch (error) {
       console.warn(`Dictionary lookup failed for '${cleanWord}':`, error)
       // Fall back to heuristic method below
+    }
+  }
+
+  // For single-syllable words, check if it's contextual first
+  if (syllables.length === 1 && context) {
+    const contextualWords = ['there', 'here', 'where', 'when', 'how', 'why', 'what']
+    if (contextualWords.includes(cleanWord)) {
+      try {
+        const response = await fetch('http://localhost:8001/api/dictionary/contextual-stress', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            word: cleanWord,
+            context: context,
+            position: 0
+          })
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.is_contextual) {
+            return {
+              syllables: [{
+                text: syllables[0],
+                stressed: data.stressed,
+                confidence: data.confidence || 0.8,
+                position: 0,
+                overridden: false,
+              }],
+              overridden: false,
+            }
+          }
+        }
+      } catch (error) {
+        console.warn(`Contextual analysis failed for '${cleanWord}':`, error)
+        // Fall back to function-based detection below
+      }
     }
   }
 
