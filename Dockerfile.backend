@@ -16,6 +16,9 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
+# Download spaCy English model for NLP analysis
+RUN python -m spacy download en_core_web_sm
+
 # Production stage with security hardening
 FROM python:3.11-slim
 

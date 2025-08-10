@@ -355,13 +355,26 @@ async def analyze_batch_stress(request: Dict[str, Any]) -> Dict[str, Any]:
 async def get_analyzer_status() -> Dict[str, Any]:
     """Get status of the comprehensive stress analyzer components."""
     try:
+        from .nlp_setup import get_nlp_status_message, verify_nlp_dependencies
+
+        # Check NLP dependencies first
+        nlp_status = verify_nlp_dependencies()
+        all_nlp_ready = all(nlp_status.values())
+
+        if not all_nlp_ready:
+            return {
+                "status": "error",
+                "message": get_nlp_status_message(nlp_status),
+                "components": nlp_status,
+                "analyzer_loaded": False,
+            }
+
+        # Try to initialize analyzer if NLP components are ready
         analyzer = get_stress_analyzer()
 
         # Test components
-        status = {
-            "spacy_model": "loaded",
-            "g2p_model": "loaded",
-            "cmu_dictionary": "loaded",
+        components = {
+            **nlp_status,  # Include NLP dependency status
             "total_words": len(analyzer.cmu_dict._dictionary),
             "cache_size": analyzer.get_phonemes.cache_info().currsize,
             "cache_hits": analyzer.get_phonemes.cache_info().hits,
@@ -370,13 +383,19 @@ async def get_analyzer_status() -> Dict[str, Any]:
 
         return {
             "status": "ready",
-            "components": status,
+            "components": components,
             "message": "Comprehensive stress analyzer fully loaded",
+            "analyzer_loaded": True,
         }
 
     except Exception as e:
         logger.error(f"Analyzer status error: {e}")
-        return {"status": "error", "message": str(e), "components": {}}
+        return {
+            "status": "error",
+            "message": f"Analyzer initialization failed: {str(e)}",
+            "components": {},
+            "analyzer_loaded": False,
+        }
 
 
 # --- Test Endpoints ---

@@ -88,14 +88,23 @@ class ComprehensiveStressAnalyzer:
 
     def _load_spacy_model(self) -> spacy.Language:
         """Load spaCy English model with error handling."""
-        try:
-            # Try to load the small English model
-            return spacy.load("en_core_web_sm")
-        except OSError:
-            # If model not found, provide helpful error message
+        from .nlp_setup import ensure_spacy_model_installed
+
+        model_name = "en_core_web_sm"
+
+        # Ensure model is installed (will attempt download if missing)
+        if not ensure_spacy_model_installed(model_name):
             raise RuntimeError(
-                "spaCy English model 'en_core_web_sm' not found. "
-                "Please install it with: python -m spacy download en_core_web_sm"
+                f"spaCy model '{model_name}' could not be loaded or downloaded. "
+                f"For production deployments, ensure the Docker image includes: "
+                f"RUN python -m spacy download {model_name}"
+            )
+
+        try:
+            return spacy.load(model_name)
+        except OSError as e:
+            raise RuntimeError(
+                f"spaCy model '{model_name}' failed to load after installation: {e}"
             )
 
     @lru_cache(maxsize=1000)
