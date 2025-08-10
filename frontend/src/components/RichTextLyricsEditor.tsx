@@ -9,13 +9,16 @@ import {
   $getRoot,
   $createTextNode,
   type LexicalEditor,
+  type EditorState,
   $getSelection,
   $isRangeSelection,
   $getNodeByKey,
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
   COMMAND_PRIORITY_CRITICAL,
-  COMMAND_PRIORITY_LOW
+  COMMAND_PRIORITY_LOW,
+  PASTE_COMMAND,
+  KEY_ENTER_COMMAND
 } from 'lexical'
 import FormattingToolbar from './FormattingToolbar'
 import { type LexicalLyricsEditorRef } from './LexicalLyricsEditor'
@@ -237,7 +240,7 @@ function ValueSyncPlugin({
   }, [editor, value])
 
   // Handle editor content changes - now using Lexical JSON serialization
-  const handleEditorChange = useCallback((editorState: any, editor: LexicalEditor, tags: Set<string>) => {
+  const handleEditorChange = useCallback((editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => {
     if (isUpdatingFromProps.current) {
       return
     }
@@ -301,7 +304,7 @@ function ValueSyncPlugin({
         }
       }, autoSaveDelay)
     }
-  }, [editor, onChange, onAutoSave, enableAutoSave, autoSaveDelay])
+  }, [onChange, onAutoSave, enableAutoSave, autoSaveDelay])
 
   // Cleanup auto-save timeout on unmount
   useEffect(() => {
@@ -409,7 +412,7 @@ function PastePlugin() {
 
   useEffect(() => {
     return editor.registerCommand(
-      'PASTE_COMMAND' as any,
+      PASTE_COMMAND,
       (event: ClipboardEvent) => {
         const clipboardData = event.clipboardData
         if (!clipboardData) return false
@@ -457,7 +460,7 @@ function EnterKeyPlugin() {
 
   useEffect(() => {
     return editor.registerCommand(
-      'KEY_ENTER_COMMAND' as any,
+      KEY_ENTER_COMMAND,
       (event: KeyboardEvent) => {
         if (event && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
           // Handle Enter key to create SectionParagraphNodes
@@ -802,7 +805,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
         // Rich text position is more complex, return 0 for now
         return 0
       },
-      setCursorPosition: (_position: number) => {
+      setCursorPosition: () => {
         // Rich text positioning requires different approach
         // TODO: Implement if needed
       },
@@ -823,7 +826,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
         }
         return ''
       },
-      wrapSelectedText: (_before: string, _after: string) => {
+      wrapSelectedText: () => {
         // TODO: Implement rich text wrapping if needed
       },
       isSourceMode: () => false, // Always false now
@@ -832,7 +835,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
           jumpToSection(sectionName)
         }
       },
-    }), [value, onChange])
+    }), [value, onChange, jumpToSection])
 
     // Store editor reference
     const storeEditorRef = useCallback((editor: LexicalEditor) => {

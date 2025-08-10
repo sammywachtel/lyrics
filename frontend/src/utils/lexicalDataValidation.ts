@@ -73,7 +73,7 @@ export function isValidLexicalJSON(jsonString: string): ValidationResult {
 /**
  * Validates the structure of Lexical nodes recursively
  */
-function validateNodeStructure(node: any): LexicalNodeValidation {
+function validateNodeStructure(node: unknown): LexicalNodeValidation {
   const result: LexicalNodeValidation = {
     hasValidRoot: true,
     hasContent: false,
@@ -248,7 +248,7 @@ export function repairLexicalJSON(jsonString: string): ValidationResult {
 /**
  * Recursively extracts text content from potentially corrupted JSON
  */
-function extractTextFromCorruptedJSON(obj: any, depth = 0): string {
+function extractTextFromCorruptedJSON(obj: unknown, depth = 0): string {
   if (depth > 10) return '' // Prevent infinite recursion
 
   let text = ''
