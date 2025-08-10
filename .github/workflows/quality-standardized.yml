@@ -51,7 +51,7 @@ jobs:
         if: contains(github.event_name, 'pull_request')
 
       - name: Upload Test Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           file: ./frontend/coverage/lcov.info
           flags: frontend
@@ -97,7 +97,7 @@ jobs:
         run: pytest --cov=app --cov-report=xml
 
       - name: Upload Backend Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           file: ./backend/coverage.xml
           flags: backend
