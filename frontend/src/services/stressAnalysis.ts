@@ -52,7 +52,7 @@ class ComprehensiveStressAnalysisService {
   private baseURL: string
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8001'
+    this.baseURL = (typeof process !== 'undefined' && process.env.VITE_API_URL) || 'http://localhost:8001'
   }
 
   /**

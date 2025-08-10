@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $isTextNode, TextNode, type LexicalNode } from 'lexical'
+import { $isTextNode, $isElementNode, TextNode, type LexicalNode } from 'lexical'
 import { useEffect } from 'react'
 import { $createStressedTextNode, $isStressedTextNode } from '../nodes/StressedTextNode'
 import { $isSectionParagraphNode } from '../nodes/SectionParagraphNode'
@@ -55,7 +55,7 @@ export function StableTextToStressedPlugin({
               content: c.getTextContent?.()?.substring(0, 15) + '...'
             })))
             processChildren(children)
-          } else if (node.getType?.() === 'paragraph') {
+          } else if (node.getType?.() === 'paragraph' && $isElementNode(node)) {
             // Also process regular Lexical paragraphs (unsectioned text)
             const children = node.getChildren()
             console.log('🔍 STABLE-PLUGIN: Regular paragraph children:', children.map((c: LexicalNode) => ({
@@ -65,9 +65,9 @@ export function StableTextToStressedPlugin({
               content: c.getTextContent?.()?.substring(0, 15) + '...'
             })))
             processChildren(children)
-          } else {
+          } else if ($isElementNode(node)) {
             // Continue traversing other node types
-            const children = node.getChildren?.() || []
+            const children = node.getChildren()
             children.forEach(collectTextNodes)
           }
         }

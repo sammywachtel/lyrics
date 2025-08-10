@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useEffect } from 'react'
-import { $getRoot, type LexicalNode } from 'lexical'
+import { $getRoot, $isElementNode, type LexicalNode } from 'lexical'
 import { $isStressedTextNode, StressedTextNode } from '../nodes/StressedTextNode'
 // import { mergeRegister } from '@lexical/utils'
 
@@ -42,8 +42,10 @@ export function AutoStressDetectionPlugin({
               nodesToProcess.push(node)
             }
 
-            const children = node.getChildren?.() || []
-            children.forEach(collectStressedTextNodes)
+            if ($isElementNode(node)) {
+              const children = node.getChildren()
+              children.forEach(collectStressedTextNodes)
+            }
           }
 
           // Get the root node and traverse from the current editor state

@@ -376,7 +376,7 @@ function findVowelPositionInWord(word: string, syllables: Syllable[], syllableIn
   if (!syllable) return -1
 
   // Extract the text from the Syllable object
-  const syllableText = syllable.text || syllable
+  const syllableText = typeof syllable === 'string' ? syllable : syllable.text
 
   // Calculate the start position of this syllable within the word
   const syllableStartPos = syllables.slice(0, syllableIndex).reduce((pos, syl) => {
