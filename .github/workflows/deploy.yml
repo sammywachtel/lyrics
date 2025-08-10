@@ -85,26 +85,27 @@ jobs:
     permissions:
       security-events: write
       contents: read
+      actions: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.24.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
-          format: 'table'
-          exit-code: 0
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          ignore-unfixed: true
           severity: 'HIGH,CRITICAL'
 
-      # Note: SARIF upload disabled until code scanning is enabled in repository settings
-      # - name: Upload Trivy scan results
-      #   uses: github/codeql-action/upload-sarif@v3
-      #   if: always()
-      #   with:
-      #     sarif_file: 'trivy-results.sarif'
+      - name: Upload Trivy scan results to Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
 
   # Build and deploy stage - only on main branch pushes
   deploy:
