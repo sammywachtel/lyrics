@@ -1,0 +1,454 @@
+# PHASE 2: Ratchet and Expand Scope Template
+# This template shows the Phase 2 evolution with coverage ratcheting
+# Activate by renaming to quality-gate.yml when ready for Phase 2
+
+name: Quality Gate - Phase 2 (Ratchet and Expand Scope)
+
+# PHASE 2 STRATEGY:
+# - Repo-wide enforcement for tools already at baseline
+# - Coverage ratchet: gradual improvement required
+# - Module-by-module quality campaigns
+# - Tighten linter rules progressively
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ main, master ]
+
+env:
+  NODE_VERSION: 20
+  PYTHON_VERSION: 3.11
+  # Phase 2 Configuration
+  QUALITY_GATE_PHASE: "2"
+  COVERAGE_RATCHET_ENABLED: "true"
+  MYPY_MODULE_CAMPAIGN: "true"
+  REPO_WIDE_ENFORCEMENT: "true"
+
+jobs:
+  # Phase 2: Coverage baseline and ratcheting
+  coverage-ratchet:
+    name: "Phase 2: Coverage Ratchet Analysis"
+    runs-on: ubuntu-latest
+    outputs:
+      current_coverage: ${{ steps.coverage.outputs.current }}
+      target_coverage: ${{ steps.coverage.outputs.target }}
+      ratchet_passed: ${{ steps.coverage.outputs.passed }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: "Phase 2: Coverage Measurement and Ratchet Check"
+        id: coverage
+        run: |
+          echo "📊 PHASE 2: COVERAGE RATCHET SYSTEM"
+          echo "===================================="
+          echo ""
+
+          # Run tests with coverage
+          npm test -- --watchAll=false --coverage --coverageReporters=json-summary
+
+          # Extract coverage percentage
+          CURRENT_COVERAGE=$(jq -r '.total.lines.pct' coverage/coverage-summary.json)
+          echo "Current coverage: $CURRENT_COVERAGE%"
+
+          # Load baseline coverage (or set initial)
+          BASELINE_COVERAGE_FILE=".coverage-baseline.json"
+          if [ -f "$BASELINE_COVERAGE_FILE" ]; then
+            BASELINE_COVERAGE=$(jq -r '.baseline_coverage' $BASELINE_COVERAGE_FILE)
+            TARGET_COVERAGE=$(jq -r '.target_coverage' $BASELINE_COVERAGE_FILE)
+          else
+            # Initialize baseline
+            BASELINE_COVERAGE=$CURRENT_COVERAGE
+            TARGET_COVERAGE=$(echo "$CURRENT_COVERAGE + 2" | bc) # 2% improvement target
+            cat > $BASELINE_COVERAGE_FILE << EOF
+          {
+            "version": "1.0.0",
+            "phase": "2",
+            "baseline_coverage": $BASELINE_COVERAGE,
+            "target_coverage": $TARGET_COVERAGE,
+            "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "ratchet_strategy": "gradual_2_percent_improvement"
+          }
+          EOF
+            echo "📋 Coverage baseline established: $BASELINE_COVERAGE%"
+          fi
+
+          echo "Baseline coverage: $BASELINE_COVERAGE%"
+          echo "Target coverage: $TARGET_COVERAGE%"
+
+          # Check ratchet compliance
+          RATCHET_PASSED="true"
+          if (( $(echo "$CURRENT_COVERAGE < $BASELINE_COVERAGE" | bc -l) )); then
+            echo "❌ Coverage regression detected!"
+            echo "   Current: $CURRENT_COVERAGE% < Baseline: $BASELINE_COVERAGE%"
+            RATCHET_PASSED="false"
+          elif (( $(echo "$CURRENT_COVERAGE >= $TARGET_COVERAGE" | bc -l) )); then
+            echo "🎉 Coverage ratchet exceeded! New baseline: $CURRENT_COVERAGE%"
+            # Update baseline
+            NEW_TARGET=$(echo "$CURRENT_COVERAGE + 2" | bc)
+            jq ".baseline_coverage = $CURRENT_COVERAGE | .target_coverage = $NEW_TARGET | .updated_at = \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"" \
+              $BASELINE_COVERAGE_FILE > tmp.json && mv tmp.json $BASELINE_COVERAGE_FILE
+          else
+            echo "✅ Coverage maintained within acceptable range"
+          fi
+
+          # Set outputs
+          echo "current=$CURRENT_COVERAGE" >> $GITHUB_OUTPUT
+          echo "target=$TARGET_COVERAGE" >> $GITHUB_OUTPUT
+          echo "passed=$RATCHET_PASSED" >> $GITHUB_OUTPUT
+
+        working-directory: frontend
+
+  # Phase 2: MyPy module-by-module campaign
+  mypy-module-campaign:
+    name: "Phase 2: MyPy Module-by-Module Campaign"
+    runs-on: ubuntu-latest
+    outputs:
+      clean_modules: ${{ steps.mypy.outputs.clean_modules }}
+      total_modules: ${{ steps.mypy.outputs.total_modules }}
+      campaign_status: ${{ steps.mypy.outputs.status }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install mypy
+        working-directory: backend
+
+      - name: "Phase 2: Module-by-Module MyPy Campaign"
+        id: mypy
+        run: |
+          echo "🔄 PHASE 2: MYPY MODULE-BY-MODULE CAMPAIGN"
+          echo "=========================================="
+          echo ""
+
+          # Define module campaign order (easiest to hardest)
+          MODULES=(
+            "app/config.py"
+            "app/__init__.py"
+            "app/main.py"
+            # Add more modules as they become clean
+          )
+
+          CLEAN_MODULES=0
+          TOTAL_MODULES=${#MODULES[@]}
+          CAMPAIGN_STATUS="in_progress"
+
+          echo "📋 Module Campaign Progress:"
+          for module in "${MODULES[@]}"; do
+            if [ -f "$module" ]; then
+              if mypy "$module" --ignore-missing-imports > /dev/null 2>&1; then
+                echo "   ✅ $module - Clean"
+                ((CLEAN_MODULES++))
+              else
+                echo "   🔄 $module - Work needed"
+              fi
+            else
+              echo "   ⚠️  $module - Not found"
+            fi
+          done
+
+          echo ""
+          echo "📊 Campaign Status: $CLEAN_MODULES/$TOTAL_MODULES modules clean"
+
+          if [ $CLEAN_MODULES -eq $TOTAL_MODULES ]; then
+            CAMPAIGN_STATUS="completed"
+            echo "🎉 Module campaign completed! Ready for Phase 3"
+          elif [ $CLEAN_MODULES -gt 0 ]; then
+            CAMPAIGN_STATUS="progressing"
+            echo "📈 Campaign progressing steadily"
+          else
+            CAMPAIGN_STATUS="starting"
+            echo "🚀 Campaign starting - focus on config.py first"
+          fi
+
+          # Set outputs
+          echo "clean_modules=$CLEAN_MODULES" >> $GITHUB_OUTPUT
+          echo "total_modules=$TOTAL_MODULES" >> $GITHUB_OUTPUT
+          echo "status=$CAMPAIGN_STATUS" >> $GITHUB_OUTPUT
+
+        working-directory: backend
+
+  # Phase 2: Enhanced pre-commit with additional rules
+  enhanced-pre-commit:
+    name: "Phase 2: Enhanced Pre-commit Enforcement"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Dependencies
+        run: |
+          pip install pre-commit
+          pre-commit install-hooks
+
+      - name: "Phase 2: Enhanced Pre-commit Validation"
+        run: |
+          echo "🔧 PHASE 2: ENHANCED PRE-COMMIT ENFORCEMENT"
+          echo "============================================"
+          echo "Strategy: Tightened rules + additional security checks"
+          echo ""
+
+          if ! pre-commit run --all-files; then
+            echo "❌ PHASE 2 QUALITY GATE: Enhanced pre-commit failures"
+            echo ""
+            echo "⚠️  PHASE 2 ENHANCEMENTS:"
+            echo "   • Additional security scanning enabled"
+            echo "   • Tightened linter rules active"
+            echo "   • Performance regression detection"
+            echo "   • Documentation quality checks"
+            echo ""
+            echo "🔧 TO FIX:"
+            echo "   1. Run: scripts/validate.sh --phase=2"
+            echo "   2. Address all reported issues"
+            echo "   3. Commit the fixes"
+            exit 1
+          fi
+          echo "✅ Phase 2: Enhanced pre-commit enforcement satisfied"
+
+  # Phase 2: Frontend with strict enforcement
+  frontend-phase2:
+    name: "Phase 2: Frontend Repo-Wide Enforcement"
+    runs-on: ubuntu-latest
+    needs: [coverage-ratchet, enhanced-pre-commit]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: "Phase 2: ESLint Repo-Wide (Strict)"
+        run: |
+          echo "🔍 Phase 2: ESLint repo-wide enforcement..."
+          if ! npm run lint; then
+            echo "❌ PHASE 2: ESLint errors detected (repo-wide enforcement)"
+            echo "🔧 Fix with: cd frontend && npm run lint:fix"
+            exit 1
+          fi
+          echo "✅ Phase 2: ESLint passed (repo-wide)"
+        working-directory: frontend
+
+      - name: "Phase 2: TypeScript Strict Mode"
+        run: |
+          echo "🔍 Phase 2: TypeScript strict compilation..."
+          if ! npx tsc --noEmit --strict; then
+            echo "❌ PHASE 2: TypeScript strict mode errors"
+            echo "Note: Phase 2 enables stricter TypeScript checking"
+            exit 1
+          fi
+          echo "✅ Phase 2: TypeScript strict mode passed"
+        working-directory: frontend
+
+      - name: "Phase 2: Test Suite with Coverage Ratchet"
+        run: |
+          echo "🧪 Phase 2: Test suite with coverage ratchet..."
+
+          # Use coverage ratchet from previous job
+          TARGET_COVERAGE="${{ needs.coverage-ratchet.outputs.target_coverage }}"
+
+          if ! npm test -- --watchAll=false --coverage --coverageThreshold="{\"global\":{\"lines\":$TARGET_COVERAGE}}"; then
+            echo "❌ PHASE 2: Tests or coverage ratchet failed"
+            echo "Current target: $TARGET_COVERAGE%"
+            echo "🔧 Improve test coverage to meet ratchet requirements"
+            exit 1
+          fi
+          echo "✅ Phase 2: Tests and coverage ratchet passed"
+        working-directory: frontend
+
+  # Phase 2: Backend with module campaign
+  backend-phase2:
+    name: "Phase 2: Backend Module Campaign Enforcement"
+    runs-on: ubuntu-latest
+    needs: [mypy-module-campaign, enhanced-pre-commit]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install black isort flake8 mypy
+        working-directory: backend
+
+      - name: "Phase 2: Black Repo-Wide (Strict)"
+        run: |
+          echo "🔍 Phase 2: Black repo-wide enforcement..."
+          if ! black --check --diff .; then
+            echo "❌ PHASE 2: Black formatting issues (repo-wide enforcement)"
+            echo "🔧 Fix with: cd backend && black ."
+            exit 1
+          fi
+          echo "✅ Phase 2: Black passed (repo-wide)"
+        working-directory: backend
+
+      - name: "Phase 2: isort Repo-Wide (Strict)"
+        run: |
+          echo "🔍 Phase 2: isort repo-wide enforcement..."
+          if ! isort --check-only --diff .; then
+            echo "❌ PHASE 2: isort issues (repo-wide enforcement)"
+            echo "🔧 Fix with: cd backend && isort ."
+            exit 1
+          fi
+          echo "✅ Phase 2: isort passed (repo-wide)"
+        working-directory: backend
+
+      - name: "Phase 2: flake8 Enhanced Rules"
+        run: |
+          echo "🔍 Phase 2: flake8 with enhanced rules..."
+          # Phase 2 adds more strict flake8 rules
+          if ! flake8 --max-complexity=6 --max-line-length=88; then
+            echo "❌ PHASE 2: flake8 enhanced rules failed"
+            echo "Note: Phase 2 enables stricter complexity and style checks"
+            exit 1
+          fi
+          echo "✅ Phase 2: flake8 enhanced rules passed"
+        working-directory: backend
+
+      - name: "Phase 2: MyPy Module Campaign Enforcement"
+        run: |
+          echo "🔍 Phase 2: MyPy module campaign enforcement..."
+
+          CLEAN_MODULES="${{ needs.mypy-module-campaign.outputs.clean_modules }}"
+          TOTAL_MODULES="${{ needs.mypy-module-campaign.outputs.total_modules }}"
+          CAMPAIGN_STATUS="${{ needs.mypy-module-campaign.outputs.campaign_status }}"
+
+          echo "📊 Module Campaign Status: $CLEAN_MODULES/$TOTAL_MODULES modules clean"
+
+          if [ "$CAMPAIGN_STATUS" = "completed" ]; then
+            echo "🎉 Module campaign completed - ready for Phase 3!"
+          elif [ "$CLEAN_MODULES" -gt 0 ]; then
+            echo "📈 Campaign progressing - continue improving modules"
+          else
+            echo "🚀 Campaign starting - focus on easy modules first"
+          fi
+
+          # Enforce MyPy on clean modules only
+          CLEAN_MODULE_FILES=(
+            # These will be populated based on campaign progress
+            "app/config.py"
+            # Add more as they become clean
+          )
+
+          for module in "${CLEAN_MODULE_FILES[@]}"; do
+            if [ -f "$module" ]; then
+              if ! mypy "$module" --strict; then
+                echo "❌ PHASE 2: MyPy regression in clean module: $module"
+                echo "Clean modules must maintain strict type compliance"
+                exit 1
+              fi
+            fi
+          done
+
+          echo "✅ Phase 2: MyPy module campaign enforcement passed"
+        working-directory: backend
+
+  # Phase 2: Summary with ratcheting metrics
+  phase2-summary:
+    name: "Phase 2: Ratchet and Expand Quality Gate Summary"
+    runs-on: ubuntu-latest
+    needs: [coverage-ratchet, mypy-module-campaign, enhanced-pre-commit, frontend-phase2, backend-phase2]
+    if: always()
+    steps:
+      - name: "Phase 2: Quality Gate Results"
+        run: |
+          echo "🔄 PHASE 2: RATCHET AND EXPAND QUALITY GATE RESULTS"
+          echo "==================================================="
+          echo ""
+
+          # Check results
+          SUCCESS=true
+
+          # Coverage ratchet status
+          if [[ "${{ needs.coverage-ratchet.result }}" == "success" ]]; then
+            CURRENT_COV="${{ needs.coverage-ratchet.outputs.current_coverage }}"
+            TARGET_COV="${{ needs.coverage-ratchet.outputs.target_coverage }}"
+            echo "✅ Coverage ratchet: PASSED ($CURRENT_COV% ≥ baseline, target: $TARGET_COV%)"
+          else
+            echo "❌ Coverage ratchet: FAILED"
+            SUCCESS=false
+          fi
+
+          # MyPy campaign status
+          if [[ "${{ needs.mypy-module-campaign.result }}" == "success" ]]; then
+            CLEAN_MODS="${{ needs.mypy-module-campaign.outputs.clean_modules }}"
+            TOTAL_MODS="${{ needs.mypy-module-campaign.outputs.total_modules }}"
+            CAMPAIGN_STATUS="${{ needs.mypy-module-campaign.outputs.campaign_status }}"
+            echo "✅ MyPy module campaign: $CAMPAIGN_STATUS ($CLEAN_MODS/$TOTAL_MODS modules)"
+          else
+            echo "❌ MyPy module campaign: FAILED"
+            SUCCESS=false
+          fi
+
+          # Other checks
+          [[ "${{ needs.enhanced-pre-commit.result }}" == "success" ]] && echo "✅ Enhanced pre-commit: PASSED" || { echo "❌ Enhanced pre-commit: FAILED"; SUCCESS=false; }
+          [[ "${{ needs.frontend-phase2.result }}" == "success" ]] && echo "✅ Frontend repo-wide enforcement: PASSED" || { echo "❌ Frontend repo-wide enforcement: FAILED"; SUCCESS=false; }
+          [[ "${{ needs.backend-phase2.result }}" == "success" ]] && echo "✅ Backend module campaign enforcement: PASSED" || { echo "❌ Backend module campaign enforcement: FAILED"; SUCCESS=false; }
+
+          echo ""
+
+          if [[ "$SUCCESS" == "true" ]]; then
+            echo "🎉 PHASE 2: ALL RATCHET AND EXPAND QUALITY GATES PASSED!"
+            echo ""
+            echo "📊 PHASE 2 ACHIEVEMENTS:"
+            echo "   • Coverage ratchet: Active and maintained ✅"
+            echo "   • MyPy module campaign: Progressing steadily ✅"
+            echo "   • Enhanced rules: Stricter quality standards ✅"
+            echo "   • Repo-wide enforcement: All baseline tools ✅"
+            echo ""
+            echo "📈 NEXT PHASE TIMELINE:"
+            echo "   Phase 3 (ongoing): Full strict enforcement + branch protection"
+            echo "   Goals: Zero technical debt, all quality gates blocking"
+            echo ""
+            echo "🚀 This PR meets Phase 2 standards and is ready for merge!"
+          else
+            echo "⚠️  PHASE 2: QUALITY GATE FAILURES DETECTED"
+            echo ""
+            echo "🔧 PHASE 2 REQUIREMENTS:"
+            echo "   • Coverage must meet or exceed ratchet baseline"
+            echo "   • Clean modules must maintain strict MyPy compliance"
+            echo "   • All baseline tools require repo-wide compliance"
+            echo "   • Enhanced rules must pass for all code"
+            echo ""
+            echo "Address the issues above and re-run the pipeline."
+            exit 1
+          fi

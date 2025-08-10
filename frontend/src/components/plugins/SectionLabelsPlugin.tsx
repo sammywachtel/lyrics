@@ -9,7 +9,8 @@ import {
   $createTextNode,
   createCommand,
   type LexicalCommand,
-  type LexicalNode
+  type LexicalNode,
+  type ElementNode
 } from 'lexical'
 import { useEffect } from 'react'
 import { $createSectionTagNode, $isSectionTagNode } from '../nodes/SectionTagNode'
@@ -88,7 +89,7 @@ export default function SectionLabelsPlugin(): null {
             const textContent = child.getTextContent()
             const sectionMatch = textContent.match(/^\[([^\]]+)\]$/)
 
-            if (sectionMatch && !child.getChildren().some((node: LexicalNode) => $isSectionTagNode(node))) {
+            if (sectionMatch && !(child as ElementNode).getChildren().some((node: LexicalNode) => $isSectionTagNode(node))) {
               // Replace text with section tag node
               const sectionName = sectionMatch[1]
               const sectionNode = $createSectionTagNode(sectionName)

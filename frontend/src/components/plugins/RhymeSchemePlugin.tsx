@@ -131,7 +131,7 @@ export default function RhymeSchemePlugin(): null {
 
       children.forEach((child) => {
         if (child.getType() === 'paragraph') {
-          const rhymeNodes = child.getChildren().filter((node) => $isRhymeSchemeNode(node))
+          const rhymeNodes = (child as ElementNode).getChildren().filter((node) => $isRhymeSchemeNode(node))
           rhymeNodes.forEach((rhymeNode) => {
             rhymeNode.remove()
           })
