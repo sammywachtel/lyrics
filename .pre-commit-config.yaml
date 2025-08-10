@@ -20,30 +20,28 @@ repos:
   # Frontend Quality Gates - STRICT MODE
   - repo: local
     hooks:
-      # TEMPORARILY DISABLED FOR QUALITY GATES SETUP PR
-      # - id: eslint-check
-      #   name: ESLint Quality Gate (STRICT - no auto-fix)
-      #   entry: bash -c 'cd frontend && npm run lint'
-      #   language: system
-      #   files: ^frontend/.*\.(js|jsx|ts|tsx)$
-      #   pass_filenames: false
-      #   fail_fast: true
+     - id: eslint-check
+       name: ESLint Quality Gate (STRICT - no auto-fix)
+       entry: bash -c 'cd frontend && npm run lint'
+       language: system
+       files: ^frontend/.*\.(js|jsx|ts|tsx)$
+       pass_filenames: false
+       fail_fast: true
 
-      - id: typescript-check
-        name: TypeScript Compilation Check
-        entry: bash -c 'cd frontend && npx tsc --noEmit'
-        language: system
-        files: ^frontend/.*\.(ts|tsx)$
-        pass_filenames: false
-        fail_fast: true
+     - id: typescript-check
+       name: TypeScript Compilation Check
+       entry: bash -c 'cd frontend && npx tsc --noEmit'
+       language: system
+       files: ^frontend/.*\.(ts|tsx)$
+       pass_filenames: false
+       fail_fast: true
 
-      # TEMPORARILY DISABLED FOR QUALITY GATES SETUP PR
-      # - id: frontend-tests
-      #   name: Frontend Tests (affected files only)
-      #   entry: bash -c 'cd frontend && npm test -- --findRelatedTests --passWithNoTests --watchAll=false'
-      #   language: system
-      #   files: ^frontend/.*\.(js|jsx|ts|tsx)$
-      #   pass_filenames: false
+     - id: frontend-tests
+       name: Frontend Tests with Coverage (matches CI)
+       entry: bash -c 'cd frontend && npm test -- --watchAll=false --coverage --coverageReporters=text'
+       language: system
+       files: ^frontend/.*\.(js|jsx|ts|tsx)$
+       pass_filenames: false
 
   # Backend Quality Gates - STRICT MODE
   - repo: local
@@ -64,15 +62,17 @@ repos:
         pass_filenames: false
         fail_fast: true
 
-      # TEMPORARILY DISABLED FOR QUALITY GATES SETUP PR
-      # - id: python-flake8
-      #   name: Python flake8 Linting
-      #   entry: bash -c 'cd backend && flake8'
-      #   language: system
-      #   files: ^backend/.*\.py$
-      #   pass_filenames: false
-      #   fail_fast: true
+      - id: python-flake8
+        name: Python flake8 Linting
+        entry: bash -c 'cd backend && flake8 app/'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+        fail_fast: true
 
+      # TEMPORARILY DISABLED: MyPy has extensive type annotation issues
+      # that require significant work to resolve. Enable after adding proper
+      # type hints throughout the backend codebase.
       # - id: python-mypy
       #   name: Python MyPy Type Checking
       #   entry: bash -c 'cd backend && mypy . --no-error-summary'

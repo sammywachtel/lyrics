@@ -2,6 +2,7 @@ import {
   $getSelection,
   $isRangeSelection,
   createCommand,
+  ParagraphNode,
   type LexicalCommand,
   type LexicalNode
 } from 'lexical'
@@ -21,7 +22,7 @@ function $getSelectedParagraphs() {
     return []
   }
 
-  const paragraphs: Array<SectionParagraphNode | any> = []
+  const paragraphs: Array<SectionParagraphNode | LexicalNode> = []
   const seen = new Set<string>()
 
   // Handle collapsed selections (cursor position only) differently from range selections
@@ -73,7 +74,7 @@ export function $applySectionFormatting(sectionType: string | null) {
 
   selectedParagraphs.forEach(paragraph => {
     // Convert regular paragraph to section paragraph if needed
-    if (paragraph.getType() === 'paragraph') {
+    if (paragraph.getType() === 'paragraph' && paragraph instanceof ParagraphNode) {
       const sectionParagraph = $convertToSectionParagraph(paragraph, sectionType)
       paragraph.replace(sectionParagraph)
     } else if ($isSectionParagraphNode(paragraph)) {

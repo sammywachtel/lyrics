@@ -8,6 +8,7 @@ let activePluginId: string | null = null
 import {
   $isStressedTextNode,
   type StressPattern,
+  type Syllable,
 } from '../nodes/StressedTextNode'
 import { $isSectionParagraphNode } from '../nodes/SectionParagraphNode'
 import { $getRoot, type LexicalNode, $isElementNode } from 'lexical'
@@ -342,7 +343,7 @@ function StressMarkOverlay({
     const mark = syllable.stressed ? '´' : '˘'
 
     // Calculate the actual position of the vowel within this syllable
-    const vowelPosition = findVowelPositionInWord(word, pattern.syllables, index)
+    const vowelPosition = findVowelPositionInWord(pattern.syllables, index)
 
     if (vowelPosition === -1) {
       // Fallback to old method if vowel detection fails
@@ -368,18 +369,18 @@ function StressMarkOverlay({
 /**
  * Find the position of the main vowel within a specific syllable of a word
  */
-function findVowelPositionInWord(word: string, syllables: any[], syllableIndex: number): number {
+function findVowelPositionInWord(syllables: Syllable[], syllableIndex: number): number {
   if (syllableIndex >= syllables.length) return -1
 
   const syllable = syllables[syllableIndex]
   if (!syllable) return -1
 
   // Extract the text from the Syllable object
-  const syllableText = syllable.text || syllable
+  const syllableText = typeof syllable === 'string' ? syllable : syllable.text
 
   // Calculate the start position of this syllable within the word
   const syllableStartPos = syllables.slice(0, syllableIndex).reduce((pos, syl) => {
-    const sylText = syl.text || syl
+    const sylText = typeof syl === 'string' ? syl : syl.text
     return pos + sylText.length
   }, 0)
 
@@ -402,7 +403,7 @@ function createStressMarkSpan(
   mark: string,
   x: number,
   y: number,
-  syllable: any,
+  syllable: Syllable,
   index: number,
   word: string,
   overlay: StressMarkOverlay,

@@ -1,13 +1,13 @@
 import logging
 import uuid
-from datetime import datetime, timezone
+
+# datetime and timezone available if needed in future
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from supabase import Client
 
 from .models import (
-    ErrorResponse,
     ProsodyConfig,
     ProsodyConfigResponse,
     ProsodyConfigUpdate,
@@ -144,7 +144,8 @@ class SongsService:
 
             if not response.data:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Song not found"
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Song not found",
                 )
 
             return self._db_to_song(response.data[0])
@@ -291,7 +292,7 @@ class SongsService:
             # First check if song exists and belongs to user
             await self.get_song(song_id, user)
 
-            response = (
+            (
                 self.supabase.table("songs")
                 .delete()
                 .eq("id", song_id)
@@ -325,7 +326,8 @@ class SongsService:
 
             if not response.data:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Song not found"
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Song not found",
                 )
 
             settings_data = response.data[0].get("settings", {})
@@ -347,15 +349,18 @@ class SongsService:
             )
 
     async def update_song_settings(
-        self, song_id: str, settings_update: SongSettingsUpdate, user: UserContext
+        self,
+        song_id: str,
+        settings_update: SongSettingsUpdate,
+        user: UserContext,
     ) -> SongSettings:
         """Update settings for a specific song."""
         self._check_database()
 
         try:
             # Get current settings for change tracking
-            current_settings = await self.get_song_settings(song_id, user)
-            current_dict = current_settings.model_dump()
+            # current_settings = await self.get_song_settings(song_id, user)  # Available if needed
+            # current_dict = current_settings.model_dump()  # Available if needed
 
             # Convert new settings to dict for JSON storage
             settings_dict = settings_update.settings.model_dump()
@@ -390,7 +395,10 @@ class SongsService:
             )
 
     async def update_song_settings_partial(
-        self, song_id: str, partial_update: SongSettingsPartialUpdate, user: UserContext
+        self,
+        song_id: str,
+        partial_update: SongSettingsPartialUpdate,
+        user: UserContext,
     ) -> SongSettings:
         """Update song settings partially (for auto-save functionality)."""
         self._check_database()
@@ -401,7 +409,7 @@ class SongsService:
             current_dict = current_settings.model_dump()
 
             # Store original for change tracking
-            original_settings = current_dict.copy()
+            # original_settings = current_dict.copy()  # Available if needed
 
             # Apply partial updates - handle both old and new structure
             update_data = partial_update.model_dump(exclude_unset=True)
@@ -497,7 +505,8 @@ class SongsService:
 
             if not response.data:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Song not found"
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Song not found",
                 )
 
             prosody_data = response.data[0].get("prosody_config", {})
@@ -519,15 +528,18 @@ class SongsService:
             )
 
     async def update_prosody_config(
-        self, song_id: str, config_update: ProsodyConfigUpdate, user: UserContext
+        self,
+        song_id: str,
+        config_update: ProsodyConfigUpdate,
+        user: UserContext,
     ) -> ProsodyConfig:
         """Update prosody configuration for a specific song."""
         self._check_database()
 
         try:
             # Get current prosody config for change tracking
-            current_config = await self.get_prosody_config(song_id, user)
-            current_dict = current_config.model_dump()
+            # current_config = await self.get_prosody_config(song_id, user)  # Available if needed
+            # current_dict = current_config.model_dump()  # Available if needed
 
             # Convert new config to dict for JSON storage
             config_dict = config_update.prosody_config.model_dump()
@@ -623,7 +635,11 @@ class SongsService:
             )
 
     async def get_song_versions(
-        self, song_id: str, user: UserContext, page: int = 1, per_page: int = 10
+        self,
+        song_id: str,
+        user: UserContext,
+        page: int = 1,
+        per_page: int = 10,
     ) -> SongVersionResponse:
         """Get version history for a song."""
         self._check_database()
@@ -650,7 +666,8 @@ class SongsService:
             ]
 
             return SongVersionResponse(
-                message="Song versions retrieved successfully", versions=versions
+                message="Song versions retrieved successfully",
+                versions=versions,
             )
 
         except HTTPException:
@@ -663,7 +680,11 @@ class SongsService:
             )
 
     async def get_settings_history(
-        self, song_id: str, user: UserContext, page: int = 1, per_page: int = 10
+        self,
+        song_id: str,
+        user: UserContext,
+        page: int = 1,
+        per_page: int = 10,
     ) -> SongSettingsHistoryResponse:
         """Get settings change history for a song."""
         self._check_database()
@@ -840,13 +861,15 @@ def create_songs_router(
     @router.post("/", response_model=SongResponse, status_code=status.HTTP_201_CREATED)
     async def create_song(
         song_data: SongCreate, user: UserContext = Depends(get_current_user)
-    ):
+    ) -> SongResponse:
         """Create a new song."""
         song = await songs_service.create_song(song_data, user)
         return SongResponse(message="Song created successfully", song=song)
 
     @router.get("/{song_id}", response_model=SongResponse)
-    async def get_song(song_id: str, user: UserContext = Depends(get_current_user)):
+    async def get_song(
+        song_id: str, user: UserContext = Depends(get_current_user)
+    ) -> SongResponse:
         """Get a song by ID."""
         song = await songs_service.get_song(song_id, user)
         return SongResponse(message="Song retrieved successfully", song=song)
@@ -857,7 +880,7 @@ def create_songs_router(
         page: int = Query(1, ge=1, description="Page number"),
         per_page: int = Query(10, ge=1, le=100, description="Items per page"),
         status: Optional[SongStatus] = Query(None, description="Filter by status"),
-    ):
+    ) -> SongListResponse:
         """List songs for the current user."""
         return await songs_service.list_songs(user, page, per_page, status)
 
@@ -866,13 +889,15 @@ def create_songs_router(
         song_id: str,
         song_update: SongUpdate,
         user: UserContext = Depends(get_current_user),
-    ):
+    ) -> SongResponse:
         """Update an existing song."""
         song = await songs_service.update_song(song_id, song_update, user)
         return SongResponse(message="Song updated successfully", song=song)
 
     @router.delete("/{song_id}", status_code=status.HTTP_204_NO_CONTENT)
-    async def delete_song(song_id: str, user: UserContext = Depends(get_current_user)):
+    async def delete_song(
+        song_id: str, user: UserContext = Depends(get_current_user)
+    ) -> None:
         """Delete a song."""
         await songs_service.delete_song(song_id, user)
         return None
@@ -937,7 +962,8 @@ def create_songs_router(
             song_id, config_update, user
         )
         return ProsodyConfigResponse(
-            message="Prosody config updated successfully", prosody_config=prosody_config
+            message="Prosody config updated successfully",
+            prosody_config=prosody_config,
         )
 
     @router.post(
@@ -967,7 +993,8 @@ def create_songs_router(
         return await songs_service.get_song_versions(song_id, user, page, per_page)
 
     @router.get(
-        "/{song_id}/settings/history", response_model=SongSettingsHistoryResponse
+        "/{song_id}/settings/history",
+        response_model=SongSettingsHistoryResponse,
     )
     async def get_settings_history(
         song_id: str,
@@ -990,7 +1017,8 @@ def create_songs_router(
             await songs_service.get_song(song_id, user)
 
             # Validate settings by creating the model
-            validated_settings = SongSettings(**settings.model_dump())
+            # validated_settings = SongSettings(**settings.model_dump())  # Available if needed
+            SongSettings(**settings.model_dump())  # Validation check
 
             return {
                 "valid": True,
@@ -1016,7 +1044,8 @@ def create_songs_router(
 
         default_settings = SongSettings()
         return SongSettingsResponse(
-            message="Default settings retrieved successfully", settings=default_settings
+            message="Default settings retrieved successfully",
+            settings=default_settings,
         )
 
     @router.post("/{song_id}/settings/reset", response_model=SongSettingsResponse)
@@ -1031,7 +1060,8 @@ def create_songs_router(
             song_id, settings_update, user
         )
         return SongSettingsResponse(
-            message="Settings reset to defaults successfully", settings=updated_settings
+            message="Settings reset to defaults successfully",
+            settings=updated_settings,
         )
 
     return router

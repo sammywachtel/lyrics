@@ -45,7 +45,11 @@
     "quality:frontend": "bash scripts/quality-gate.sh frontend",
     "quality:backend": "bash scripts/quality-gate.sh backend",
     "quality:precommit": "bash scripts/quality-gate.sh pre-commit",
-    "setup:dev": "bash setup-dev.sh"
+    "setup:dev": "bash setup-dev.sh",
+    "validate": "bash scripts/validate.sh",
+    "validate:phase0": "bash scripts/validate.sh --phase=0",
+    "quality:baseline": "bash scripts/validate.sh --baseline",
+    "quality:status": "bash scripts/quality-status.sh"
   },
   "keywords": [
     "songwriting",

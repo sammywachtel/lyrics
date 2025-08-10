@@ -73,7 +73,7 @@ export function isValidLexicalJSON(jsonString: string): ValidationResult {
 /**
  * Validates the structure of Lexical nodes recursively
  */
-function validateNodeStructure(node: any): LexicalNodeValidation {
+function validateNodeStructure(node: unknown): LexicalNodeValidation {
   const result: LexicalNodeValidation = {
     hasValidRoot: true,
     hasContent: false,
@@ -87,21 +87,23 @@ function validateNodeStructure(node: any): LexicalNodeValidation {
     return result
   }
 
+  const nodeWithType = node as { type?: string; text?: string; children?: unknown[] }
+
   // Track node type
-  if (node.type) {
-    result.nodeTypes.push(node.type)
+  if (nodeWithType.type) {
+    result.nodeTypes.push(nodeWithType.type)
   }
 
   // Check for text content
-  if (node.type === 'text' || node.type === 'stressed-text') {
-    if (node.text && typeof node.text === 'string' && node.text.trim().length > 0) {
+  if (nodeWithType.type === 'text' || nodeWithType.type === 'stressed-text') {
+    if (nodeWithType.text && typeof nodeWithType.text === 'string' && nodeWithType.text.trim().length > 0) {
       result.hasContent = true
     }
   }
 
   // Recursively validate children
-  if (Array.isArray(node.children)) {
-    for (const child of node.children) {
+  if (Array.isArray(nodeWithType.children)) {
+    for (const child of nodeWithType.children) {
       const childValidation = validateNodeStructure(child)
       result.nodeTypes.push(...childValidation.nodeTypes)
       if (childValidation.hasContent) {
@@ -248,7 +250,7 @@ export function repairLexicalJSON(jsonString: string): ValidationResult {
 /**
  * Recursively extracts text content from potentially corrupted JSON
  */
-function extractTextFromCorruptedJSON(obj: any, depth = 0): string {
+function extractTextFromCorruptedJSON(obj: unknown, depth = 0): string {
   if (depth > 10) return '' // Prevent infinite recursion
 
   let text = ''
@@ -262,22 +264,24 @@ function extractTextFromCorruptedJSON(obj: any, depth = 0): string {
   }
 
   // Check for text properties
-  if (obj.text && typeof obj.text === 'string') {
-    text += obj.text
+  const objWithText = obj as { text?: unknown }
+  if (objWithText.text && typeof objWithText.text === 'string') {
+    text += objWithText.text
   }
 
   // Recursively search children, content, etc.
+  const objWithKeys = obj as Record<string, unknown>
   const searchKeys = ['children', 'content', 'child', 'nodes', 'elements']
   for (const key of searchKeys) {
-    if (Array.isArray(obj[key])) {
-      for (const item of obj[key]) {
+    if (Array.isArray(objWithKeys[key])) {
+      for (const item of objWithKeys[key] as unknown[]) {
         const childText = extractTextFromCorruptedJSON(item, depth + 1)
         if (childText) {
           text += (text ? '\n' : '') + childText
         }
       }
-    } else if (obj[key]) {
-      const childText = extractTextFromCorruptedJSON(obj[key], depth + 1)
+    } else if (objWithKeys[key]) {
+      const childText = extractTextFromCorruptedJSON(objWithKeys[key], depth + 1)
       if (childText) {
         text += (text ? '\n' : '') + childText
       }

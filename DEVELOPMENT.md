@@ -203,18 +203,54 @@ lyrics/
 | **Actions** | Auto-fix lint, check TS, run tests | Validate only, no fixing |
 | **Failure** | Fix locally and re-commit | Fix locally and push |
 
-This hybrid approach ensures:
-- ⚡ **Fast feedback** during development
-- 🧹 **Clean commit history** without auto-fix commits
-- 🔒 **Quality assurance** at every stage
-- 🚀 **Efficient CI** that focuses on validation
-- 👥 **Consistent code** across the team
+This graduated approach ensures:
+- ⚡ **Fast feedback** during development (< 10 seconds local validation)
+- 🧹 **Clean commit history** without disruptive auto-fix commits
+- 🔒 **Quality assurance** at every stage with phase-appropriate standards
+- 🚀 **Efficient CI** that focuses on validation with helpful guidance
+- 👥 **Consistent code** across the team with clear quality expectations
+- 📈 **Sustainable improvement** through graduated enforcement
+- 🎯 **Developer-friendly** progression from permissive to strict
 
 ## Getting Help
 
+### Phase-Specific Help
+
+**Phase 0 Issues:**
+- **Quality Status**: `npm run quality:status` - Current phase dashboard
+- **Full Validation**: `scripts/validate.sh` - Complete local validation
+- **Regression Issues**: Focus on maintaining zero-error baseline
+- **MyPy Questions**: Review QUALITY_GATES.md for typing roadmap
+
+**General Help:**
 - **Setup Issues**: Run `./setup-dev.sh` again
 - **Hook Problems**: Check `.pre-commit-config.yaml` configuration
-- **CI Failures**: Compare local commands with CI steps
+- **CI Failures**: Use `scripts/validate.sh` to match CI locally
 - **Test Issues**: Use `npm run test:watch` for interactive debugging
 
-Happy coding! 🎵
+**Documentation:**
+- **QUALITY_GATES.md**: Complete graduation plan and phase details
+- **.quality-baseline.json**: Current metrics and technical debt tracking
+- **scripts/validate.sh**: Comprehensive validation with phase awareness
+- **scripts/quality-status.sh**: Real-time quality metrics dashboard
+
+**Key Commands Reference:**
+```bash
+# Essential Phase 0 commands
+npm run validate              # Complete validation (matches CI)
+npm run quality:status        # Quality gate dashboard
+scripts/validate.sh           # Detailed validation script
+pre-commit run --all-files    # Manual hook execution
+
+# Quick fixes
+cd frontend && npm run lint:fix     # Fix ESLint issues
+cd backend && black . && isort .    # Format backend code
+```
+
+### Quality Gate Philosophy
+
+Remember: The graduated quality gate system is designed to **accelerate development** while improving quality. Phase 0 leverages your excellent baseline position to prevent regressions while planning systematic improvements.
+
+**Current Status**: You're in an excellent position with most tools at zero-error state. The focus is maintaining this baseline while preparing for gradual quality improvements.
+
+Happy coding with confidence! 🎵✨

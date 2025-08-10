@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $isTextNode, TextNode } from 'lexical'
+import { $isTextNode, $isElementNode, TextNode, type LexicalNode } from 'lexical'
 import { useEffect } from 'react'
 import { $createStressedTextNode, $isStressedTextNode } from '../nodes/StressedTextNode'
 import { $isSectionParagraphNode } from '../nodes/SectionParagraphNode'
@@ -44,36 +44,36 @@ export function StableTextToStressedPlugin({
         const nodesToConvert: TextNode[] = []
         let stressedNodesNeedingAnalysis = 0
 
-        function collectTextNodes(node: any) {
+        function collectTextNodes(node: LexicalNode) {
           // Look inside section paragraphs AND regular paragraphs
           if ($isSectionParagraphNode(node)) {
             const children = node.getChildren()
-            console.log('🔍 STABLE-PLUGIN: Section paragraph children:', children.map((c: any) => ({
+            console.log('🔍 STABLE-PLUGIN: Section paragraph children:', children.map((c: LexicalNode) => ({
               type: c.getType(),
               isText: $isTextNode(c),
               isStressed: $isStressedTextNode(c),
               content: c.getTextContent?.()?.substring(0, 15) + '...'
             })))
             processChildren(children)
-          } else if (node.getType?.() === 'paragraph') {
+          } else if (node.getType?.() === 'paragraph' && $isElementNode(node)) {
             // Also process regular Lexical paragraphs (unsectioned text)
             const children = node.getChildren()
-            console.log('🔍 STABLE-PLUGIN: Regular paragraph children:', children.map((c: any) => ({
+            console.log('🔍 STABLE-PLUGIN: Regular paragraph children:', children.map((c: LexicalNode) => ({
               type: c.getType(),
               isText: $isTextNode(c),
               isStressed: $isStressedTextNode(c),
               content: c.getTextContent?.()?.substring(0, 15) + '...'
             })))
             processChildren(children)
-          } else {
+          } else if ($isElementNode(node)) {
             // Continue traversing other node types
-            const children = node.getChildren?.() || []
+            const children = node.getChildren()
             children.forEach(collectTextNodes)
           }
         }
 
-        function processChildren(children: any[]) {
-          children.forEach((child: any) => {
+        function processChildren(children: LexicalNode[]) {
+          children.forEach((child: LexicalNode) => {
             if ($isTextNode(child) && !$isStressedTextNode(child)) {
                 const text = child.getTextContent()
                 const nodeKey = child.getKey()

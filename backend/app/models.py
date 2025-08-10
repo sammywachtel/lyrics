@@ -107,7 +107,10 @@ class ProsodySettings(BaseModel):
         True, description="Consider syllable stress patterns"
     )
     meter_consistency: int = Field(
-        5, ge=1, le=10, description="Meter consistency (1=free verse, 10=strict)"
+        5,
+        ge=1,
+        le=10,
+        description="Meter consistency (1=free verse, 10=strict)",
     )
 
 
@@ -261,7 +264,8 @@ class SongSettings(BaseModel):
 
     # Foundation tab - Core narrative
     foundation: NarrativeSettings = Field(
-        default_factory=NarrativeSettings, description="Foundation/narrative settings"
+        default_factory=NarrativeSettings,
+        description="Foundation/narrative settings",
     )
 
     # Structure tab - Song organization
@@ -281,7 +285,8 @@ class SongSettings(BaseModel):
 
     # Content tab - Keywords and content guidelines
     content: ContentSettings = Field(
-        default_factory=ContentSettings, description="Content management settings"
+        default_factory=ContentSettings,
+        description="Content management settings",
     )
 
     # AI tab - AI assistance configuration
@@ -513,10 +518,12 @@ class SongVersion(BaseModel):
         default_factory=dict, description="Metadata at this version"
     )
     settings: SongSettings = Field(
-        default_factory=lambda: SongSettings(), description="Settings at this version"
+        default_factory=lambda: SongSettings(),
+        description="Settings at this version",
     )
     prosody_config: ProsodyConfig = Field(
-        default_factory=ProsodyConfig, description="Prosody config at this version"
+        default_factory=ProsodyConfig,
+        description="Prosody config at this version",
     )
     change_summary: Optional[str] = Field(
         None, description="Summary of changes in this version"

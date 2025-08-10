@@ -4,7 +4,6 @@ import {
   type DOMConversionOutput,
   type DOMExportOutput,
   DecoratorNode,
-  type EditorConfig,
   type LexicalNode,
   type NodeKey,
   type SerializedLexicalNode,
@@ -106,7 +105,7 @@ export class StressMarkDecoratorNode extends DecoratorNode<ReactElement> {
     return { element }
   }
 
-  createDOM(_config: EditorConfig): HTMLElement {
+  createDOM(): HTMLElement {
     const span = document.createElement('span')
     span.className = `stress-decorated-word ${this.__className}`.trim()
     span.setAttribute('data-word', this.__word)

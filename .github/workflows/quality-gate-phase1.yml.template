@@ -1,0 +1,401 @@
+# PHASE 1: Changed-Code-Only Enforcement Template
+# This template shows the Phase 1 evolution of quality gates
+# Activate by renaming to quality-gate.yml when ready for Phase 1
+
+name: Quality Gate - Phase 1 (Changed-Code-Only Enforcement)
+
+# PHASE 1 STRATEGY:
+# - Strict enforcement for files modified in PR
+# - Warnings (not failures) for untouched legacy code
+# - MyPy enabled for new/modified files only
+# - Per-module quality tracking and ratcheting
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ main, master ]
+
+env:
+  NODE_VERSION: 20
+  PYTHON_VERSION: 3.11
+  # Phase 1 Configuration
+  QUALITY_GATE_PHASE: "1"
+  CHANGED_FILES_ONLY: "true"
+  LEGACY_WARNING_MODE: "true"
+  MYPY_NEW_FILES_ONLY: "true"
+
+jobs:
+  # Phase 1: Analyze changed files and create enforcement strategy
+  changed-files-analysis:
+    name: "Phase 1: Changed Files Analysis"
+    runs-on: ubuntu-latest
+    outputs:
+      frontend_changed: ${{ steps.changes.outputs.frontend }}
+      backend_changed: ${{ steps.changes.outputs.backend }}
+      changed_files: ${{ steps.files.outputs.changed_files }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Changed Files
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
+      - name: Get Changed Files List
+        id: files
+        run: |
+          # Get list of changed files for targeted enforcement
+          git diff --name-only ${{ github.event.before }}..${{ github.sha }} > changed_files.txt
+          echo "changed_files=$(cat changed_files.txt | tr '\n' ' ')" >> $GITHUB_OUTPUT
+
+          echo "🎯 PHASE 1: Changed Files Analysis"
+          echo "=================================="
+          echo "Files changed in this PR:"
+          cat changed_files.txt
+          echo ""
+          echo "Frontend changed: ${{ steps.changes.outputs.frontend }}"
+          echo "Backend changed: ${{ steps.changes.outputs.backend }}"
+
+  # Phase 1: Pre-commit with changed-file awareness
+  pre-commit-phase1:
+    name: "Phase 1: Pre-commit Changed-Files Enforcement"
+    runs-on: ubuntu-latest
+    needs: changed-files-analysis
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Dependencies
+        run: |
+          pip install pre-commit
+          pre-commit install-hooks
+
+      - name: "Phase 1: Run Pre-commit on Changed Files"
+        run: |
+          echo "🎯 PHASE 1: PRE-COMMIT CHANGED-FILES ENFORCEMENT"
+          echo "Strategy: Strict for changed files, warnings for legacy"
+          echo ""
+
+          # Run pre-commit only on changed files
+          if ! pre-commit run --files ${{ needs.changed-files-analysis.outputs.changed_files }}; then
+            echo "❌ PHASE 1 QUALITY GATE: Pre-commit failures on changed files"
+            echo ""
+            echo "⚠️  PHASE 1 POLICY:"
+            echo "   • Changed files MUST pass all quality checks"
+            echo "   • Legacy files show warnings only (not blocking)"
+            echo ""
+            echo "🔧 TO FIX:"
+            echo "   1. Run: scripts/validate.sh --phase=1"
+            echo "   2. Fix issues in files you modified"
+            echo "   3. Commit the fixes"
+            exit 1
+          fi
+          echo "✅ Phase 1: Pre-commit enforcement satisfied for changed files"
+
+  # Phase 1: Frontend with changed-files-only enforcement
+  frontend-phase1:
+    name: "Phase 1: Frontend Changed-Files Quality Gate"
+    runs-on: ubuntu-latest
+    needs: [changed-files-analysis, pre-commit-phase1]
+    if: needs.changed-files-analysis.outputs.frontend_changed == 'true'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: "Phase 1: ESLint Changed Files Only"
+        run: |
+          echo "🎯 Phase 1: ESLint enforcement for changed frontend files..."
+
+          # Filter changed files for frontend
+          CHANGED_FRONTEND_FILES=$(echo "${{ needs.changed-files-analysis.outputs.changed_files }}" | tr ' ' '\n' | grep '^frontend/' | grep -E '\.(js|jsx|ts|tsx)$' || true)
+
+          if [ -n "$CHANGED_FRONTEND_FILES" ]; then
+            echo "Checking files: $CHANGED_FRONTEND_FILES"
+            if ! npx eslint $CHANGED_FRONTEND_FILES; then
+              echo "❌ PHASE 1: ESLint errors in changed files"
+              echo "🔧 Fix with: cd frontend && npm run lint:fix"
+              exit 1
+            fi
+          else
+            echo "✅ No frontend JS/TS files changed"
+          fi
+          echo "✅ Phase 1: ESLint passed for changed files"
+        working-directory: frontend
+
+      - name: "Phase 1: TypeScript Changed Files Validation"
+        run: |
+          echo "🎯 Phase 1: TypeScript validation (full project - interdependency)"
+          # TypeScript must check entire project due to interdependencies
+          if ! npx tsc --noEmit; then
+            echo "❌ PHASE 1: TypeScript compilation errors"
+            echo "Note: TypeScript checked globally due to type interdependencies"
+            exit 1
+          fi
+          echo "✅ Phase 1: TypeScript validation passed"
+        working-directory: frontend
+
+      - name: "Phase 1: Tests for Changed Files + Related"
+        run: |
+          echo "🎯 Phase 1: Test execution for changed files and dependencies..."
+
+          # Run tests related to changed files
+          CHANGED_FRONTEND_FILES=$(echo "${{ needs.changed-files-analysis.outputs.changed_files }}" | tr ' ' '\n' | grep '^frontend/' || true)
+
+          if [ -n "$CHANGED_FRONTEND_FILES" ]; then
+            # Use Jest's --findRelatedTests to run tests for changed files
+            if ! npm test -- --findRelatedTests $CHANGED_FRONTEND_FILES --coverage --watchAll=false; then
+              echo "❌ PHASE 1: Tests failing for changed files or dependencies"
+              exit 1
+            fi
+          else
+            echo "✅ No frontend files changed, skipping tests"
+          fi
+          echo "✅ Phase 1: Tests passed for changed files"
+        working-directory: frontend
+
+  # Phase 1: Backend with MyPy for new files only
+  backend-phase1:
+    name: "Phase 1: Backend Changed-Files Quality Gate"
+    runs-on: ubuntu-latest
+    needs: [changed-files-analysis, pre-commit-phase1]
+    if: needs.changed-files-analysis.outputs.backend_changed == 'true'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install black isort flake8 mypy
+        working-directory: backend
+
+      - name: "Phase 1: Black on Changed Files Only"
+        run: |
+          echo "🎯 Phase 1: Black formatting check for changed backend files..."
+
+          CHANGED_BACKEND_FILES=$(echo "${{ needs.changed-files-analysis.outputs.changed_files }}" | tr ' ' '\n' | grep '^backend/' | grep '\.py$' || true)
+
+          if [ -n "$CHANGED_BACKEND_FILES" ]; then
+            echo "Checking files: $CHANGED_BACKEND_FILES"
+            if ! black --check --diff $CHANGED_BACKEND_FILES; then
+              echo "❌ PHASE 1: Black formatting issues in changed files"
+              echo "🔧 Fix with: black $CHANGED_BACKEND_FILES"
+              exit 1
+            fi
+          else
+            echo "✅ No Python files changed"
+          fi
+          echo "✅ Phase 1: Black passed for changed files"
+        working-directory: backend
+
+      - name: "Phase 1: isort on Changed Files Only"
+        run: |
+          echo "🎯 Phase 1: isort import checking for changed backend files..."
+
+          CHANGED_BACKEND_FILES=$(echo "${{ needs.changed-files-analysis.outputs.changed_files }}" | tr ' ' '\n' | grep '^backend/' | grep '\.py$' || true)
+
+          if [ -n "$CHANGED_BACKEND_FILES" ]; then
+            echo "Checking files: $CHANGED_BACKEND_FILES"
+            if ! isort --check-only --diff $CHANGED_BACKEND_FILES; then
+              echo "❌ PHASE 1: isort issues in changed files"
+              echo "🔧 Fix with: isort $CHANGED_BACKEND_FILES"
+              exit 1
+            fi
+          else
+            echo "✅ No Python files changed"
+          fi
+          echo "✅ Phase 1: isort passed for changed files"
+        working-directory: backend
+
+      - name: "Phase 1: flake8 on Changed Files Only"
+        run: |
+          echo "🎯 Phase 1: flake8 linting for changed backend files..."
+
+          CHANGED_BACKEND_FILES=$(echo "${{ needs.changed-files-analysis.outputs.changed_files }}" | tr ' ' '\n' | grep '^backend/' | grep '\.py$' || true)
+
+          if [ -n "$CHANGED_BACKEND_FILES" ]; then
+            echo "Checking files: $CHANGED_BACKEND_FILES"
+            if ! flake8 $CHANGED_BACKEND_FILES; then
+              echo "❌ PHASE 1: flake8 errors in changed files"
+              echo "🔧 Fix PEP 8 violations in changed files"
+              exit 1
+            fi
+          else
+            echo "✅ No Python files changed"
+          fi
+          echo "✅ Phase 1: flake8 passed for changed files"
+        working-directory: backend
+
+      - name: "Phase 1: MyPy on Changed Files Only (NEW!)"
+        run: |
+          echo "🎯 Phase 1: MyPy type checking for changed backend files..."
+          echo "🆕 PHASE 1 ENHANCEMENT: MyPy now enabled for new/modified files"
+
+          CHANGED_BACKEND_FILES=$(echo "${{ needs.changed-files-analysis.outputs.changed_files }}" | tr ' ' '\n' | grep '^backend/' | grep '\.py$' || true)
+
+          if [ -n "$CHANGED_BACKEND_FILES" ]; then
+            echo "Type-checking files: $CHANGED_BACKEND_FILES"
+
+            # Run MyPy only on changed files with isolated mode
+            if ! mypy $CHANGED_BACKEND_FILES --ignore-missing-imports --no-error-summary; then
+              echo "❌ PHASE 1: MyPy type errors in changed files"
+              echo ""
+              echo "🆕 PHASE 1 TYPING POLICY:"
+              echo "   • All new/modified files MUST have proper type annotations"
+              echo "   • Legacy files remain unchanged (warnings only)"
+              echo "   • Use 'from typing import' for type hints"
+              echo "   • Add return type annotations to functions"
+              echo ""
+              echo "🔧 TYPING QUICK FIXES:"
+              echo "   • Add function return types: def func() -> RetVal:"
+              echo "   • Import types: from typing import List, Dict, Optional"
+              echo "   • Use # type: ignore sparingly for complex cases"
+              exit 1
+            fi
+          else
+            echo "✅ No Python files changed"
+          fi
+          echo "✅ Phase 1: MyPy passed for changed files"
+        working-directory: backend
+
+  # Phase 1: Legacy code warnings (informational only)
+  legacy-code-warnings:
+    name: "Phase 1: Legacy Code Quality Warnings"
+    runs-on: ubuntu-latest
+    needs: [changed-files-analysis]
+    if: always()
+    steps:
+      - name: "Phase 1: Legacy Quality Assessment"
+        run: |
+          echo "📊 PHASE 1: LEGACY CODE QUALITY ASSESSMENT"
+          echo "==========================================="
+          echo ""
+          echo "🔍 QUALITY DEBT ANALYSIS:"
+          echo "   • MyPy typing debt: ~90+ errors across legacy modules"
+          echo "   • Most other tools: Excellent baseline (0 errors)"
+          echo ""
+          echo "⚠️  LEGACY POLICY (Phase 1):"
+          echo "   • Legacy files: Warnings only (not blocking)"
+          echo "   • Changed files: Strict enforcement required"
+          echo "   • New files: Must meet all quality standards"
+          echo ""
+          echo "📈 IMPROVEMENT TRACKING:"
+          echo "   • Files touched: Subject to current phase standards"
+          echo "   • Files untouched: Gradual improvement in Phase 2"
+          echo "   • Technical debt: Systematically addressed per phase"
+          echo ""
+          echo "✅ Legacy code warnings documented (non-blocking)"
+
+  # Phase 1: Summary with progression metrics
+  phase1-summary:
+    name: "Phase 1: Changed-Code Quality Gate Summary"
+    runs-on: ubuntu-latest
+    needs: [changed-files-analysis, pre-commit-phase1, frontend-phase1, backend-phase1, legacy-code-warnings]
+    if: always()
+    steps:
+      - name: "Phase 1: Quality Gate Results"
+        run: |
+          echo "🎯 PHASE 1: CHANGED-CODE QUALITY GATE RESULTS"
+          echo "=============================================="
+          echo ""
+
+          # Check results
+          PRECOMMIT_RESULT="${{ needs.pre-commit-phase1.result }}"
+          FRONTEND_RESULT="${{ needs.frontend-phase1.result }}"
+          BACKEND_RESULT="${{ needs.backend-phase1.result }}"
+
+          # Determine overall success
+          SUCCESS=true
+
+          if [[ "$PRECOMMIT_RESULT" != "success" ]]; then
+            echo "❌ Pre-commit enforcement: FAILED"
+            SUCCESS=false
+          else
+            echo "✅ Pre-commit enforcement: PASSED"
+          fi
+
+          if [[ "${{ needs.changed-files-analysis.outputs.frontend_changed }}" == "true" ]]; then
+            if [[ "$FRONTEND_RESULT" != "success" ]]; then
+              echo "❌ Frontend changed-files enforcement: FAILED"
+              SUCCESS=false
+            else
+              echo "✅ Frontend changed-files enforcement: PASSED"
+            fi
+          else
+            echo "✅ Frontend: No changes (skipped)"
+          fi
+
+          if [[ "${{ needs.changed-files-analysis.outputs.backend_changed }}" == "true" ]]; then
+            if [[ "$BACKEND_RESULT" != "success" ]]; then
+              echo "❌ Backend changed-files enforcement: FAILED"
+              SUCCESS=false
+            else
+              echo "✅ Backend changed-files enforcement: PASSED (including MyPy for new files!)"
+            fi
+          else
+            echo "✅ Backend: No changes (skipped)"
+          fi
+
+          echo "✅ Legacy code warnings: DOCUMENTED (non-blocking)"
+          echo ""
+
+          if [[ "$SUCCESS" == "true" ]]; then
+            echo "🎉 PHASE 1: ALL CHANGED-CODE QUALITY GATES PASSED!"
+            echo ""
+            echo "📊 PHASE 1 ACHIEVEMENTS:"
+            echo "   • Changed files: Strict quality enforcement ✅"
+            echo "   • MyPy typing: Enabled for new/modified files ✅"
+            echo "   • Legacy code: Documented warnings (gradual improvement) ⚠️"
+            echo "   • Development velocity: Maintained while improving quality ✅"
+            echo ""
+            echo "📈 NEXT PHASE PREVIEW:"
+            echo "   Phase 2 (2-4 weeks): Coverage ratchet + module-by-module campaigns"
+            echo "   Phase 3 (ongoing): Full strict enforcement + branch protection"
+            echo ""
+            echo "🚀 This PR meets Phase 1 standards and is ready for merge!"
+          else
+            echo "⚠️  PHASE 1: QUALITY GATE FAILURES DETECTED"
+            echo ""
+            echo "🔧 PHASE 1 REQUIREMENTS:"
+            echo "   • All changed files must pass strict quality checks"
+            echo "   • New Python files must have proper type annotations"
+            echo "   • Pre-commit hooks must be used (no bypass allowed)"
+            echo ""
+            echo "Fix the issues above and re-run the pipeline."
+            exit 1
+          fi

@@ -3,11 +3,11 @@ CMU Pronouncing Dictionary service for stress pattern lookup.
 Provides accurate syllable and stress information for multi-syllable words.
 """
 
-import re
+# import re  # Imported later as needed to avoid redefinition
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Union
 
 
 @dataclass
@@ -24,7 +24,7 @@ class StressPattern:
 class CMUDictionary:
     """CMU Pronouncing Dictionary parser and lookup service."""
 
-    def __init__(self, dict_path: Optional[str] = None):
+    def __init__(self, dict_path: Optional[Union[str, Path]] = None):
         if dict_path is None:
             # Default path relative to backend root
             dict_path = (
@@ -83,7 +83,10 @@ class CMUDictionary:
         print(f"Loaded {entries_loaded} dictionary entries")
 
     def _extract_stress_pattern(self, phonemes: List[str]) -> List[int]:
-        """Extract stress pattern from phonemes (0, 1, 2 for unstressed, primary, secondary)."""
+        """Extract stress pattern from phonemes.
+
+        (0, 1, 2 for unstressed, primary, secondary).
+        """
         stress_pattern = []
 
         for phoneme in phonemes:

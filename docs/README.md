@@ -18,6 +18,10 @@ This directory contains all project documentation organized by category for easy
 ### 🛠 Development
 - **[CLAUDE.md](../CLAUDE.md)** - Comprehensive codebase guide for Claude instances (kept at root)
 
+### 🧠 Linguistic Technology
+- **[stress-analysis.md](technology/stress-analysis.md)** - Comprehensive stress analysis system documentation
+- **[nlp-integration.md](technology/nlp-integration.md)** - spaCy, CMU dictionary, and G2P integration details
+
 ### 🏗 Architecture & Scalability
 - **[scalability-review.md](architecture/scalability-review.md)** - Comprehensive architecture review with scalability recommendations
 
@@ -26,8 +30,9 @@ This directory contains all project documentation organized by category for easy
 ### For Developers
 1. Start with [CLAUDE.md](../CLAUDE.md) for complete codebase overview
 2. Review [requirements.md](../requirements.md) for current implementation status
-3. **Review [scalability-review.md](architecture/scalability-review.md) for critical architecture recommendations**
-4. Check [development-plan.md](project/development-plan.md) for upcoming features
+3. **Study [stress-analysis.md](technology/stress-analysis.md) for comprehensive stress detection system**
+4. **Review [scalability-review.md](architecture/scalability-review.md) for critical architecture recommendations**
+5. Check [development-plan.md](project/development-plan.md) for upcoming features
 
 ### For Designers
 1. Reference [specifications.md](design/specifications.md) for UI/UX requirements
