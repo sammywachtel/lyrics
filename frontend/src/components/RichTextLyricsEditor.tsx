@@ -845,7 +845,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
     const minHeight = `${rows * 1.5}rem`
 
     return (
-      <div className={`rich-text-lyrics-editor h-full flex flex-col relative ${className}`}>
+      <div className={`rich-text-lyrics-editor h-full flex flex-col relative ${className}`} data-testid="lyrics-editor">
         {/* Rich Text Editor - Always Active */}
         <div className="flex-1 relative overflow-hidden rounded-lg border border-neutral-200/50 bg-white/80 backdrop-blur-sm">
           <LexicalComposer initialConfig={initialConfig}>
