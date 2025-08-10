@@ -25,7 +25,7 @@ def ensure_spacy_model_installed(model_name: str = "en_core_web_sm") -> bool:
 
         # Try to load the model
         try:
-            nlp = spacy.load(model_name)
+            spacy.load(model_name)
             logger.info(f"✅ spaCy model '{model_name}' loaded successfully")
             return True
         except OSError:
@@ -42,7 +42,7 @@ def ensure_spacy_model_installed(model_name: str = "en_core_web_sm") -> bool:
                 )
 
                 # Try loading again after download
-                nlp = spacy.load(model_name)
+                spacy.load(model_name)
                 logger.info(
                     f"✅ spaCy model '{model_name}' downloaded and loaded successfully"
                 )
@@ -69,6 +69,74 @@ def ensure_spacy_model_installed(model_name: str = "en_core_web_sm") -> bool:
         return False
 
 
+def _check_spacy() -> bool:
+    """Check if spaCy library is installed."""
+    try:
+        import spacy  # noqa: F401
+
+        logger.info("✅ spaCy library installed")
+        return True
+    except ImportError:
+        logger.error("❌ spaCy library not installed")
+        return False
+
+
+def _check_g2p() -> bool:
+    """Check if g2p_en library is working."""
+    try:
+        from g2p_en import G2p
+
+        g2p = G2p()
+        test_result = g2p("hello")
+        result = len(test_result) > 0
+        if result:
+            logger.info("✅ g2p_en installed and working")
+        return result
+    except ImportError:
+        logger.error("❌ g2p_en not installed")
+        return False
+    except Exception as e:
+        logger.error(f"❌ g2p_en error: {e}")
+        return False
+
+
+def _check_pronouncing() -> bool:
+    """Check if pronouncing library is working."""
+    try:
+        import pronouncing
+
+        test_phones = pronouncing.phones_for_word("hello")
+        result = test_phones is not None
+        if result:
+            logger.info("✅ pronouncing library installed")
+        return result
+    except ImportError:
+        logger.error("❌ pronouncing library not installed")
+        return False
+    except Exception as e:
+        logger.error(f"❌ pronouncing error: {e}")
+        return False
+
+
+def _check_cmu_dictionary() -> bool:
+    """Check if CMU dictionary files exist."""
+    try:
+        from pathlib import Path
+
+        cmu_path = (
+            Path(__file__).parent.parent / "dictionary" / "cmu_raw" / "cmudict-0.7b"
+        )
+        exists = cmu_path.exists()
+        if exists:
+            logger.info(f"✅ CMU dictionary found at {cmu_path}")
+        else:
+            logger.error(f"❌ CMU dictionary not found at {cmu_path}")
+        return exists
+    except Exception as e:
+        logger.error(f"❌ Error checking CMU dictionary: {e}")
+        return False
+
+
 def verify_nlp_dependencies() -> dict:
     """
     Verify all NLP dependencies are properly installed.
@@ -84,58 +152,13 @@ def verify_nlp_dependencies() -> dict:
         "cmu_dictionary": False,
     }
 
-    # Check spaCy
-    try:
-        import spacy
-
-        status["spacy"] = True
-        logger.info("✅ spaCy library installed")
-    except ImportError:
-        logger.error("❌ spaCy library not installed")
-
-    # Check spaCy model
+    status["spacy"] = _check_spacy()
     if status["spacy"]:
         status["spacy_model"] = ensure_spacy_model_installed()
 
-    # Check g2p_en
-    try:
-        from g2p_en import G2p
-
-        g2p = G2p()
-        test_result = g2p("hello")
-        status["g2p_en"] = len(test_result) > 0
-        logger.info("✅ g2p_en installed and working")
-    except ImportError:
-        logger.error("❌ g2p_en not installed")
-    except Exception as e:
-        logger.error(f"❌ g2p_en error: {e}")
-
-    # Check pronouncing
-    try:
-        import pronouncing
-
-        test_phones = pronouncing.phones_for_word("hello")
-        status["pronouncing"] = test_phones is not None
-        logger.info("✅ pronouncing library installed")
-    except ImportError:
-        logger.error("❌ pronouncing library not installed")
-    except Exception as e:
-        logger.error(f"❌ pronouncing error: {e}")
-
-    # Check CMU dictionary file
-    try:
-        from pathlib import Path
-
-        cmu_path = (
-            Path(__file__).parent.parent / "dictionary" / "cmu_raw" / "cmudict-0.7b"
-        )
-        status["cmu_dictionary"] = cmu_path.exists()
-        if status["cmu_dictionary"]:
-            logger.info(f"✅ CMU dictionary found at {cmu_path}")
-        else:
-            logger.error(f"❌ CMU dictionary not found at {cmu_path}")
-    except Exception as e:
-        logger.error(f"❌ Error checking CMU dictionary: {e}")
+    status["g2p_en"] = _check_g2p()
+    status["pronouncing"] = _check_pronouncing()
+    status["cmu_dictionary"] = _check_cmu_dictionary()
 
     return status
 

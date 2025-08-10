@@ -1,13 +1,13 @@
 import logging
 import uuid
-from datetime import datetime, timezone
+
+# datetime and timezone available if needed in future
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from supabase import Client
 
 from .models import (
-    ErrorResponse,
     ProsodyConfig,
     ProsodyConfigResponse,
     ProsodyConfigUpdate,
@@ -291,7 +291,7 @@ class SongsService:
             # First check if song exists and belongs to user
             await self.get_song(song_id, user)
 
-            response = (
+            (
                 self.supabase.table("songs")
                 .delete()
                 .eq("id", song_id)
@@ -355,7 +355,7 @@ class SongsService:
         try:
             # Get current settings for change tracking
             current_settings = await self.get_song_settings(song_id, user)
-            current_dict = current_settings.model_dump()
+            # current_dict = current_settings.model_dump()  # Available if needed
 
             # Convert new settings to dict for JSON storage
             settings_dict = settings_update.settings.model_dump()
@@ -401,7 +401,7 @@ class SongsService:
             current_dict = current_settings.model_dump()
 
             # Store original for change tracking
-            original_settings = current_dict.copy()
+            # original_settings = current_dict.copy()  # Available if needed
 
             # Apply partial updates - handle both old and new structure
             update_data = partial_update.model_dump(exclude_unset=True)
@@ -527,7 +527,7 @@ class SongsService:
         try:
             # Get current prosody config for change tracking
             current_config = await self.get_prosody_config(song_id, user)
-            current_dict = current_config.model_dump()
+            # current_dict = current_config.model_dump()  # Available if needed
 
             # Convert new config to dict for JSON storage
             config_dict = config_update.prosody_config.model_dump()
@@ -990,7 +990,8 @@ def create_songs_router(
             await songs_service.get_song(song_id, user)
 
             # Validate settings by creating the model
-            validated_settings = SongSettings(**settings.model_dump())
+            # validated_settings = SongSettings(**settings.model_dump())  # Available if needed
+            SongSettings(**settings.model_dump())  # Validation check
 
             return {
                 "valid": True,

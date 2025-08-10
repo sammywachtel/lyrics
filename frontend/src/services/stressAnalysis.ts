@@ -123,28 +123,31 @@ class ComprehensiveStressAnalysisService {
   /**
    * Extract lines from Lexical JSON structure for batch analysis
    */
-  extractLinesFromLexicalJSON(lexicalJSON: any): string[] {
+  extractLinesFromLexicalJSON(lexicalJSON: unknown): string[] {
     const lines: string[] = []
 
-    function traverseNodes(nodes: any[]) {
+    function traverseNodes(nodes: unknown[]) {
       for (const node of nodes) {
-        if (node.type === 'section-paragraph' || node.type === 'paragraph') {
+        const nodeObj = node as Record<string, unknown>
+        if (nodeObj.type === 'section-paragraph' || nodeObj.type === 'paragraph') {
           // Extract text content from paragraph node
-          const textContent = this.extractTextFromNode(node)
+          const textContent = this.extractTextFromNode(nodeObj)
           if (textContent.trim()) {
             lines.push(textContent.trim())
           }
         }
 
         // Recursively traverse children
-        if (node.children && Array.isArray(node.children)) {
-          traverseNodes(node.children)
+        if (nodeObj.children && Array.isArray(nodeObj.children)) {
+          traverseNodes(nodeObj.children as unknown[])
         }
       }
     }
 
-    if (lexicalJSON?.root?.children) {
-      traverseNodes.call(this, lexicalJSON.root.children)
+    const lexicalObj = lexicalJSON as Record<string, unknown>
+    const root = lexicalObj?.root as Record<string, unknown>
+    if (root?.children && Array.isArray(root.children)) {
+      traverseNodes.call(this, root.children as unknown[])
     }
 
     return lines
@@ -153,14 +156,18 @@ class ComprehensiveStressAnalysisService {
   /**
    * Extract text content from a Lexical node
    */
-  private extractTextFromNode(node: any): string {
-    if (node.type === 'text') {
-      return node.text || ''
+  private extractTextFromNode(node: unknown): string {
+    if (!node || typeof node !== 'object') return ''
+
+    const nodeObj = node as Record<string, unknown>
+
+    if (nodeObj.type === 'text') {
+      return String(nodeObj.text || '')
     }
 
-    if (node.children && Array.isArray(node.children)) {
-      return node.children
-        .map((child: any) => this.extractTextFromNode(child))
+    if (nodeObj.children && Array.isArray(nodeObj.children)) {
+      return nodeObj.children
+        .map((child: unknown) => this.extractTextFromNode(child))
         .join('')
     }
 

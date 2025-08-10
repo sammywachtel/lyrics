@@ -1,7 +1,13 @@
-import { render } from '@testing-library/react'
-import { createEditor, $getRoot } from 'lexical'
+import { createEditor } from 'lexical'
 import { StressMarkDecoratorNode, $createStressMarkDecoratorNode, $isStressMarkDecoratorNode } from '../StressMarkDecoratorNode'
 import { type StressPattern } from '../StressedTextNode'
+
+// Type for component props to avoid any types
+type StressMarkProps = {
+  word: string
+  pattern: StressPattern
+  className?: string
+}
 
 describe('StressMarkDecoratorNode', () => {
   let editor: ReturnType<typeof createEditor>
@@ -171,9 +177,10 @@ describe('StressMarkDecoratorNode', () => {
         const component = node.decorate()
 
         expect(component).toBeDefined()
-        expect((component as any).props.word).toBe('walking')
-        expect((component as any).props.pattern).toEqual(mockPattern)
-        expect((component as any).props.className).toBe('test-class')
+        const props = (component as { props: StressMarkProps }).props
+        expect(props.word).toBe('walking')
+        expect(props.pattern).toEqual(mockPattern)
+        expect(props.className).toBe('test-class')
       })
     })
   })

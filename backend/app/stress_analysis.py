@@ -9,15 +9,14 @@ stress detection that respects English prosody.
 import re
 from dataclasses import dataclass
 from functools import lru_cache
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 # Import NLP libraries
 import spacy
 from g2p_en import G2p
 
 # Import existing dictionary service
-from .dictionary import CMUDictionary, StressPattern, get_cmu_dictionary
+from .dictionary import get_cmu_dictionary
 
 
 @dataclass
@@ -310,7 +309,7 @@ class ComprehensiveStressAnalyzer:
         if len(vowel_positions) >= n_syllables:
             # Split at consonant clusters between vowels
             syllables = []
-            word_len = len(word)
+            # Split at consonant clusters between vowels (word_len available if needed)
 
             for i in range(n_syllables):
                 if i == 0:
