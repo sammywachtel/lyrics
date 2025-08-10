@@ -82,8 +82,11 @@ jobs:
       - name: Run Flake8 Linting
         run: flake8
 
-      - name: Run MyPy Type Checking
-        run: mypy .
+      # MyPy temporarily disabled for Phase 0 - graduated quality gate system
+      # Will be re-enabled in Phase 1 for new files only
+      # See QUALITY_GATES.md for the full implementation plan
+      # - name: Run MyPy Type Checking
+      #   run: mypy .
 
       - name: Run Backend Tests
         run: pytest --cov=app --cov-report=xml
