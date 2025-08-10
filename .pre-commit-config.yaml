@@ -64,7 +64,7 @@ repos:
 
       - id: python-flake8
         name: Python flake8 Linting
-        entry: bash -c 'flake8 backend/app/'
+        entry: bash -c 'cd backend && flake8 app/'
         language: system
         files: ^backend/.*\.py$
         pass_filenames: false
