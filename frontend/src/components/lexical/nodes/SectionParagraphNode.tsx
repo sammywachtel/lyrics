@@ -7,7 +7,8 @@ import {
   type DOMConversionOutput,
   type DOMExportOutput,
   type LexicalNode,
-  type EditorConfig
+  type EditorConfig,
+  type LexicalEditor
 } from 'lexical'
 
 export interface SerializedSectionParagraphNode extends Spread<
