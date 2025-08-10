@@ -343,7 +343,7 @@ function StressMarkOverlay({
     const mark = syllable.stressed ? '´' : '˘'
 
     // Calculate the actual position of the vowel within this syllable
-    const vowelPosition = findVowelPositionInWord(word, pattern.syllables, index)
+    const vowelPosition = findVowelPositionInWord(pattern.syllables, index)
 
     if (vowelPosition === -1) {
       // Fallback to old method if vowel detection fails
@@ -369,7 +369,7 @@ function StressMarkOverlay({
 /**
  * Find the position of the main vowel within a specific syllable of a word
  */
-function findVowelPositionInWord(word: string, syllables: Syllable[], syllableIndex: number): number {
+function findVowelPositionInWord(syllables: Syllable[], syllableIndex: number): number {
   if (syllableIndex >= syllables.length) return -1
 
   const syllable = syllables[syllableIndex]

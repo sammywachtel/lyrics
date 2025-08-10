@@ -126,7 +126,7 @@ class ComprehensiveStressAnalysisService {
   extractLinesFromLexicalJSON(lexicalJSON: unknown): string[] {
     const lines: string[] = []
 
-    function traverseNodes(nodes: unknown[]) {
+    const traverseNodes = (nodes: unknown[]) => {
       for (const node of nodes) {
         const nodeObj = node as Record<string, unknown>
         if (nodeObj.type === 'section-paragraph' || nodeObj.type === 'paragraph') {
