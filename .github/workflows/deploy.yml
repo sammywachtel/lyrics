@@ -99,13 +99,16 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           ignore-unfixed: true
+          exit-code: '1'
           severity: 'HIGH,CRITICAL'
 
-      - name: Upload Trivy scan results to Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Upload Trivy SARIF as artifact
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          sarif_file: 'trivy-results.sarif'
+          name: trivy-sarif
+          path: trivy-results.sarif
+          retention-days: 7
 
   # Build and deploy stage - only on main branch pushes
   deploy:
