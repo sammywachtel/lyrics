@@ -3,11 +3,11 @@ CMU Pronouncing Dictionary service for stress pattern lookup.
 Provides accurate syllable and stress information for multi-syllable words.
 """
 
-import re
+# import re  # Imported later as needed to avoid redefinition
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -16,7 +16,9 @@ class StressPattern:
 
     word: str
     syllables: List[str]
-    stress_pattern: List[int]  # 0=unstressed, 1=primary stress, 2=secondary stress
+    stress_pattern: List[
+        int
+    ]  # 0=unstressed, 1=primary stress, 2=secondary stress
     phonemes: List[str]
     confidence: float = 1.0  # CMU dictionary entries have high confidence
 
@@ -28,7 +30,10 @@ class CMUDictionary:
         if dict_path is None:
             # Default path relative to backend root
             dict_path = (
-                Path(__file__).parent.parent / "dictionary" / "cmu_raw" / "cmudict-0.7b"
+                Path(__file__).parent.parent
+                / "dictionary"
+                / "cmu_raw"
+                / "cmudict-0.7b"
             )
 
         self.dict_path = Path(dict_path)
@@ -40,7 +45,9 @@ class CMUDictionary:
         print(f"Loading CMU dictionary from {self.dict_path}")
 
         if not self.dict_path.exists():
-            raise FileNotFoundError(f"CMU dictionary not found at {self.dict_path}")
+            raise FileNotFoundError(
+                f"CMU dictionary not found at {self.dict_path}"
+            )
 
         entries_loaded = 0
 
@@ -83,7 +90,10 @@ class CMUDictionary:
         print(f"Loaded {entries_loaded} dictionary entries")
 
     def _extract_stress_pattern(self, phonemes: List[str]) -> List[int]:
-        """Extract stress pattern from phonemes (0, 1, 2 for unstressed, primary, secondary)."""
+        """Extract stress pattern from phonemes.
+
+        (0, 1, 2 for unstressed, primary, secondary).
+        """
         stress_pattern = []
 
         for phoneme in phonemes:
@@ -94,7 +104,9 @@ class CMUDictionary:
 
         return stress_pattern
 
-    def _phonemes_to_syllables(self, word: str, phonemes: List[str]) -> List[str]:
+    def _phonemes_to_syllables(
+        self, word: str, phonemes: List[str]
+    ) -> List[str]:
         """Convert phonemes back to approximate syllables for the word."""
         # Count vowel sounds (phonemes ending with stress markers)
         vowel_count = sum(1 for p in phonemes if p[-1].isdigit())
@@ -136,18 +148,26 @@ class CMUDictionary:
                 if i == 0:
                     # First syllable: start to midpoint between first and second vowel
                     if len(vowel_positions) > 1:
-                        split_point = (vowel_positions[0] + vowel_positions[1]) // 2 + 1
+                        split_point = (
+                            vowel_positions[0] + vowel_positions[1]
+                        ) // 2 + 1
                         syllables.append(word[:split_point])
                     else:
                         syllables.append(word)
                 elif i == vowel_count - 1:
                     # Last syllable: from previous split to end
-                    prev_split = (vowel_positions[i - 1] + vowel_positions[i]) // 2 + 1
+                    prev_split = (
+                        vowel_positions[i - 1] + vowel_positions[i]
+                    ) // 2 + 1
                     syllables.append(word[prev_split:])
                 else:
                     # Middle syllables
-                    prev_split = (vowel_positions[i - 1] + vowel_positions[i]) // 2 + 1
-                    next_split = (vowel_positions[i] + vowel_positions[i + 1]) // 2 + 1
+                    prev_split = (
+                        vowel_positions[i - 1] + vowel_positions[i]
+                    ) // 2 + 1
+                    next_split = (
+                        vowel_positions[i] + vowel_positions[i + 1]
+                    ) // 2 + 1
                     syllables.append(word[prev_split:next_split])
 
             return [s for s in syllables if s]  # Filter empty strings
@@ -157,7 +177,11 @@ class CMUDictionary:
         syllables = []
         for i in range(vowel_count):
             start = int(i * syllable_length)
-            end = int((i + 1) * syllable_length) if i < vowel_count - 1 else word_length
+            end = (
+                int((i + 1) * syllable_length)
+                if i < vowel_count - 1
+                else word_length
+            )
             syllables.append(word[start:end])
 
         return syllables
@@ -206,7 +230,9 @@ def lookup_stress_pattern(word: str) -> Optional[StressPattern]:
     return get_cmu_dictionary().lookup(word)
 
 
-def analyze_contextual_stress(word: str, context: str, position: int) -> Optional[bool]:
+def analyze_contextual_stress(
+    word: str, context: str, position: int
+) -> Optional[bool]:
     """
     Analyze whether a contextual word should be stressed based on its grammatical role.
 

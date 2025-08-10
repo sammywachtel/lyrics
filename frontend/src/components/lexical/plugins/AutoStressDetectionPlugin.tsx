@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useEffect } from 'react'
-import { $getRoot } from 'lexical'
+import { $getRoot, type LexicalNode } from 'lexical'
 import { $isStressedTextNode, StressedTextNode } from '../nodes/StressedTextNode'
 // import { mergeRegister } from '@lexical/utils'
 
@@ -37,7 +37,7 @@ export function AutoStressDetectionPlugin({
           // Find all StressedTextNodes and trigger auto-detection
           const nodesToProcess: StressedTextNode[] = []
 
-          function collectStressedTextNodes(node: any) {
+          function collectStressedTextNodes(node: LexicalNode) {
             if ($isStressedTextNode(node)) {
               nodesToProcess.push(node)
             }

@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $isTextNode, TextNode } from 'lexical'
+import { $isTextNode, TextNode, type LexicalNode } from 'lexical'
 import { useEffect } from 'react'
 import { $createStressedTextNode, $isStressedTextNode } from '../nodes/StressedTextNode'
 import { $isSectionParagraphNode } from '../nodes/SectionParagraphNode'
@@ -44,11 +44,11 @@ export function StableTextToStressedPlugin({
         const nodesToConvert: TextNode[] = []
         let stressedNodesNeedingAnalysis = 0
 
-        function collectTextNodes(node: any) {
+        function collectTextNodes(node: LexicalNode) {
           // Look inside section paragraphs AND regular paragraphs
           if ($isSectionParagraphNode(node)) {
             const children = node.getChildren()
-            console.log('🔍 STABLE-PLUGIN: Section paragraph children:', children.map((c: any) => ({
+            console.log('🔍 STABLE-PLUGIN: Section paragraph children:', children.map((c: LexicalNode) => ({
               type: c.getType(),
               isText: $isTextNode(c),
               isStressed: $isStressedTextNode(c),
@@ -58,7 +58,7 @@ export function StableTextToStressedPlugin({
           } else if (node.getType?.() === 'paragraph') {
             // Also process regular Lexical paragraphs (unsectioned text)
             const children = node.getChildren()
-            console.log('🔍 STABLE-PLUGIN: Regular paragraph children:', children.map((c: any) => ({
+            console.log('🔍 STABLE-PLUGIN: Regular paragraph children:', children.map((c: LexicalNode) => ({
               type: c.getType(),
               isText: $isTextNode(c),
               isStressed: $isStressedTextNode(c),
@@ -72,8 +72,8 @@ export function StableTextToStressedPlugin({
           }
         }
 
-        function processChildren(children: any[]) {
-          children.forEach((child: any) => {
+        function processChildren(children: LexicalNode[]) {
+          children.forEach((child: LexicalNode) => {
             if ($isTextNode(child) && !$isStressedTextNode(child)) {
                 const text = child.getTextContent()
                 const nodeKey = child.getKey()

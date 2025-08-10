@@ -1,5 +1,5 @@
 import { $createSectionParagraphNode, $isSectionParagraphNode, SectionParagraphNode } from '../SectionParagraphNode'
-import { $createTextNode, $getRoot } from 'lexical'
+import { $createTextNode, $getRoot, type EditorConfig } from 'lexical'
 import { createTestEditor } from '../../../utils/testUtils'
 
 describe('SectionParagraphNode', () => {
@@ -81,10 +81,10 @@ describe('SectionParagraphNode', () => {
 
     it('should handle DOM creation with section classes', () => {
       editor.update(() => {
-        const mockConfig = { theme: {}, namespace: 'test' }
+        const mockConfig = { theme: {}, namespace: 'test' } as EditorConfig
 
         const node = $createSectionParagraphNode('chorus')
-        const domElement = node.createDOM(mockConfig as any)
+        const domElement = node.createDOM(mockConfig)
 
         expect(domElement.classList.contains('lexical-text-chorus')).toBe(true)
       })
@@ -99,7 +99,7 @@ describe('SectionParagraphNode', () => {
         const domElement = document.createElement('p')
         domElement.classList.add('lexical-text-verse')
 
-        const wasUpdated = newNode.updateDOM(oldNode, domElement, mockConfig as any)
+        const wasUpdated = newNode.updateDOM(oldNode, domElement, mockConfig as EditorConfig)
 
         expect(wasUpdated).toBe(true)
         expect(domElement.classList.contains('lexical-text-verse')).toBe(false)

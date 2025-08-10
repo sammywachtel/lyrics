@@ -8,6 +8,7 @@ let activePluginId: string | null = null
 import {
   $isStressedTextNode,
   type StressPattern,
+  type Syllable,
 } from '../nodes/StressedTextNode'
 import { $isSectionParagraphNode } from '../nodes/SectionParagraphNode'
 import { $getRoot, type LexicalNode, $isElementNode } from 'lexical'
@@ -368,7 +369,7 @@ function StressMarkOverlay({
 /**
  * Find the position of the main vowel within a specific syllable of a word
  */
-function findVowelPositionInWord(word: string, syllables: any[], syllableIndex: number): number {
+function findVowelPositionInWord(word: string, syllables: Syllable[], syllableIndex: number): number {
   if (syllableIndex >= syllables.length) return -1
 
   const syllable = syllables[syllableIndex]
@@ -402,7 +403,7 @@ function createStressMarkSpan(
   mark: string,
   x: number,
   y: number,
-  syllable: any,
+  syllable: Syllable,
   index: number,
   word: string,
   overlay: StressMarkOverlay,

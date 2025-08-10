@@ -452,9 +452,10 @@ export const RichTextSongEditor = forwardRef<RichTextSongEditorRef, RichTextSong
     }
 
     // Use the jumpToSection method from RichTextLyricsEditor
-    if (typeof (editorRef as any).jumpToSection === 'function') {
+    const editor = editorRef as { jumpToSection?: (section: string) => void }
+    if (typeof editor.jumpToSection === 'function') {
       try {
-        (editorRef as any).jumpToSection(sectionName)
+        editor.jumpToSection(sectionName)
         // Update current section after navigation
         setTimeout(updateCurrentSection, 100)
       } catch (error) {

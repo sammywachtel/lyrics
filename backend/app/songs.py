@@ -52,10 +52,14 @@ class SongsService:
         # Parse settings or create default
         try:
             settings = (
-                SongSettings(**settings_data) if settings_data else SongSettings()
+                SongSettings(**settings_data)
+                if settings_data
+                else SongSettings()
             )
         except Exception as e:
-            logger.warning(f"Error parsing song settings: {e}. Using defaults.")
+            logger.warning(
+                f"Error parsing song settings: {e}. Using defaults."
+            )
             settings = SongSettings()
 
         return Song(
@@ -84,7 +88,9 @@ class SongsService:
                 detail="Database service unavailable",
             )
 
-    async def create_song(self, song_data: SongCreate, user: UserContext) -> Song:
+    async def create_song(
+        self, song_data: SongCreate, user: UserContext
+    ) -> Song:
         """Create a new song."""
         self._check_database()
 
@@ -144,7 +150,8 @@ class SongsService:
 
             if not response.data:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Song not found"
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Song not found",
                 )
 
             return self._db_to_song(response.data[0])
@@ -171,7 +178,11 @@ class SongsService:
         try:
             offset = (page - 1) * per_page
 
-            query = self.supabase.table("songs").select("*").eq("user_id", user.user_id)
+            query = (
+                self.supabase.table("songs")
+                .select("*")
+                .eq("user_id", user.user_id)
+            )
 
             if status_filter:
                 if status_filter == SongStatus.ARCHIVED:
@@ -191,9 +202,9 @@ class SongsService:
                 if status_filter == SongStatus.ARCHIVED:
                     count_response = count_response.eq("is_archived", True)
                 else:
-                    count_response = count_response.eq("is_archived", False).eq(
-                        "metadata->>status", status_filter.value
-                    )
+                    count_response = count_response.eq(
+                        "is_archived", False
+                    ).eq("metadata->>status", status_filter.value)
             count_result = count_response.execute()
             total = count_result.count or 0
 
@@ -204,7 +215,9 @@ class SongsService:
                 .execute()
             )
 
-            songs = [self._db_to_song(song_data) for song_data in response.data]
+            songs = [
+                self._db_to_song(song_data) for song_data in response.data
+            ]
 
             return SongListResponse(
                 songs=songs, total=total, page=page, per_page=per_page
@@ -243,7 +256,9 @@ class SongsService:
                 metadata_updates["tags"] = song_update.tags
             if song_update.status is not None:
                 metadata_updates["status"] = song_update.status.value
-                update_data["is_archived"] = song_update.status == SongStatus.ARCHIVED
+                update_data["is_archived"] = (
+                    song_update.status == SongStatus.ARCHIVED
+                )
             if song_update.metadata is not None:
                 metadata_updates.update(song_update.metadata)
 
@@ -310,7 +325,9 @@ class SongsService:
                 detail="Failed to delete song",
             )
 
-    async def get_song_settings(self, song_id: str, user: UserContext) -> SongSettings:
+    async def get_song_settings(
+        self, song_id: str, user: UserContext
+    ) -> SongSettings:
         """Get settings for a specific song."""
         self._check_database()
 
@@ -325,16 +342,21 @@ class SongsService:
 
             if not response.data:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Song not found"
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Song not found",
                 )
 
             settings_data = response.data[0].get("settings", {})
             try:
                 return (
-                    SongSettings(**settings_data) if settings_data else SongSettings()
+                    SongSettings(**settings_data)
+                    if settings_data
+                    else SongSettings()
                 )
             except Exception as e:
-                logger.warning(f"Error parsing song settings: {e}. Using defaults.")
+                logger.warning(
+                    f"Error parsing song settings: {e}. Using defaults."
+                )
                 return SongSettings()
 
         except HTTPException:
@@ -347,7 +369,10 @@ class SongsService:
             )
 
     async def update_song_settings(
-        self, song_id: str, settings_update: SongSettingsUpdate, user: UserContext
+        self,
+        song_id: str,
+        settings_update: SongSettingsUpdate,
+        user: UserContext,
     ) -> SongSettings:
         """Update settings for a specific song."""
         self._check_database()
@@ -390,7 +415,10 @@ class SongsService:
             )
 
     async def update_song_settings_partial(
-        self, song_id: str, partial_update: SongSettingsPartialUpdate, user: UserContext
+        self,
+        song_id: str,
+        partial_update: SongSettingsPartialUpdate,
+        user: UserContext,
     ) -> SongSettings:
         """Update song settings partially (for auto-save functionality)."""
         self._check_database()
@@ -430,10 +458,14 @@ class SongsService:
                 ] = partial_update.target_duration_minutes
                 changed_fields.append("structure.target_duration_minutes")
             if partial_update.overall_mood is not None:
-                current_dict["style"]["overall_mood"] = partial_update.overall_mood
+                current_dict["style"][
+                    "overall_mood"
+                ] = partial_update.overall_mood
                 changed_fields.append("style.overall_mood")
             if partial_update.energy_level is not None:
-                current_dict["style"]["energy_level"] = partial_update.energy_level
+                current_dict["style"][
+                    "energy_level"
+                ] = partial_update.energy_level
                 changed_fields.append("style.energy_level")
             if partial_update.ai_creativity_level is not None:
                 current_dict["ai"][
@@ -497,16 +529,21 @@ class SongsService:
 
             if not response.data:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Song not found"
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Song not found",
                 )
 
             prosody_data = response.data[0].get("prosody_config", {})
             try:
                 return (
-                    ProsodyConfig(**prosody_data) if prosody_data else ProsodyConfig()
+                    ProsodyConfig(**prosody_data)
+                    if prosody_data
+                    else ProsodyConfig()
                 )
             except Exception as e:
-                logger.warning(f"Error parsing prosody config: {e}. Using defaults.")
+                logger.warning(
+                    f"Error parsing prosody config: {e}. Using defaults."
+                )
                 return ProsodyConfig()
 
         except HTTPException:
@@ -519,7 +556,10 @@ class SongsService:
             )
 
     async def update_prosody_config(
-        self, song_id: str, config_update: ProsodyConfigUpdate, user: UserContext
+        self,
+        song_id: str,
+        config_update: ProsodyConfigUpdate,
+        user: UserContext,
     ) -> ProsodyConfig:
         """Update prosody configuration for a specific song."""
         self._check_database()
@@ -602,7 +642,9 @@ class SongsService:
             }
 
             response = (
-                self.supabase.table("song_versions").insert(version_dict).execute()
+                self.supabase.table("song_versions")
+                .insert(version_dict)
+                .execute()
             )
 
             if not response.data:
@@ -623,7 +665,11 @@ class SongsService:
             )
 
     async def get_song_versions(
-        self, song_id: str, user: UserContext, page: int = 1, per_page: int = 10
+        self,
+        song_id: str,
+        user: UserContext,
+        page: int = 1,
+        per_page: int = 10,
     ) -> SongVersionResponse:
         """Get version history for a song."""
         self._check_database()
@@ -646,11 +692,13 @@ class SongsService:
             )
 
             versions = [
-                self._db_to_song_version(version_data) for version_data in response.data
+                self._db_to_song_version(version_data)
+                for version_data in response.data
             ]
 
             return SongVersionResponse(
-                message="Song versions retrieved successfully", versions=versions
+                message="Song versions retrieved successfully",
+                versions=versions,
             )
 
         except HTTPException:
@@ -663,7 +711,11 @@ class SongsService:
             )
 
     async def get_settings_history(
-        self, song_id: str, user: UserContext, page: int = 1, per_page: int = 10
+        self,
+        song_id: str,
+        user: UserContext,
+        page: int = 1,
+        per_page: int = 10,
     ) -> SongSettingsHistoryResponse:
         """Get settings change history for a song."""
         self._check_database()
@@ -724,15 +776,21 @@ class SongsService:
 
         try:
             settings = (
-                SongSettings(**settings_data) if settings_data else SongSettings()
+                SongSettings(**settings_data)
+                if settings_data
+                else SongSettings()
             )
         except Exception as e:
-            logger.warning(f"Error parsing version settings: {e}. Using defaults.")
+            logger.warning(
+                f"Error parsing version settings: {e}. Using defaults."
+            )
             settings = SongSettings()
 
         try:
             prosody_config = (
-                ProsodyConfig(**prosody_data) if prosody_data else ProsodyConfig()
+                ProsodyConfig(**prosody_data)
+                if prosody_data
+                else ProsodyConfig()
             )
         except Exception as e:
             logger.warning(
@@ -802,13 +860,17 @@ class SongsService:
     ) -> None:
         """Manually create a settings history entry (useful for API-level tracking)."""
         try:
-            changed_fields = self._detect_settings_changes(old_settings, new_settings)
+            changed_fields = self._detect_settings_changes(
+                old_settings, new_settings
+            )
 
             if old_prosody and new_prosody:
                 prosody_changes = self._detect_settings_changes(
                     old_prosody, new_prosody
                 )
-                changed_fields.extend([f"prosody.{field}" for field in prosody_changes])
+                changed_fields.extend(
+                    [f"prosody.{field}" for field in prosody_changes]
+                )
 
             if changed_fields:  # Only create entry if there are actual changes
                 history_record = {
@@ -837,7 +899,9 @@ def create_songs_router(
     router = APIRouter(prefix="/api/songs", tags=["songs"])
     songs_service = SongsService(supabase_client)
 
-    @router.post("/", response_model=SongResponse, status_code=status.HTTP_201_CREATED)
+    @router.post(
+        "/", response_model=SongResponse, status_code=status.HTTP_201_CREATED
+    )
     async def create_song(
         song_data: SongCreate, user: UserContext = Depends(get_current_user)
     ):
@@ -846,7 +910,9 @@ def create_songs_router(
         return SongResponse(message="Song created successfully", song=song)
 
     @router.get("/{song_id}", response_model=SongResponse)
-    async def get_song(song_id: str, user: UserContext = Depends(get_current_user)):
+    async def get_song(
+        song_id: str, user: UserContext = Depends(get_current_user)
+    ):
         """Get a song by ID."""
         song = await songs_service.get_song(song_id, user)
         return SongResponse(message="Song retrieved successfully", song=song)
@@ -856,7 +922,9 @@ def create_songs_router(
         user: UserContext = Depends(get_current_user),
         page: int = Query(1, ge=1, description="Page number"),
         per_page: int = Query(10, ge=1, le=100, description="Items per page"),
-        status: Optional[SongStatus] = Query(None, description="Filter by status"),
+        status: Optional[SongStatus] = Query(
+            None, description="Filter by status"
+        ),
     ):
         """List songs for the current user."""
         return await songs_service.list_songs(user, page, per_page, status)
@@ -872,7 +940,9 @@ def create_songs_router(
         return SongResponse(message="Song updated successfully", song=song)
 
     @router.delete("/{song_id}", status_code=status.HTTP_204_NO_CONTENT)
-    async def delete_song(song_id: str, user: UserContext = Depends(get_current_user)):
+    async def delete_song(
+        song_id: str, user: UserContext = Depends(get_current_user)
+    ):
         """Delete a song."""
         await songs_service.delete_song(song_id, user)
         return None
@@ -915,7 +985,9 @@ def create_songs_router(
             message="Song settings updated successfully", settings=settings
         )
 
-    @router.get("/{song_id}/prosody-config", response_model=ProsodyConfigResponse)
+    @router.get(
+        "/{song_id}/prosody-config", response_model=ProsodyConfigResponse
+    )
     async def get_prosody_config(
         song_id: str, user: UserContext = Depends(get_current_user)
     ):
@@ -926,7 +998,9 @@ def create_songs_router(
             prosody_config=prosody_config,
         )
 
-    @router.put("/{song_id}/prosody-config", response_model=ProsodyConfigResponse)
+    @router.put(
+        "/{song_id}/prosody-config", response_model=ProsodyConfigResponse
+    )
     async def update_prosody_config(
         song_id: str,
         config_update: ProsodyConfigUpdate,
@@ -937,7 +1011,8 @@ def create_songs_router(
             song_id, config_update, user
         )
         return ProsodyConfigResponse(
-            message="Prosody config updated successfully", prosody_config=prosody_config
+            message="Prosody config updated successfully",
+            prosody_config=prosody_config,
         )
 
     @router.post(
@@ -951,7 +1026,9 @@ def create_songs_router(
         user: UserContext = Depends(get_current_user),
     ):
         """Create a new version of a song."""
-        version = await songs_service.create_song_version(song_id, version_data, user)
+        version = await songs_service.create_song_version(
+            song_id, version_data, user
+        )
         return SongVersionResponse(
             message="Song version created successfully", version=version
         )
@@ -964,10 +1041,13 @@ def create_songs_router(
         per_page: int = Query(10, ge=1, le=50, description="Items per page"),
     ):
         """Get version history for a song."""
-        return await songs_service.get_song_versions(song_id, user, page, per_page)
+        return await songs_service.get_song_versions(
+            song_id, user, page, per_page
+        )
 
     @router.get(
-        "/{song_id}/settings/history", response_model=SongSettingsHistoryResponse
+        "/{song_id}/settings/history",
+        response_model=SongSettingsHistoryResponse,
     )
     async def get_settings_history(
         song_id: str,
@@ -976,7 +1056,9 @@ def create_songs_router(
         per_page: int = Query(10, ge=1, le=50, description="Items per page"),
     ):
         """Get settings change history for a song."""
-        return await songs_service.get_settings_history(song_id, user, page, per_page)
+        return await songs_service.get_settings_history(
+            song_id, user, page, per_page
+        )
 
     @router.post("/{song_id}/settings/validate", response_model=dict)
     async def validate_song_settings(
@@ -1007,7 +1089,9 @@ def create_songs_router(
                 "errors": [str(e)],
             }
 
-    @router.get("/{song_id}/settings/defaults", response_model=SongSettingsResponse)
+    @router.get(
+        "/{song_id}/settings/defaults", response_model=SongSettingsResponse
+    )
     async def get_default_settings(
         song_id: str, user: UserContext = Depends(get_current_user)
     ):
@@ -1017,10 +1101,13 @@ def create_songs_router(
 
         default_settings = SongSettings()
         return SongSettingsResponse(
-            message="Default settings retrieved successfully", settings=default_settings
+            message="Default settings retrieved successfully",
+            settings=default_settings,
         )
 
-    @router.post("/{song_id}/settings/reset", response_model=SongSettingsResponse)
+    @router.post(
+        "/{song_id}/settings/reset", response_model=SongSettingsResponse
+    )
     async def reset_song_settings(
         song_id: str, user: UserContext = Depends(get_current_user)
     ):
@@ -1032,7 +1119,8 @@ def create_songs_router(
             song_id, settings_update, user
         )
         return SongSettingsResponse(
-            message="Settings reset to defaults successfully", settings=updated_settings
+            message="Settings reset to defaults successfully",
+            settings=updated_settings,
         )
 
     return router

@@ -11,15 +11,12 @@ from supabase import Client, create_client
 from .auth import create_auth_dependency
 from .config import settings
 from .dictionary import (
-    StressPattern,
     analyze_contextual_stress,
     get_cmu_dictionary,
     lookup_stress_pattern,
 )
 from .songs import create_songs_router
 from .stress_analysis import (
-    StressAnalysisResult,
-    WordAnalysis,
     analyze_stress,
     get_stress_analyzer,
 )
@@ -72,7 +69,9 @@ def initialize_supabase() -> Optional[Client]:
         # Test connection with a simple query
         try:
             # This will validate the client can connect
-            response = client.table("users").select("count").limit(1).execute()
+            _ = (
+                client.table("users").select("count").limit(1).execute()
+            )  # noqa: F841
             supabase_available = True
             logger.info("Supabase client initialized successfully")
             return client
@@ -128,7 +127,9 @@ async def health_check() -> Dict[str, Any]:
 
     try:
         # Test database connection by querying users table
-        response = supabase.table("users").select("count").limit(1).execute()
+        _ = (
+            supabase.table("users").select("count").limit(1).execute()
+        )  # noqa: F841
 
         return {
             "status": "healthy",
@@ -207,7 +208,8 @@ async def analyze_word_in_context(request: Dict[str, Any]) -> Dict[str, Any]:
 
         if not word or not context:
             raise HTTPException(
-                status_code=400, detail="Both 'word' and 'context' are required"
+                status_code=400,
+                detail="Both 'word' and 'context' are required",
             )
 
         stress_result = analyze_contextual_stress(word, context, position)
@@ -285,7 +287,9 @@ async def analyze_text_stress(request: Dict[str, Any]) -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Comprehensive stress analysis error: {e}")
-        raise HTTPException(status_code=500, detail=f"Stress analysis failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Stress analysis failed: {str(e)}"
+        )
 
 
 @app.post("/api/stress/analyze-batch")
@@ -304,7 +308,9 @@ async def analyze_batch_stress(request: Dict[str, Any]) -> Dict[str, Any]:
         context = request.get("context", "lyrical")
 
         if not lines or not isinstance(lines, list):
-            raise HTTPException(status_code=400, detail="Lines array is required")
+            raise HTTPException(
+                status_code=400, detail="Lines array is required"
+            )
 
         results = []
         total_processing_time = 0
@@ -432,7 +438,11 @@ async def test_endpoint() -> Dict[str, Any]:
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail={"error": "Test failed", "details": str(e), "framework": "FastAPI"},
+            detail={
+                "error": "Test failed",
+                "details": str(e),
+                "framework": "FastAPI",
+            },
         )
 
 
@@ -449,7 +459,11 @@ async def test_songs_endpoint() -> Dict[str, Any]:
             "user_id": "550e8400-e29b-41d4-a716-446655440000",
             "title": "Test Song",
             "content": "Test lyrics content",
-            "metadata": {"artist": "Test Artist", "tags": ["test"], "status": "draft"},
+            "metadata": {
+                "artist": "Test Artist",
+                "tags": ["test"],
+                "status": "draft",
+            },
             "is_archived": False,
         }
 
