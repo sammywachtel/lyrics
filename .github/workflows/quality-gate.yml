@@ -175,13 +175,24 @@ jobs:
           echo "✅ Flake8 quality gate passed"
         working-directory: backend
 
-      - name: MyPy Type Quality Gate
+      - name: MyPy Type Quality Gate (Disabled - See Issue #TODO)
         run: |
           echo "🔍 MyPy type checking temporarily disabled"
-          echo "⚠️  MyPy has extensive type annotation issues that require"
-          echo "   significant work to resolve. Enable after adding proper"
-          echo "   type hints throughout the backend codebase."
-          echo "✅ MyPy quality gate skipped (temporarily)"
+          echo ""
+          echo "⚠️  ANALYSIS SUMMARY:"
+          echo "   • 90+ type annotation errors across all modules"
+          echo "   • Missing type stubs for: pydantic, fastapi, spacy, g2p_en, etc."
+          echo "   • Schema/type mismatches in songs.py (List[str] vs str assignments)"
+          echo "   • FastAPI decorator type inference issues"
+          echo ""
+          echo "📋 REQUIRED WORK:"
+          echo "   • Add comprehensive return type annotations"
+          echo "   • Fix schema type mismatches in database operations"
+          echo "   • Install/create missing type stubs"
+          echo "   • Review Optional vs Union type usage"
+          echo ""
+          echo "🎯 ESTIMATED EFFORT: 1-2 weeks of focused typing work"
+          echo "✅ MyPy will be re-enabled after comprehensive type annotation project"
         working-directory: backend
 
   # Final quality gate summary

@@ -7,7 +7,7 @@ Provides accurate syllable and stress information for multi-syllable words.
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 
 @dataclass
@@ -24,7 +24,7 @@ class StressPattern:
 class CMUDictionary:
     """CMU Pronouncing Dictionary parser and lookup service."""
 
-    def __init__(self, dict_path: Optional[str] = None):
+    def __init__(self, dict_path: Optional[Union[str, Path]] = None):
         if dict_path is None:
             # Default path relative to backend root
             dict_path = (

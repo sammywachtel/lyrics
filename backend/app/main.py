@@ -305,7 +305,7 @@ async def analyze_batch_stress(request: Dict[str, Any]) -> Dict[str, Any]:
             raise HTTPException(status_code=400, detail="Lines array is required")
 
         results = []
-        total_processing_time = 0
+        total_processing_time = 0.0
 
         for line_number, text in enumerate(lines, 1):
             if not text.strip():

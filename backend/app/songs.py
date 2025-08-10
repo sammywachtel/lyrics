@@ -861,13 +861,15 @@ def create_songs_router(
     @router.post("/", response_model=SongResponse, status_code=status.HTTP_201_CREATED)
     async def create_song(
         song_data: SongCreate, user: UserContext = Depends(get_current_user)
-    ):
+    ) -> SongResponse:
         """Create a new song."""
         song = await songs_service.create_song(song_data, user)
         return SongResponse(message="Song created successfully", song=song)
 
     @router.get("/{song_id}", response_model=SongResponse)
-    async def get_song(song_id: str, user: UserContext = Depends(get_current_user)):
+    async def get_song(
+        song_id: str, user: UserContext = Depends(get_current_user)
+    ) -> SongResponse:
         """Get a song by ID."""
         song = await songs_service.get_song(song_id, user)
         return SongResponse(message="Song retrieved successfully", song=song)
@@ -878,7 +880,7 @@ def create_songs_router(
         page: int = Query(1, ge=1, description="Page number"),
         per_page: int = Query(10, ge=1, le=100, description="Items per page"),
         status: Optional[SongStatus] = Query(None, description="Filter by status"),
-    ):
+    ) -> SongListResponse:
         """List songs for the current user."""
         return await songs_service.list_songs(user, page, per_page, status)
 
@@ -887,13 +889,15 @@ def create_songs_router(
         song_id: str,
         song_update: SongUpdate,
         user: UserContext = Depends(get_current_user),
-    ):
+    ) -> SongResponse:
         """Update an existing song."""
         song = await songs_service.update_song(song_id, song_update, user)
         return SongResponse(message="Song updated successfully", song=song)
 
     @router.delete("/{song_id}", status_code=status.HTTP_204_NO_CONTENT)
-    async def delete_song(song_id: str, user: UserContext = Depends(get_current_user)):
+    async def delete_song(
+        song_id: str, user: UserContext = Depends(get_current_user)
+    ) -> None:
         """Delete a song."""
         await songs_service.delete_song(song_id, user)
         return None
