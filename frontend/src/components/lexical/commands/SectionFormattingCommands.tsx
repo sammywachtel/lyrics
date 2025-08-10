@@ -21,7 +21,7 @@ function $getSelectedParagraphs() {
     return []
   }
 
-  const paragraphs: Array<SectionParagraphNode | any> = []
+  const paragraphs: Array<SectionParagraphNode | LexicalNode> = []
   const seen = new Set<string>()
 
   // Handle collapsed selections (cursor position only) differently from range selections

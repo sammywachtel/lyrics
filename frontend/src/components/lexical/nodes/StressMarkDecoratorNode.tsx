@@ -4,7 +4,6 @@ import {
   type DOMConversionOutput,
   type DOMExportOutput,
   DecoratorNode,
-  type EditorConfig,
   type LexicalNode,
   type NodeKey,
   type SerializedLexicalNode,

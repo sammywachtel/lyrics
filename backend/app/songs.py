@@ -354,7 +354,7 @@ class SongsService:
 
         try:
             # Get current settings for change tracking
-            current_settings = await self.get_song_settings(song_id, user)
+            # current_settings = await self.get_song_settings(song_id, user)  # Available if needed
             # current_dict = current_settings.model_dump()  # Available if needed
 
             # Convert new settings to dict for JSON storage
@@ -526,7 +526,7 @@ class SongsService:
 
         try:
             # Get current prosody config for change tracking
-            current_config = await self.get_prosody_config(song_id, user)
+            # current_config = await self.get_prosody_config(song_id, user)  # Available if needed
             # current_dict = current_config.model_dump()  # Available if needed
 
             # Convert new config to dict for JSON storage

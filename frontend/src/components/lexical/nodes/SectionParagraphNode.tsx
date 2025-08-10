@@ -126,7 +126,7 @@ export class SectionParagraphNode extends ParagraphNode {
     }
   }
 
-  exportDOM(editor: any): DOMExportOutput {
+  exportDOM(editor: LexicalEditor): DOMExportOutput {
     const { element } = super.exportDOM(editor)
 
     if (this.__sectionType && element && element instanceof HTMLElement) {
