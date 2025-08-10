@@ -26,8 +26,10 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install pre-commit
-        run: pip install pre-commit
+      - name: Install pre-commit and dependencies
+        run: |
+          pip install pre-commit
+          pip install black isort
 
       - name: Check if pre-commit hooks were bypassed
         run: |
