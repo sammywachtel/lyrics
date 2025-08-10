@@ -1,5 +1,9 @@
 name: Code Quality Pipeline
 
+permissions:
+  contents: read
+  security-events: write
+
 on:
   push:
     branches: [ main, develop, feature/*, hotfix/* ]
