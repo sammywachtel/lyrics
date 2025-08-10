@@ -88,7 +88,7 @@ function validateNodeStructure(node: unknown): LexicalNodeValidation {
   }
 
   const nodeWithType = node as { type?: string; text?: string; children?: unknown[] }
-  
+
   // Track node type
   if (nodeWithType.type) {
     result.nodeTypes.push(nodeWithType.type)
