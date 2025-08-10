@@ -150,9 +150,7 @@ class ComprehensiveStressAnalyzer:
 
         if word == "there":
             # Check for existential "there is/are" pattern
-            next_token = (
-                token.nbor(1) if token.i + 1 < len(token.doc) else None
-            )
+            next_token = token.nbor(1) if token.i + 1 < len(token.doc) else None
             if (
                 next_token
                 and next_token.lemma_ == "be"
@@ -180,9 +178,7 @@ class ComprehensiveStressAnalyzer:
         Returns list of character indices where stress marks should be placed.
         """
         # Find vowel positions in the word
-        vowel_positions = [
-            i for i, char in enumerate(word) if char.lower() in "aeiouy"
-        ]
+        vowel_positions = [i for i, char in enumerate(word) if char.lower() in "aeiouy"]
 
         if not vowel_positions:
             return []
@@ -202,9 +198,7 @@ class ComprehensiveStressAnalyzer:
             # Still too many? Take proportional spacing
             if len(vowel_positions) > n_syllables:
                 step = len(vowel_positions) / n_syllables
-                return [
-                    vowel_positions[int(i * step)] for i in range(n_syllables)
-                ]
+                return [vowel_positions[int(i * step)] for i in range(n_syllables)]
 
         elif len(vowel_positions) < n_syllables:
             # Too few vowels - extend the last position
@@ -213,9 +207,7 @@ class ComprehensiveStressAnalyzer:
 
         return vowel_positions[:n_syllables]
 
-    def analyze_text(
-        self, text: str, context: str = "lyrical"
-    ) -> StressAnalysisResult:
+    def analyze_text(self, text: str, context: str = "lyrical") -> StressAnalysisResult:
         """
         Perform comprehensive stress analysis on input text.
 
@@ -253,9 +245,7 @@ class ComprehensiveStressAnalyzer:
             # Determine stress pattern based on syllable count
             if n_syllables == 1:
                 # Monosyllabic - use POS-based rules
-                stress_level, reasoning = self.analyze_monosyllable_stress(
-                    token
-                )
+                stress_level, reasoning = self.analyze_monosyllable_stress(token)
                 stress_pattern = [stress_level]
                 syllables = [word]
 
@@ -277,9 +267,7 @@ class ComprehensiveStressAnalyzer:
                 reasoning = "fallback_single_stressed"
 
             # Map to character positions
-            char_positions = self.map_syllables_to_chars(
-                word, len(stress_pattern)
-            )
+            char_positions = self.map_syllables_to_chars(word, len(stress_pattern))
 
             # Create analysis result
             analysis = WordAnalysis(
@@ -316,9 +304,7 @@ class ComprehensiveStressAnalyzer:
             return [word]
 
         # Find vowel positions for splitting
-        vowel_positions = [
-            i for i, char in enumerate(word.lower()) if char in "aeiouy"
-        ]
+        vowel_positions = [i for i, char in enumerate(word.lower()) if char in "aeiouy"]
 
         if len(vowel_positions) >= n_syllables:
             # Split at consonant clusters between vowels
@@ -346,9 +332,7 @@ class ComprehensiveStressAnalyzer:
                     next_vowel_idx = min(i + 1, len(vowel_positions) - 1)
                     split_point = min(
                         vowel_positions[next_vowel_idx],
-                        (vowel_positions[i] + vowel_positions[next_vowel_idx])
-                        // 2
-                        + 1,
+                        (vowel_positions[i] + vowel_positions[next_vowel_idx]) // 2 + 1,
                     )
                     syllables.append(word[prev_split:split_point])
 
@@ -359,18 +343,12 @@ class ComprehensiveStressAnalyzer:
         syllables = []
         for i in range(n_syllables):
             start = int(i * syllable_length)
-            end = (
-                int((i + 1) * syllable_length)
-                if i < n_syllables - 1
-                else len(word)
-            )
+            end = int((i + 1) * syllable_length) if i < n_syllables - 1 else len(word)
             syllables.append(word[start:end])
 
         return syllables
 
-    def _apply_prosodic_smoothing(
-        self, word_analyses: List[WordAnalysis]
-    ) -> None:
+    def _apply_prosodic_smoothing(self, word_analyses: List[WordAnalysis]) -> None:
         """
         Apply optional prosodic smoothing to avoid awkward stress clusters.
         Modifies word_analyses in place.
@@ -414,8 +392,6 @@ def get_stress_analyzer() -> ComprehensiveStressAnalyzer:
     return _stress_analyzer
 
 
-def analyze_stress(
-    text: str, context: str = "lyrical"
-) -> StressAnalysisResult:
+def analyze_stress(text: str, context: str = "lyrical") -> StressAnalysisResult:
     """Convenience function for stress analysis."""
     return get_stress_analyzer().analyze_text(text, context)

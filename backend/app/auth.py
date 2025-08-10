@@ -103,10 +103,7 @@ class AuthService:
 
                 # Check if user exists in our users table
                 user_check = (
-                    self.supabase.table("users")
-                    .select("*")
-                    .eq("id", user_id)
-                    .execute()
+                    self.supabase.table("users").select("*").eq("id", user_id).execute()
                 )
 
                 if not user_check.data:
@@ -128,9 +125,7 @@ class AuthService:
                         .execute()
                     )
 
-                    logger.info(
-                        f"User record created successfully for {user_email}"
-                    )
+                    logger.info(f"User record created successfully for {user_email}")
                     logger.debug(f"Insert result: {insert_result.data}")
 
             except Exception as e:
@@ -152,9 +147,7 @@ class AuthService:
                         detail="Failed to initialize user record",
                     )
 
-            return UserContext(
-                user_id=user_id, email=user_email, is_authenticated=True
-            )
+            return UserContext(user_id=user_id, email=user_email, is_authenticated=True)
 
         except HTTPException:
             raise

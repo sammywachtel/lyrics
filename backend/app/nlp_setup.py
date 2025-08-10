@@ -124,10 +124,7 @@ def _check_cmu_dictionary() -> bool:
         from pathlib import Path
 
         cmu_path = (
-            Path(__file__).parent.parent
-            / "dictionary"
-            / "cmu_raw"
-            / "cmudict-0.7b"
+            Path(__file__).parent.parent / "dictionary" / "cmu_raw" / "cmudict-0.7b"
         )
         exists = cmu_path.exists()
         if exists:

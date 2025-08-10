@@ -67,9 +67,7 @@ class SectionType(str, Enum):
 class SectionStructure(BaseModel):
     """Configuration for a song section."""
 
-    label: str = Field(
-        ..., description="Section label (e.g., 'Verse 1', 'Chorus')"
-    )
+    label: str = Field(..., description="Section label (e.g., 'Verse 1', 'Chorus')")
     type: SectionType = Field(SectionType.CUSTOM, description="Section type")
     order: int = Field(..., description="Order in song structure")
     line_count_target: Optional[int] = Field(
@@ -92,12 +90,8 @@ class RhymePreferences(BaseModel):
     scheme_pattern: Optional[str] = Field(
         None, description="Overall rhyme scheme pattern"
     )
-    allow_slant_rhymes: bool = Field(
-        True, description="Allow near/slant rhymes"
-    )
-    emphasis_on_perfect: bool = Field(
-        False, description="Emphasize perfect rhymes"
-    )
+    allow_slant_rhymes: bool = Field(True, description="Allow near/slant rhymes")
+    emphasis_on_perfect: bool = Field(False, description="Emphasize perfect rhymes")
 
 
 class ProsodySettings(BaseModel):
@@ -127,9 +121,7 @@ class SixBestFriends(BaseModel):
     what: Optional[str] = Field(None, description="What happens in the song?")
     when: Optional[str] = Field(None, description="When does it take place?")
     where: Optional[str] = Field(None, description="Where does it happen?")
-    why: Optional[str] = Field(
-        None, description="Why is this story important?"
-    )
+    why: Optional[str] = Field(None, description="Why is this story important?")
     how: Optional[str] = Field(None, description="How does the story unfold?")
 
 
@@ -143,9 +135,7 @@ class KeywordSettings(BaseModel):
     metaphor_themes: List[str] = Field(
         default_factory=list, description="Metaphorical themes to explore"
     )
-    avoid_words: List[str] = Field(
-        default_factory=list, description="Words to avoid"
-    )
+    avoid_words: List[str] = Field(default_factory=list, description="Words to avoid")
     synonym_groups: Dict[str, List[str]] = Field(
         default_factory=dict, description="Synonym groups for variety"
     )
@@ -171,21 +161,15 @@ class StyleGuide(BaseModel):
 class NarrativeSettings(BaseModel):
     """Foundation tab - Core narrative elements."""
 
-    who_is_talking: Optional[str] = Field(
-        None, description="Who is telling the story?"
-    )
-    to_whom: Optional[str] = Field(
-        None, description="Who is the audience/recipient?"
-    )
+    who_is_talking: Optional[str] = Field(None, description="Who is telling the story?")
+    to_whom: Optional[str] = Field(None, description="Who is the audience/recipient?")
     why_message: Optional[str] = Field(
         None, description="Why is this message important?"
     )
     point_of_view: NarrativePOV = Field(
         NarrativePOV.FIRST_PERSON, description="Narrative perspective"
     )
-    central_theme: Optional[str] = Field(
-        None, description="Main theme or message"
-    )
+    central_theme: Optional[str] = Field(None, description="Main theme or message")
     six_best_friends: SixBestFriends = Field(
         default_factory=SixBestFriends, description="Core story elements"
     )
@@ -228,9 +212,7 @@ class SoundSettings(BaseModel):
 class StyleSettings(BaseModel):
     """Style tab - Genre and artistic direction."""
 
-    primary_genre: Optional[str] = Field(
-        None, description="Primary musical genre"
-    )
+    primary_genre: Optional[str] = Field(None, description="Primary musical genre")
     sub_genres: List[str] = Field(
         default_factory=list, description="Additional genre influences"
     )
@@ -254,9 +236,7 @@ class ContentSettings(BaseModel):
     metaphor_themes: List[str] = Field(
         default_factory=list, description="Metaphorical themes"
     )
-    avoid_words: List[str] = Field(
-        default_factory=list, description="Words to avoid"
-    )
+    avoid_words: List[str] = Field(default_factory=list, description="Words to avoid")
     synonym_groups: Dict[str, List[str]] = Field(
         default_factory=dict, description="Synonym alternatives"
     )
@@ -268,18 +248,12 @@ class ContentSettings(BaseModel):
 class AISettings(BaseModel):
     """AI tab - AI assistance configuration."""
 
-    creativity_level: int = Field(
-        5, ge=1, le=10, description="AI creativity level"
-    )
+    creativity_level: int = Field(5, ge=1, le=10, description="AI creativity level")
     preserve_user_phrases: bool = Field(
         True, description="Preserve original user phrases"
     )
-    auto_suggestions: bool = Field(
-        True, description="Enable automatic suggestions"
-    )
-    suggestion_frequency: int = Field(
-        3, ge=1, le=5, description="How often to suggest"
-    )
+    auto_suggestions: bool = Field(True, description="Enable automatic suggestions")
+    suggestion_frequency: int = Field(3, ge=1, le=5, description="How often to suggest")
     writing_style_adaptation: bool = Field(
         True, description="Adapt to user's writing style"
     )
@@ -422,17 +396,11 @@ class SongSettings(BaseModel):
 class SongBase(BaseModel):
     """Base song model with common fields."""
 
-    title: str = Field(
-        ..., min_length=1, max_length=200, description="Song title"
-    )
-    artist: Optional[str] = Field(
-        None, max_length=100, description="Artist name"
-    )
+    title: str = Field(..., min_length=1, max_length=200, description="Song title")
+    artist: Optional[str] = Field(None, max_length=100, description="Artist name")
     lyrics: str = Field("", description="Song lyrics content")
     status: SongStatus = Field(SongStatus.DRAFT, description="Song status")
-    tags: List[str] = Field(
-        default_factory=list, description="Tags for categorization"
-    )
+    tags: List[str] = Field(default_factory=list, description="Tags for categorization")
     settings: SongSettings = Field(
         default_factory=SongSettings, description="Comprehensive song settings"
     )
@@ -568,9 +536,7 @@ class SongVersion(BaseModel):
 class SongVersionCreate(BaseModel):
     """Model for creating a new song version."""
 
-    change_summary: Optional[str] = Field(
-        None, description="Summary of changes"
-    )
+    change_summary: Optional[str] = Field(None, description="Summary of changes")
 
 
 class SongVersionResponse(BaseModel):
@@ -602,9 +568,7 @@ class SongSettingsHistory(BaseModel):
     changed_fields: List[str] = Field(
         default_factory=list, description="List of changed field names"
     )
-    change_type: str = Field(
-        "manual", description="Type of change (manual, auto, ai)"
-    )
+    change_type: str = Field("manual", description="Type of change (manual, auto, ai)")
     created_at: datetime = Field(..., description="Change timestamp")
 
     model_config = ConfigDict(from_attributes=True)

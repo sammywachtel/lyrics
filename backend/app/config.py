@@ -22,9 +22,7 @@ class Settings(BaseSettings):
     # API settings
     api_title: str = "Songwriting App API"
     api_version: str = "1.0.0"
-    api_description: str = (
-        "FastAPI backend for AI-assisted songwriting application"
-    )
+    api_description: str = "FastAPI backend for AI-assisted songwriting application"
 
     # CORS settings
     cors_origins: list[str] = [

@@ -69,9 +69,7 @@ def initialize_supabase() -> Optional[Client]:
         # Test connection with a simple query
         try:
             # This will validate the client can connect
-            _ = (
-                client.table("users").select("count").limit(1).execute()
-            )  # noqa: F841
+            _ = client.table("users").select("count").limit(1).execute()  # noqa: F841
             supabase_available = True
             logger.info("Supabase client initialized successfully")
             return client
@@ -127,9 +125,7 @@ async def health_check() -> Dict[str, Any]:
 
     try:
         # Test database connection by querying users table
-        _ = (
-            supabase.table("users").select("count").limit(1).execute()
-        )  # noqa: F841
+        _ = supabase.table("users").select("count").limit(1).execute()  # noqa: F841
 
         return {
             "status": "healthy",
@@ -287,9 +283,7 @@ async def analyze_text_stress(request: Dict[str, Any]) -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Comprehensive stress analysis error: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Stress analysis failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Stress analysis failed: {str(e)}")
 
 
 @app.post("/api/stress/analyze-batch")
@@ -308,9 +302,7 @@ async def analyze_batch_stress(request: Dict[str, Any]) -> Dict[str, Any]:
         context = request.get("context", "lyrical")
 
         if not lines or not isinstance(lines, list):
-            raise HTTPException(
-                status_code=400, detail="Lines array is required"
-            )
+            raise HTTPException(status_code=400, detail="Lines array is required")
 
         results = []
         total_processing_time = 0
