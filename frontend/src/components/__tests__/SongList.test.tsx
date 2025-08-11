@@ -1,17 +1,23 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
+import { renderWithRedux as render } from '../../__tests__/test-utils'
 import userEvent from '@testing-library/user-event'
 import { SongList } from '../SongList'
-import { apiClient, type Song } from '../../lib/api'
+import { apiClient } from '../../lib/api'
+import type { Song } from '../SongList'
 
 // Import jest-dom matchers
 import '@testing-library/jest-dom'
 
-// Mock the API client
+// Mock fetch for RTK Query
+global.fetch = jest.fn()
+
+// Mock the old API client (for other components that might still use it)
 jest.mock('../../lib/api', () => ({
   apiClient: {
     listSongs: jest.fn(),
     deleteSong: jest.fn()
-  }
+  },
+  createDefaultSettings: jest.fn(() => ({}))
 }))
 
 // Mock child components to isolate SongList testing

@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import type { Song } from '../lib/api'
-import { apiClient } from '../lib/api'
+import { useState, useEffect } from 'react'
+import { useGetSongsQuery, useDeleteSongMutation } from '../store/api/apiSlice'
 import { SongCard } from './SongCard'
 import { SongForm } from './SongForm'
 import SearchBar from './SearchBar'
@@ -13,31 +12,15 @@ interface SongListProps {
 }
 
 export function SongList({ onEditSong }: SongListProps) {
-  const [songs, setSongs] = useState<Song[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { data: songs = [], isLoading: loading, error } = useGetSongsQuery()
+  const [deleteSong] = useDeleteSongMutation()
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [currentSearch, setCurrentSearch] = useState<SearchFilters>({ query: '', status: 'all', tags: [], sortBy: 'updated_at', sortOrder: 'desc' })
   const [isSearching, setIsSearching] = useState(false)
 
 
-  const loadSongs = useCallback(async () => {
-    try {
-      setLoading(true)
-      const response = await apiClient.listSongs()
-      setSongs(response.songs)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load songs')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    loadSongs()
-  }, [loadSongs])
+  // Songs are automatically loaded via RTK Query
 
   // Separate effect to update search results when songs or search criteria change
   useEffect(() => {
@@ -49,7 +32,7 @@ export function SongList({ onEditSong }: SongListProps) {
 
   const handleSongCreated = () => {
     setShowCreateForm(false)
-    loadSongs()
+    // RTK Query will automatically refetch songs due to cache invalidation
   }
 
   // Handle search
@@ -71,10 +54,10 @@ export function SongList({ onEditSong }: SongListProps) {
     }
 
     try {
-      await apiClient.deleteSong(songId)
-      loadSongs()
+      await deleteSong(songId).unwrap()
+      // RTK Query will automatically remove the song from cache
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete song')
+      console.error('Failed to delete song:', err)
     }
   }
 
@@ -142,7 +125,13 @@ export function SongList({ onEditSong }: SongListProps) {
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-4">
                 <span className="text-red-500 text-lg">⚠️</span>
               </div>
-              <div className="text-red-800 font-medium">{error}</div>
+              <div className="text-red-800 font-medium">{
+                error && 'error' in error
+                  ? error.error
+                  : 'message' in error
+                    ? error.message
+                    : 'Failed to load songs'
+              }</div>
             </div>
           </div>
         )}

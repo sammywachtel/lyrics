@@ -2,8 +2,22 @@
  * Utilities for searching and filtering songs
  */
 
-import type { Song } from '../lib/api'
 import { formatTextToPlain } from './textFormatting'
+
+// Define Song type locally to avoid import issues in tests
+export interface Song {
+  id: string
+  user_id: string
+  title: string
+  artist?: string
+  lyrics: string
+  status: 'draft' | 'in_progress' | 'completed' | 'archived'
+  tags: string[]
+  created_at: string
+  updated_at: string
+  settings: Record<string, unknown>
+  metadata: Record<string, unknown>
+}
 
 export interface SearchFilters {
   query: string

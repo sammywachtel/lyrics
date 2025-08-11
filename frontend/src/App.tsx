@@ -4,7 +4,7 @@ import { AuthForm } from './components/AuthForm'
 import { AppLayout } from './components/layout/AppLayout'
 import { SongList } from './components/SongList'
 import SongEditor from './components/SongEditor'
-import type { Song, SongSettings } from './lib/api'
+import type { Song, SongSettings } from './store/api/apiSlice'
 
 function AppContent() {
   const { user, loading } = useAuth()

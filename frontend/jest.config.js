@@ -14,8 +14,14 @@ export default {
 
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/src/__mocks__/fileMock.js'
+    '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/src/__mocks__/fileMock.js',
+    '^../lib/api$': '<rootDir>/src/__mocks__/api.ts'
   },
+
+  // Transform ES modules in node_modules
+  transformIgnorePatterns: [
+    'node_modules/(?!(isows|@supabase)/)'
+  ],
   preset: 'ts-jest/presets/default-esm',
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   transform: {

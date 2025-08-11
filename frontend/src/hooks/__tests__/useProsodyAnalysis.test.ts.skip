@@ -2,11 +2,35 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { useProsodyAnalysis, useSectionAnalysis, useLineAnalysis, useProsodySettings } from '../useProsodyAnalysis'
 import * as prosodyUtils from '../../utils/prosodyAnalysis'
 
-// Mock lodash debounce to make tests synchronous
+// Mock lodash debounce with proper debouncing simulation
 jest.mock('lodash', () => ({
-  debounce: (fn: (...args: unknown[]) => unknown) => {
-    const debounced = (...args: unknown[]) => fn(...args)
-    debounced.cancel = jest.fn()
+  debounce: (fn: (...args: unknown[]) => unknown, delay?: number) => {
+    let timeoutId: NodeJS.Timeout | null = null
+    let lastArgs: unknown[] | null = null
+
+    const debounced = (...args: unknown[]) => {
+      lastArgs = args
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+
+      timeoutId = setTimeout(() => {
+        if (lastArgs) {
+          fn(...lastArgs)
+          lastArgs = null
+        }
+        timeoutId = null
+      }, delay || 0)
+    }
+
+    debounced.cancel = jest.fn(() => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      }
+      lastArgs = null
+    })
+
     return debounced
   },
 }))
