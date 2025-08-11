@@ -49,7 +49,14 @@
     "validate": "bash scripts/validate.sh",
     "validate:phase0": "bash scripts/validate.sh --phase=0",
     "quality:baseline": "bash scripts/validate.sh --baseline",
-    "quality:status": "bash scripts/quality-status.sh"
+    "quality:status": "bash scripts/quality-status.sh",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report",
+    "validate:iteration": "bash scripts/validate-iteration.sh",
+    "validate:quick": "cd frontend && npx tsc --noEmit && cd .. && npm run test:e2e",
+    "validate:full": "npm run validate:iteration"
   },
   "keywords": [
     "songwriting",
@@ -61,7 +68,9 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@playwright/test": "^1.54.2",
+    "concurrently": "^8.2.2",
+    "playwright": "^1.54.2"
   },
   "dependencies": {
     "lint": "^1.1.2"
