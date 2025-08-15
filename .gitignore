@@ -5,10 +5,13 @@
 /.llm_docs/
 /.private_docs/
 .env
+.env.test
+.env.local
 *.log
 .DS_Store
-.env.local
 dist/
 build/
 .claude-setup-complete
 temp-debug/
+test-results/
+playwright-report/

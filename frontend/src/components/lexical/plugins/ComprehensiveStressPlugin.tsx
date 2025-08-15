@@ -156,15 +156,50 @@ export function ComprehensiveStressPlugin({
       })
     }
 
-    // Update on any editor changes with debouncing
+    // Update on any editor changes with debouncing - but avoid updating during active typing
     let timeoutId: NodeJS.Timeout
-    const debouncedUpdate = () => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(updateStressAnalysis, 500) // 500ms debounce
+    let isUserTyping = false
+    let lastUserActivity = 0
+
+    // Track user typing to avoid disrupting focus
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Enter') {
+        isUserTyping = true
+        lastUserActivity = Date.now()
+
+        setTimeout(() => {
+          const timeSinceActivity = Date.now() - lastUserActivity
+          if (timeSinceActivity >= 1000) {
+            isUserTyping = false
+          }
+        }, 1200)
+      }
     }
 
-    const removeListener = editor.registerUpdateListener(() => {
-      debouncedUpdate()
+    const editorElement = editor.getRootElement()
+    if (editorElement) {
+      editorElement.addEventListener('keydown', handleKeyDown)
+    }
+
+    const debouncedUpdate = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        // Skip updates if user is actively typing
+        if (isUserTyping) {
+          console.log('🚫 COMPREHENSIVE-STRESS: Skipping update - user is typing')
+          // Retry after delay
+          debouncedUpdate()
+          return
+        }
+        updateStressAnalysis()
+      }, 1500) // Increased debounce to 1.5 seconds
+    }
+
+    const removeListener = editor.registerUpdateListener(({ tags }) => {
+      // Only update for meaningful content changes, not during history operations
+      if (!tags.has('history-merge') && !isUserTyping) {
+        debouncedUpdate()
+      }
     })
 
     // Initial update
@@ -173,6 +208,11 @@ export function ComprehensiveStressPlugin({
     return () => {
       removeListener()
       clearTimeout(timeoutId)
+
+      // Clean up event listener
+      if (editorElement) {
+        editorElement.removeEventListener('keydown', handleKeyDown)
+      }
     }
   }, [editor, enabled, analyzerReady, analyzeStressComprehensively])
 
@@ -223,15 +263,15 @@ export function ComprehensiveStressPlugin({
     )
   })
 
-  // Show analyzer status indicator
+  // Show analyzer status indicator - position it lower to avoid blocking header
   const statusElement = analyzerReady ? null : createPortal(
     <div
       className="comprehensive-stress-status"
       style={{
         position: 'fixed',
-        top: '10px',
+        top: '80px', // Move down to avoid blocking header
         right: '10px',
-        zIndex: 10000,
+        zIndex: 1000, // Lower z-index so it doesn't interfere with modals/dropdowns
         backgroundColor: '#fef3cd',
         color: '#92400e',
         fontSize: '12px',
@@ -239,10 +279,17 @@ export function ComprehensiveStressPlugin({
         padding: '4px 8px',
         borderRadius: '4px',
         border: '1px solid #f59e0b',
-        userSelect: 'none'
+        userSelect: 'none',
+        maxWidth: '200px', // Prevent it from being too wide
+        cursor: 'pointer'
       }}
+      onClick={() => {
+        // Allow users to dismiss the warning by clicking it
+        console.log('Stress analyzer status: backend may need to be restarted or dependencies installed');
+      }}
+      title="Click to dismiss. Check backend console for stress analyzer issues."
     >
-      ⚠️ Comprehensive stress analyzer not ready - using fallback
+      ⚠️ Stress analyzer not ready
     </div>,
     document.body
   )

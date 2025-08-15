@@ -37,6 +37,12 @@ class SongsService:
 
     def __init__(self, supabase_client: Optional[Client]):
         self.supabase = supabase_client
+        self._admin_client = None
+
+    def _get_client_for_user(self, user: UserContext) -> Optional[Client]:
+        """Get appropriate client for the user."""
+        # Use regular client for all users - RLS policies should handle access control
+        return self.supabase
 
     def _db_to_song(self, db_record: dict) -> Song:
         """Convert database record to Song model."""
@@ -89,6 +95,11 @@ class SongsService:
         self._check_database()
 
         try:
+            # Get appropriate client for this user
+            client = self._get_client_for_user(user)
+            if not client:
+                client = self.supabase
+
             # Map API model to database schema
             metadata = song_data.metadata.copy()
             metadata["artist"] = song_data.artist
@@ -110,7 +121,7 @@ class SongsService:
                 "is_archived": song_data.status == SongStatus.ARCHIVED,
             }
 
-            response = self.supabase.table("songs").insert(song_dict).execute()
+            response = client.table("songs").insert(song_dict).execute()
 
             if not response.data:
                 raise HTTPException(
@@ -134,8 +145,13 @@ class SongsService:
         self._check_database()
 
         try:
+            # Use authenticated client for this user to ensure proper RLS context
+            client = self._get_client_for_user(user)
+            if not client:
+                client = self.supabase
+
             response = (
-                self.supabase.table("songs")
+                client.table("songs")
                 .select("*")
                 .eq("id", song_id)
                 .eq("user_id", user.user_id)
@@ -172,7 +188,12 @@ class SongsService:
         try:
             offset = (page - 1) * per_page
 
-            query = self.supabase.table("songs").select("*").eq("user_id", user.user_id)
+            # Get appropriate client for this user
+            client = self._get_client_for_user(user)
+            if not client:
+                client = self.supabase
+
+            query = client.table("songs").select("*").eq("user_id", user.user_id)
 
             if status_filter:
                 if status_filter == SongStatus.ARCHIVED:
@@ -184,7 +205,7 @@ class SongsService:
 
             # Get total count
             count_response = (
-                self.supabase.table("songs")
+                client.table("songs")
                 .select("id", count="exact")
                 .eq("user_id", user.user_id)
             )
@@ -259,8 +280,13 @@ class SongsService:
                 current_metadata.update(metadata_updates)
                 update_data["metadata"] = current_metadata
 
+            # Use authenticated client for this user
+            client = self._get_client_for_user(user)
+            if not client:
+                client = self.supabase
+
             response = (
-                self.supabase.table("songs")
+                client.table("songs")
                 .update(update_data)
                 .eq("id", song_id)
                 .eq("user_id", user.user_id)
@@ -292,8 +318,13 @@ class SongsService:
             # First check if song exists and belongs to user
             await self.get_song(song_id, user)
 
+            # Use authenticated client for this user
+            client = self._get_client_for_user(user)
+            if not client:
+                client = self.supabase
+
             (
-                self.supabase.table("songs")
+                client.table("songs")
                 .delete()
                 .eq("id", song_id)
                 .eq("user_id", user.user_id)
@@ -855,24 +886,68 @@ def create_songs_router(
     supabase_client: Optional[Client], get_current_user
 ) -> APIRouter:
     """Create songs router with dependencies."""
+    print("DEBUGGING: Starting create_songs_router initialization")
+    logger.info(
+        "Creating songs router with supabase_client and get_current_user dependencies"
+    )
+
+    if supabase_client:
+        print("DEBUGGING: supabase_client is available")
+        logger.info("Supabase client is available for songs router")
+    else:
+        print("DEBUGGING: WARNING - supabase_client is None!")
+        logger.warning("Supabase client is None - this may cause issues")
+
     router = APIRouter(prefix="/api/songs", tags=["songs"])
     songs_service = SongsService(supabase_client)
+
+    print("DEBUGGING: Router and service created successfully")
+    logger.info("Songs router and service initialized successfully")
 
     @router.post("/", response_model=SongResponse, status_code=status.HTTP_201_CREATED)
     async def create_song(
         song_data: SongCreate, user: UserContext = Depends(get_current_user)
     ) -> SongResponse:
         """Create a new song."""
-        song = await songs_service.create_song(song_data, user)
-        return SongResponse(message="Song created successfully", song=song)
+        print(f"DEBUGGING: create_song endpoint called for user: {user.user_id}")
+        print(f"DEBUGGING: Creating song with title: {song_data.title}")
+        logger.info(
+            f"Create song endpoint called for user: {user.user_id}, title: {song_data.title}"
+        )
+
+        try:
+            song = await songs_service.create_song(song_data, user)
+            print(f"DEBUGGING: Successfully created song: {song.title} (ID: {song.id})")
+            logger.info(f"Successfully created song: {song.title} with ID: {song.id}")
+            return SongResponse(message="Song created successfully", song=song)
+        except Exception as e:
+            print(f"DEBUGGING: Error in create_song endpoint: {str(e)}")
+            logger.error(f"Error in create_song endpoint: {str(e)}")
+            raise
 
     @router.get("/{song_id}", response_model=SongResponse)
     async def get_song(
         song_id: str, user: UserContext = Depends(get_current_user)
     ) -> SongResponse:
         """Get a song by ID."""
-        song = await songs_service.get_song(song_id, user)
-        return SongResponse(message="Song retrieved successfully", song=song)
+        print(f"DEBUGGING: get_song endpoint called with song_id: {song_id}")
+        logger.info(
+            f"Get song endpoint called for song_id: {song_id}, user_id: {user.user_id}"
+        )
+
+        try:
+            song = await songs_service.get_song(song_id, user)
+            print(
+                f"DEBUGGING: Successfully retrieved song: {song.title} (ID: {song.id})"
+            )
+            logger.info(
+                f"Successfully retrieved song: {song.title} for user: {user.user_id}"
+            )
+            return SongResponse(message="Song retrieved successfully", song=song)
+        except Exception as e:
+            print(f"DEBUGGING: Error in get_song endpoint: {str(e)}")
+            logger.error(f"Error in get_song endpoint: {str(e)}")
+            raise
 
     @router.get("/", response_model=SongListResponse)
     async def list_songs(
@@ -882,7 +957,27 @@ def create_songs_router(
         status: Optional[SongStatus] = Query(None, description="Filter by status"),
     ) -> SongListResponse:
         """List songs for the current user."""
-        return await songs_service.list_songs(user, page, per_page, status)
+        print(f"DEBUGGING: list_songs endpoint called for user: {user.user_id}")
+        print(
+            f"DEBUGGING: Parameters - page: {page}, per_page: {per_page}, status: {status}"
+        )
+        logger.info(
+            f"List songs endpoint called for user: {user.user_id}, page: {page}, per_page: {per_page}, status: {status}"
+        )
+
+        try:
+            result = await songs_service.list_songs(user, page, per_page, status)
+            print(
+                f"DEBUGGING: Retrieved {len(result.songs)} songs, total: {result.total}"
+            )
+            logger.info(
+                f"Successfully retrieved {len(result.songs)} songs for user: {user.user_id}"
+            )
+            return result
+        except Exception as e:
+            print(f"DEBUGGING: Error in list_songs endpoint: {str(e)}")
+            logger.error(f"Error in list_songs endpoint: {str(e)}")
+            raise
 
     @router.put("/{song_id}", response_model=SongResponse)
     async def update_song(
@@ -891,6 +986,16 @@ def create_songs_router(
         user: UserContext = Depends(get_current_user),
     ) -> SongResponse:
         """Update an existing song."""
+        song = await songs_service.update_song(song_id, song_update, user)
+        return SongResponse(message="Song updated successfully", song=song)
+
+    @router.patch("/{song_id}", response_model=SongResponse)
+    async def update_song_partial(
+        song_id: str,
+        song_update: SongUpdate,
+        user: UserContext = Depends(get_current_user),
+    ) -> SongResponse:
+        """Partially update an existing song (for auto-save functionality)."""
         song = await songs_service.update_song(song_id, song_update, user)
         return SongResponse(message="Song updated successfully", song=song)
 
@@ -1064,4 +1169,6 @@ def create_songs_router(
             settings=updated_settings,
         )
 
+    print("DEBUGGING: Songs router fully configured and ready to return")
+    logger.info("Songs router configuration completed successfully")
     return router

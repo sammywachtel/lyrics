@@ -3,7 +3,9 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AuthForm } from './components/AuthForm'
 import { AppLayout } from './components/layout/AppLayout'
 import { SongList } from './components/SongList'
-import SongEditor from './components/SongEditor'
+// import SongEditor from './components/SongEditor'
+import CleanSongEditor from './components/CleanSongEditor'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import type { Song, SongSettings } from './store/api/apiSlice'
 
 function AppContent() {
@@ -48,8 +50,7 @@ function AppContent() {
     console.log('💾 App.handleSaveStatusChange:', status)
     setSaveStatus(status)
     setIsSaving(status === 'saving')
-    setHasUnsavedChanges(status !== 'saved')
-    console.log('📝 App: setHasUnsavedChanges(' + (status !== 'saved') + ')')
+    // Don't override hasUnsavedChanges here - it's managed by handleHasUnsavedChangesChange
   }, [])
 
   const handleSettingsChange = useCallback((newSettings: SongSettings) => {
@@ -60,15 +61,23 @@ function AppContent() {
 
   const handleSave = useCallback(async () => {
     console.log('🔧 App.handleSave called, songEditorRef:', !!songEditorRef.current)
+
+    // Set isSaving immediately for instant UI feedback
+    setIsSaving(true)
+
     if (songEditorRef.current?.triggerSave) {
       try {
         await songEditorRef.current.triggerSave()
         console.log('✅ Save completed')
       } catch (error) {
         console.error('💥 Error calling triggerSave:', error)
+        // Reset saving state on error
+        setIsSaving(false)
       }
     } else {
       console.error('⚠️ songEditorRef.triggerSave is not available')
+      // Reset saving state if triggerSave is not available
+      setIsSaving(false)
     }
   }, [])
 
@@ -142,41 +151,45 @@ function AppContent() {
   // If editing a song, show it in the professional layout
   if (currentView === 'editor' && selectedSongId) {
     return (
-      <AppLayout
-        currentSong={currentSong}
-        saveStatus={saveStatus}
-        onSearch={handleSearch}
-        onViewChange={handleViewChange}
-        settings={settings}
-        onSettingsChange={handleSettingsChange}
-        // Enhanced header props for editor mode
-        isEditorMode={true}
-        onBack={handleCloseSong}
-        onSongUpdate={handleSongUpdate}
-        hasUnsavedChanges={hasUnsavedChanges}
-        onSave={handleSave}
-        isSaving={isSaving}
-        autoSaveStatus={autoSaveStatus}
-        editorContent={(
-          <SongEditor
-            songId={selectedSongId}
-            onSongChange={handleSongChange}
-            onSongLoaded={handleSongLoaded}
-            onSettingsChange={handleSettingsChange}
-            onClose={handleCloseSong}
-            onSaveStatusChange={handleSaveStatusChange}
-            ref={songEditorRef}
-            onAutoSaveStatusChange={handleAutoSaveStatusChange}
-            onHasUnsavedChangesChange={handleHasUnsavedChangesChange}
-          />
-        )}
-      />
+      <ErrorBoundary>
+        <AppLayout
+          currentSong={currentSong}
+          saveStatus={saveStatus}
+          onSearch={handleSearch}
+          onViewChange={handleViewChange}
+          settings={settings}
+          onSettingsChange={handleSettingsChange}
+          // Enhanced header props for editor mode
+          isEditorMode={true}
+          onBack={handleCloseSong}
+          onSongUpdate={handleSongUpdate}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onSave={handleSave}
+          isSaving={isSaving}
+          autoSaveStatus={autoSaveStatus}
+          editorContent={(
+            <ErrorBoundary>
+              <CleanSongEditor
+                songId={selectedSongId}
+                onSongChange={handleSongChange}
+                onSongLoaded={handleSongLoaded}
+                onSettingsChange={handleSettingsChange}
+                onClose={handleCloseSong}
+                onSaveStatusChange={handleSaveStatusChange}
+                ref={songEditorRef}
+                onAutoSaveStatusChange={handleAutoSaveStatusChange}
+                onHasUnsavedChangesChange={handleHasUnsavedChangesChange}
+              />
+            </ErrorBoundary>
+          )}
+        />
+      </ErrorBoundary>
     )
   }
 
   // Show song list with its own simple layout
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-creative-50 to-warm-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-creative-50 to-warm-50" data-testid="song-list">
       <SongList onEditSong={handleEditSong} />
     </div>
   )

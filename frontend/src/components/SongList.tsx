@@ -12,12 +12,28 @@ interface SongListProps {
 }
 
 export function SongList({ onEditSong }: SongListProps) {
-  const { data: songs = [], isLoading: loading, error } = useGetSongsQuery()
+  const { data: songsData, isLoading: loading, error } = useGetSongsQuery()
   const [deleteSong] = useDeleteSongMutation()
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [currentSearch, setCurrentSearch] = useState<SearchFilters>({ query: '', status: 'all', tags: [], sortBy: 'updated_at', sortOrder: 'desc' })
   const [isSearching, setIsSearching] = useState(false)
+
+  // The backend returns { songs: [...], total: x, page: y, per_page: z }
+  // So we need to extract the songs array from the response
+  const songs = Array.isArray(songsData) ? songsData :
+                Array.isArray(songsData?.songs) ? songsData.songs : []
+
+  // Debug: Enable to see RTK Query response
+  if (songsData) {
+    console.log('🎵 SongList received data:', {
+      songsData,
+      songsArray: songs,
+      songsLength: songs.length,
+      loading,
+      error
+    });
+  }
 
 
   // Songs are automatically loaded via RTK Query
@@ -104,6 +120,7 @@ export function SongList({ onEditSong }: SongListProps) {
             <div className="flex-shrink-0">
               <button
                 onClick={() => setShowCreateForm(true)}
+                data-testid="create-new-song-button"
                 className="group relative bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-2 px-5 rounded-xl shadow-md hover:shadow-indigo-500/50 transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 border border-indigo-400"
               >
                 <div className="relative">
@@ -230,6 +247,7 @@ export function SongList({ onEditSong }: SongListProps) {
                   </p>
                   <button
                     onClick={() => setShowCreateForm(true)}
+                    data-testid="create-first-song-button"
                     className="group relative bg-gradient-creative from-primary-500 to-creative-600 hover:from-primary-600 hover:to-creative-700 text-white font-semibold py-4 px-8 rounded-2xl shadow-strong hover:shadow-glow-creative transition-all duration-300 transform hover:scale-105"
                   >
                     <span className="relative z-10 flex items-center space-x-3">
@@ -241,7 +259,7 @@ export function SongList({ onEditSong }: SongListProps) {
                 </div>
               </div>
             ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-testid="song-grid">
                 {songs.map((song, index) => (
                   <div key={song.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
                     <SongCard

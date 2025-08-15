@@ -5,7 +5,7 @@
  * for stress patterns, syllable analysis, and related features.
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 export interface SyllableAnalysis {
   text: string

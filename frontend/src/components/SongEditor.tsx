@@ -77,26 +77,33 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
   // Set up local state when song data is loaded
   useEffect(() => {
     if (songData && !isInitialized.current) {
-      // Enhanced logging to debug newline issues on load
-      const loadedNewlineCount = (songData.lyrics.match(/\n/g) || []).length
-      const loadedDoubleNewlineCount = (songData.lyrics.match(/\n\n/g) || []).length
-      const loadedTripleNewlineCount = (songData.lyrics.match(/\n\n\n/g) || []).length
+      // songData is directly the Song object from RTK Query
+      const actualSong = songData
+      const lyrics = actualSong.lyrics || ''
+      const loadedNewlineCount = (lyrics.match(/\n/g) || []).length
+      const loadedDoubleNewlineCount = (lyrics.match(/\n\n/g) || []).length
+      const loadedTripleNewlineCount = (lyrics.match(/\n\n\n/g) || []).length
 
       console.log('📂 Song loaded from RTK Query:', {
-        lyricsLength: songData.lyrics.length,
+        songData,
+        actualSong,
+        lyricsLength: lyrics.length,
         newlineCount: loadedNewlineCount,
         doubleNewlineCount: loadedDoubleNewlineCount,
         tripleNewlineCount: loadedTripleNewlineCount,
-        firstChars: songData.lyrics.slice(0, 50),
-        rawNewlines: JSON.stringify(songData.lyrics.slice(0, 100))
+        firstChars: lyrics.slice(0, 50),
+        rawNewlines: JSON.stringify(lyrics.slice(0, 100)),
+        hasLyrics: !!lyrics,
+        lyricsType: typeof lyrics,
+        actualLyrics: lyrics
       })
 
-      setSong(songData)
-      setTitle(songData.title)
-      setArtist(songData.artist || '')
-      setLyrics(songData.lyrics)
-      setStatus(songData.status)
-      setTags(songData.tags)
+      setSong(actualSong)
+      setTitle(actualSong.title || '')
+      setArtist(actualSong.artist || '')
+      setLyrics(lyrics)
+      setStatus(actualSong.status || 'draft')
+      setTags(actualSong.tags || [])
       setSettings(songData.settings || createDefaultSettings())
       setError(null)
 
@@ -110,11 +117,33 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
       // Notify parent of song load
       if (onSongLoaded) {
         setTimeout(() => {
-          onSongLoaded(songData)
+          onSongLoaded(actualSong)
         }, 0)
       }
     }
   }, [songData, onSongLoaded])
+
+  // Handle RTK Query optimistic updates without disrupting the editor
+  useEffect(() => {
+    if (songData && isInitialized.current) {
+      // Only update song reference, NOT the lyrics content
+      // This prevents disrupting the Lexical editor during typing
+      const actualSong = songData
+
+      // Update song metadata but preserve current lyrics state
+      setSong(prevSong => ({
+        ...actualSong,
+        lyrics: prevSong?.lyrics || actualSong.lyrics // Preserve current lyrics
+      }))
+
+      // Update other fields that don't affect editor content
+      setTitle(actualSong.title || '')
+      setArtist(actualSong.artist || '')
+      setStatus(actualSong.status || 'draft')
+      setTags(actualSong.tags || [])
+      setSettings(songData.settings || createDefaultSettings())
+    }
+  }, [songData])
 
   // Handle loading and error states from RTK Query
   useEffect(() => {
@@ -219,32 +248,38 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
 
       const updatedSong = response
 
-      // Enhanced logging to debug newline issues
-      const receivedNewlineCount = (updatedSong.lyrics.match(/\n/g) || []).length
-      const receivedDoubleNewlineCount = (updatedSong.lyrics.match(/\n\n/g) || []).length
-      const receivedTripleNewlineCount = (updatedSong.lyrics.match(/\n\n\n/g) || []).length
+      // Enhanced logging to debug newline issues - with null safety
+      const responseLyrics = updatedSong.lyrics || ''
+      const receivedNewlineCount = (responseLyrics.match(/\n/g) || []).length
+      const receivedDoubleNewlineCount = (responseLyrics.match(/\n\n/g) || []).length
+      const receivedTripleNewlineCount = (responseLyrics.match(/\n\n\n/g) || []).length
 
       console.log('📨 Received from API:', {
-        lyricsLength: updatedSong.lyrics.length,
+        hasLyrics: !!updatedSong.lyrics,
+        lyricsType: typeof updatedSong.lyrics,
+        lyricsLength: responseLyrics.length,
         newlineCount: receivedNewlineCount,
         doubleNewlineCount: receivedDoubleNewlineCount,
         tripleNewlineCount: receivedTripleNewlineCount,
-        lastChars: updatedSong.lyrics.slice(-10),
-        firstChars: updatedSong.lyrics.slice(0, 50),
-        rawNewlines: JSON.stringify(updatedSong.lyrics.slice(0, 100)),
-        lengthChanged: finalLyrics.length !== updatedSong.lyrics.length,
-        contentChanged: finalLyrics !== updatedSong.lyrics
+        lastChars: responseLyrics.slice(-10),
+        firstChars: responseLyrics.slice(0, 50),
+        rawNewlines: JSON.stringify(responseLyrics.slice(0, 100)),
+        lengthChanged: finalLyrics.length !== responseLyrics.length,
+        contentChanged: finalLyrics !== responseLyrics,
+        fullResponse: updatedSong
       })
 
-      setSong(updatedSong)
-      // Defer state update to avoid updating during render
-      setTimeout(() => {
-        setHasUnsavedChanges(false)
-        // Notify parent that changes have been saved
-        if (onHasUnsavedChangesChange) {
-          onHasUnsavedChangesChange(false)
-        }
-      }, 0)
+      // Update song state without disrupting lyrics content
+      setSong(prevSong => ({
+        ...updatedSong,
+        lyrics: prevSong?.lyrics || updatedSong.lyrics // Preserve current editor content
+      }))
+      setHasUnsavedChanges(false)
+
+      // Notify parent immediately that changes have been saved
+      if (onHasUnsavedChangesChange) {
+        onHasUnsavedChangesChange(false)
+      }
 
       // Defer parent state updates to avoid render conflicts
       setTimeout(() => {
@@ -332,6 +367,11 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
 
       if (isMountedRef.current) {
         setAutoSaveStatus('saved')
+        setHasUnsavedChanges(false)
+        // Notify parent that auto-save completed
+        if (onHasUnsavedChangesChange) {
+          onHasUnsavedChangesChange(false)
+        }
       }
     } catch (error) {
       console.error('Auto-save failed:', error)

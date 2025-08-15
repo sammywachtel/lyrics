@@ -6,9 +6,10 @@
  */
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { authService } from '../../lib/authService'
 
-// Import Song type from lib/api to maintain consistency
-import type { Song, SongSettings } from '../../lib/api'
+// Import Song types from new organized structure
+import type { Song, SongSettings } from '../../types/song'
 
 // Export Song type for components to use
 export type { Song, SongSettings }
@@ -57,11 +58,22 @@ export const apiSlice = createApi({
     baseUrl: '/api',
 
     // Add auth headers when available
-    prepareHeaders: (headers) => {
-      // TODO: Add authentication headers when auth is implemented
+    prepareHeaders: async (headers) => {
       headers.set('content-type', 'application/json')
+
+      // Get current session and add auth token if available
+      try {
+        const { data: { session } } = await authService.getSession()
+        if (session?.access_token) {
+          headers.set('authorization', `Bearer ${session.access_token}`)
+        }
+      } catch (error) {
+        console.warn('Failed to get auth session for API call:', error)
+      }
+
       return headers
     },
+
   }),
 
   // Cache tags for intelligent invalidation
@@ -69,9 +81,15 @@ export const apiSlice = createApi({
 
   endpoints: (builder) => ({
     // Song Management Endpoints
-    getSongs: builder.query<Song[], void>({
-      query: () => '/songs',
+    getSongs: builder.query<{ songs: Song[], total: number, page: number, per_page: number }, void>({
+      query: () => '/songs/',
       providesTags: ['Song'],
+
+      // Transform the response to extract just the songs array for backward compatibility
+      transformResponse: (response: { songs: Song[], total: number, page: number, per_page: number }) => {
+        // console.log('API Response from /songs/:', response);
+        return response; // Return full response object
+      },
 
       // Cache for 5 minutes
       keepUnusedDataFor: 300, // 5 minutes
@@ -87,7 +105,7 @@ export const apiSlice = createApi({
 
     createSong: builder.mutation<Song, CreateSongRequest>({
       query: (newSong) => ({
-        url: '/songs',
+        url: '/songs/',
         method: 'POST',
         body: newSong,
       }),
@@ -103,7 +121,7 @@ export const apiSlice = createApi({
           // Update songs list cache
           dispatch(
             apiSlice.util.updateQueryData('getSongs', undefined, (draft) => {
-              draft.unshift(newSong)
+              draft.songs.unshift(newSong)
             })
           )
         } catch {
@@ -119,26 +137,29 @@ export const apiSlice = createApi({
         body: patch,
       }),
 
-      // Update specific song cache
+      // Update specific song cache only after successful response
       invalidatesTags: (result, error, arg) => [
         { type: 'Song', id: arg.id },
         'Song', // Also invalidate list
       ],
 
-      // Optimistic update
-      onQueryStarted: async ({ id, ...patch }, { dispatch, queryFulfilled }) => {
-        const patchResult = dispatch(
-          apiSlice.util.updateQueryData('getSong', id, (draft) => {
-            Object.assign(draft, patch)
-          })
-        )
-
-        try {
-          await queryFulfilled
-        } catch {
-          patchResult.undo()
-        }
-      },
+      // DISABLED: Optimistic updates cause editor cursor issues
+      // The optimistic update was immediately updating songData, which triggered
+      // re-renders of the Lexical editor during typing, causing cursor jumps
+      //
+      // onQueryStarted: async ({ id, ...patch }, { dispatch, queryFulfilled }) => {
+      //   const patchResult = dispatch(
+      //     apiSlice.util.updateQueryData('getSong', id, (draft) => {
+      //       Object.assign(draft, patch)
+      //     })
+      //   )
+      //
+      //   try {
+      //     await queryFulfilled
+      //   } catch {
+      //     patchResult.undo()
+      //   }
+      // },
     }),
 
     deleteSong: builder.mutation<void, string>({

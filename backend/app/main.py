@@ -4,8 +4,11 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from supabase import Client, create_client
 
 from .auth import create_auth_dependency
@@ -15,6 +18,7 @@ from .dictionary import (
     get_cmu_dictionary,
     lookup_stress_pattern,
 )
+from .models import UserContext
 from .songs import create_songs_router
 from .stress_analysis import (
     analyze_stress,
@@ -33,6 +37,52 @@ app = FastAPI(
     description=settings.api_description,
     version=settings.api_version,
 )
+
+
+# Add custom exception handlers to ensure all responses are JSON
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Convert all HTTP exceptions to JSON responses."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": True,
+            "status_code": exc.status_code,
+            "message": exc.detail,
+            "path": request.url.path,
+        },
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Convert validation errors to JSON responses."""
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": True,
+            "status_code": 422,
+            "message": "Validation failed",
+            "details": exc.errors(),
+            "path": request.url.path,
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """Convert any unhandled exceptions to JSON responses."""
+    logger.error(f"Unhandled exception on {request.url.path}: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": True,
+            "status_code": 500,
+            "message": "Internal server error",
+            "path": request.url.path,
+        },
+    )
+
 
 # CORS middleware
 app.add_middleware(
@@ -96,6 +146,29 @@ get_current_user = create_auth_dependency(supabase)
 # Include routers
 songs_router = create_songs_router(supabase, get_current_user)
 app.include_router(songs_router)
+
+
+# Authentication models
+class SignInRequest(BaseModel):
+    email: str
+    password: str
+
+
+class SignUpRequest(BaseModel):
+    email: str
+    password: str
+
+
+class AuthResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    user: dict
+    expires_in: int
+
+
+class ErrorResponse(BaseModel):
+    error: str
+    message: str
 
 
 @app.get("/")
@@ -396,7 +469,167 @@ async def get_analyzer_status() -> Dict[str, Any]:
         }
 
 
+# --- Authentication Endpoints ---
+
+
+@app.post("/api/auth/signin")
+async def sign_in(request: SignInRequest) -> Dict[str, Any]:
+    """Sign in with email and password."""
+    if not supabase:
+        raise HTTPException(
+            status_code=503, detail="Authentication service unavailable"
+        )
+
+    try:
+        response = supabase.auth.sign_in_with_password(
+            {"email": request.email, "password": request.password}
+        )
+
+        if response.user and response.session:
+            return {
+                "access_token": response.session.access_token,
+                "refresh_token": response.session.refresh_token,
+                "user": {
+                    "id": response.user.id,
+                    "email": response.user.email,
+                    "created_at": response.user.created_at,
+                },
+                "expires_in": response.session.expires_in,
+            }
+        else:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    except Exception as e:
+        logger.error(f"Sign in error: {e}")
+        if "Invalid login credentials" in str(e):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise HTTPException(status_code=500, detail="Authentication failed")
+
+
+@app.post("/api/auth/signup")
+async def sign_up(request: SignUpRequest) -> Dict[str, Any]:
+    """Sign up with email and password."""
+    if not supabase:
+        raise HTTPException(
+            status_code=503, detail="Authentication service unavailable"
+        )
+
+    try:
+        response = supabase.auth.sign_up(
+            {"email": request.email, "password": request.password}
+        )
+
+        if response.user:
+            return {
+                "user": {
+                    "id": response.user.id,
+                    "email": response.user.email,
+                    "created_at": response.user.created_at,
+                },
+                "session": (
+                    {
+                        "access_token": (
+                            response.session.access_token if response.session else None
+                        ),
+                        "refresh_token": (
+                            response.session.refresh_token if response.session else None
+                        ),
+                        "expires_in": (
+                            response.session.expires_in if response.session else None
+                        ),
+                    }
+                    if response.session
+                    else None
+                ),
+                "message": (
+                    "Please check your email to confirm your account"
+                    if not response.session
+                    else "Account created successfully"
+                ),
+            }
+        else:
+            raise HTTPException(status_code=400, detail="Failed to create account")
+
+    except Exception as e:
+        logger.error(f"Sign up error: {e}")
+        if "already registered" in str(e).lower():
+            raise HTTPException(
+                status_code=409, detail="An account with this email already exists"
+            )
+        raise HTTPException(status_code=500, detail="Account creation failed")
+
+
+@app.post("/api/auth/signout")
+async def sign_out() -> Dict[str, Any]:
+    """Sign out (invalidate current session)."""
+    if not supabase:
+        raise HTTPException(
+            status_code=503, detail="Authentication service unavailable"
+        )
+
+    try:
+        # Note: We can't invalidate the token server-side with Supabase
+        # The frontend should discard the token
+        return {"message": "Signed out successfully"}
+
+    except Exception as e:
+        logger.error(f"Sign out error: {e}")
+        raise HTTPException(status_code=500, detail="Sign out failed")
+
+
+@app.post("/api/auth/refresh")
+async def refresh_token(refresh_token: str = None) -> Dict[str, Any]:
+    """Refresh an access token using a refresh token."""
+    if not supabase:
+        raise HTTPException(
+            status_code=503, detail="Authentication service unavailable"
+        )
+
+    try:
+        response = supabase.auth.refresh_session(refresh_token)
+
+        if response.session:
+            return {
+                "access_token": response.session.access_token,
+                "refresh_token": response.session.refresh_token,
+                "expires_in": response.session.expires_in,
+            }
+        else:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    except Exception as e:
+        logger.error(f"Token refresh error: {e}")
+        raise HTTPException(status_code=401, detail="Token refresh failed")
+
+
+@app.get("/api/auth/user")
+async def get_current_user_info(
+    current_user: UserContext = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """Get current authenticated user information."""
+    return {
+        "user": {
+            "id": current_user.user_id,
+            "email": current_user.email,
+            "is_authenticated": current_user.is_authenticated,
+        }
+    }
+
+
 # --- Test Endpoints ---
+
+
+@app.get("/api/status")
+async def api_status() -> Dict[str, Any]:
+    """API status endpoint (no authentication required)."""
+    return {
+        "api": "operational",
+        "message": "Songwriting App API is running",
+        "version": "1.0.0",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "database_configured": supabase is not None,
+        "framework": "FastAPI",
+    }
 
 
 @app.get("/api/test")

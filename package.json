@@ -18,6 +18,10 @@
     "test:watch": "cd frontend && npm run test:watch",
     "test:coverage": "cd frontend && npm run test:coverage",
     "frontend:test": "cd frontend && npm test",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "npx playwright test --headed",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report",
     "lint": "cd frontend && npm run lint",
     "lint:fix": "cd frontend && npm run lint:fix",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
@@ -50,13 +54,13 @@
     "validate:phase0": "bash scripts/validate.sh --phase=0",
     "quality:baseline": "bash scripts/validate.sh --baseline",
     "quality:status": "bash scripts/quality-status.sh",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
-    "test:e2e:report": "playwright show-report",
+    "test:comprehensive": "node tests/e2e/run-comprehensive-tests.js",
+    "test:comprehensive:list": "node tests/e2e/run-comprehensive-tests.js --list",
     "validate:iteration": "bash scripts/validate-iteration.sh",
     "validate:quick": "cd frontend && npx tsc --noEmit && cd .. && npm run test:e2e",
-    "validate:full": "npm run validate:iteration"
+    "validate:full": "npm run validate:iteration",
+    "validate:ui": "npm run test:comprehensive"
   },
   "keywords": [
     "songwriting",
@@ -70,6 +74,7 @@
   "devDependencies": {
     "@playwright/test": "^1.54.2",
     "concurrently": "^8.2.2",
+    "dotenv": "^17.2.1",
     "playwright": "^1.54.2"
   },
   "dependencies": {

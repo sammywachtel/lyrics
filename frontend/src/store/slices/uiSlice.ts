@@ -5,7 +5,7 @@
  * loading states, and user preferences that don't belong to specific features.
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info'
 

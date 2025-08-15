@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+
+// Load test environment variables
+dotenv.config({ path: '.env.test' });
 
 /**
  * Playwright E2E Test Configuration
@@ -7,7 +11,9 @@ import { defineConfig, devices } from '@playwright/test';
  * before user testing. Run these after each development phase.
  */
 export default defineConfig({
-  testDir: './e2e',
+  testDir: './tests/e2e/features',
+  testMatch: /.*\.spec\.ts$/,
+  testIgnore: ['**/node_modules/**', '**/frontend/tests/**', '**/backend/tests/**'],
 
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -27,7 +33,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:5175',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -60,7 +66,7 @@ export default defineConfig({
   webServer: [
     {
       command: 'npm run frontend:dev',
-      port: 5173,
+      port: 5175,
       reuseExistingServer: !process.env.CI,
       stdout: 'pipe',
       stderr: 'pipe',

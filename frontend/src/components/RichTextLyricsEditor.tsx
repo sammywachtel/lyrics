@@ -44,7 +44,7 @@ import { SECTION_FORMAT_COMMAND, $getCurrentSectionType, $applySectionFormatting
 // Import prosody styles
 import '../styles/prosody.css'
 // Import validation utilities
-import { safeLexicalLoad, prepareLexicalForSave } from '../utils/lexicalDataValidation'
+import { prepareLexicalForSave } from '../utils/lexicalDataValidation'
 
 interface RichTextLyricsEditorProps {
   value: string
@@ -60,6 +60,7 @@ interface RichTextLyricsEditorProps {
   enableSyllableMarking?: boolean
   enableRhymeScheme?: boolean
   enableStressMarking?: boolean
+  editable?: boolean
 }
 
 // Enhanced Lexical theme configuration for rich text
@@ -156,14 +157,22 @@ function ValueSyncPlugin({
 
           // Fallback: treat as plain text and create section paragraph nodes
           const lines = value.split('\n')
-          lines.forEach((line) => {
-            const paragraph = $createSectionParagraphNode()
-            if (line.trim()) {
-              const textNode = $createStressedTextNode(line)
+
+          // Filter out empty lines to prevent extra newlines
+          const nonEmptyLines = lines.filter(line => line.trim().length > 0)
+
+          if (nonEmptyLines.length > 0) {
+            nonEmptyLines.forEach((line) => {
+              const paragraph = $createSectionParagraphNode()
+              const textNode = $createStressedTextNode(line.trim())
               paragraph.append(textNode)
-            }
-            root.append(paragraph)
-          })
+              root.append(paragraph)
+            })
+          } else {
+            // Create single empty paragraph for empty content
+            const emptyParagraph = $createSectionParagraphNode()
+            root.append(emptyParagraph)
+          }
         } else {
           // Create empty section paragraph
           const emptyParagraph = $createSectionParagraphNode()
@@ -179,65 +188,18 @@ function ValueSyncPlugin({
     }
   }, [editor, value])
 
-  // Update editor when external value changes (but not during initialization)
-  useEffect(() => {
-    if (isInitialized.current && !isUpdatingFromProps.current && value !== initialValueRef.current) {
-      // Get current editor content as JSON for comparison
-      const currentContent = JSON.stringify(editor.getEditorState().toJSON())
-
-      if (currentContent !== value) {
-        // Use safe loading for updates
-        const safeLoad = safeLexicalLoad(value)
-
-        if (safeLoad.wasRepaired) {
-          console.warn('⚠️ Lexical data was repaired during update:', safeLoad.errors)
-        }
-
-        isUpdatingFromProps.current = true
-        lastSavedContentRef.current = safeLoad.data
-
-        editor.update(() => {
-          const root = $getRoot()
-          root.clear()
-
-          if (safeLoad.data) {
-            try {
-              const editorState = editor.parseEditorState(safeLoad.data)
-              const hasContent = editorState.read(() => {
-                const root = $getRoot()
-                return root.getChildren().length > 0
-              })
-
-              if (hasContent) {
-                editor.setEditorState(editorState)
-                return
-              }
-            } catch (error) {
-              console.error('Failed to parse validated Lexical JSON during update:', error)
-            }
-
-            // Final fallback to plain text parsing
-            const lines = value.split('\n')
-            lines.forEach((line) => {
-              const paragraph = $createSectionParagraphNode()
-              if (line.trim()) {
-                const textNode = $createStressedTextNode(line)
-                paragraph.append(textNode)
-              }
-              root.append(paragraph)
-            })
-          } else {
-            const emptyParagraph = $createSectionParagraphNode()
-            root.append(emptyParagraph)
-          }
-        }, { tag: 'history-merge' })
-
-        setTimeout(() => {
-          isUpdatingFromProps.current = false
-        }, 100)
-      }
-    }
-  }, [editor, value])
+  // DISABLED: This useEffect was causing cursor focus issues
+  // It was triggering editor.setEditorState() when value prop changed from user typing,
+  // which disrupted the cursor position and caused text scrambling
+  //
+  // The controlled component pattern doesn't work well with Lexical's internal state management
+  // For now, we'll rely on the initial load and manual updates only
+  //
+  // useEffect(() => {
+  //   if (isInitialized.current && !isUpdatingFromProps.current && value !== initialValueRef.current) {
+  //     // ... editor update logic that was causing cursor issues
+  //   }
+  // }, [editor, value])
 
   // Handle editor content changes - now using Lexical JSON serialization
   const handleEditorChange = useCallback((editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => {
@@ -245,10 +207,9 @@ function ValueSyncPlugin({
       return
     }
 
-    // Ignore discrete updates from stress marking plugins
-    if (tags.has('stable-text-conversion') ||
-        tags.has('auto-stress-detection') ||
-        tags.has('decorator-replacement')) {
+    // Only ignore decorator replacement updates (not text conversion or stress detection)
+    // We want to capture word counts even after stress processing
+    if (tags.has('decorator-replacement')) {
       return
     }
 
@@ -267,8 +228,27 @@ function ValueSyncPlugin({
       return
     }
 
-    // Update parent component with validated content
-    onChange(safeData.data)
+    // Extract plain text for word counts and section parsing
+    // Use custom extraction to avoid newline duplication
+    const plainText = editorState.read(() => {
+      const root = $getRoot()
+      const children = root.getChildren()
+
+      // Extract text from each paragraph node and join with single newlines
+      const lines: string[] = []
+      children.forEach(child => {
+        if ($isSectionParagraphNode(child) || child.getType() === 'paragraph') {
+          const textContent = child.getTextContent()
+          lines.push(textContent)
+        }
+      })
+
+      // Join with single newlines to avoid duplication
+      return lines.join('\n')
+    })
+
+    // Update parent component with plain text for word counts and section parsing
+    onChange(plainText)
     lastChangeTimeRef.current = Date.now()
 
     // Setup debounced auto-save
@@ -294,7 +274,22 @@ function ValueSyncPlugin({
 
           if (safeCurrentData.data !== safeData.data) {
             console.log('🔧 React state behind Lexical - updating immediately')
-            onChange(safeCurrentData.data)
+            // Extract current plain text for word counts using custom extraction
+            const currentPlainText = currentEditorState.read(() => {
+              const root = $getRoot()
+              const children = root.getChildren()
+
+              const lines: string[] = []
+              children.forEach(child => {
+                if ($isSectionParagraphNode(child) || child.getType() === 'paragraph') {
+                  const textContent = child.getTextContent()
+                  lines.push(textContent)
+                }
+              })
+
+              return lines.join('\n')
+            })
+            onChange(currentPlainText)
           }
 
           lastSavedContentRef.current = safeCurrentData.data
@@ -429,19 +424,20 @@ function PastePlugin() {
           if ($isRangeSelection(selection)) {
             // Work WITH Lexical's paragraph model - each line becomes a paragraph
             const lines = plainText.split(/\r?\n/)
+            const nonEmptyLines = lines.filter(line => line.trim().length > 0)
 
-            // Create section paragraph nodes for each line (Lexical's natural behavior)
-            const paragraphNodes = lines.map(line => {
+            // Create section paragraph nodes for each non-empty line
+            const paragraphNodes = nonEmptyLines.map(line => {
               const paragraph = $createSectionParagraphNode()
-              if (line.trim()) {
-                const textNode = $createStressedTextNode(line)
-                paragraph.append(textNode)
-              }
+              const textNode = $createStressedTextNode(line.trim())
+              paragraph.append(textNode)
               return paragraph
             })
 
             // Insert the paragraph nodes
-            selection.insertNodes(paragraphNodes)
+            if (paragraphNodes.length > 0) {
+              selection.insertNodes(paragraphNodes)
+            }
           }
         })
 
@@ -463,13 +459,16 @@ function EnterKeyPlugin() {
       KEY_ENTER_COMMAND,
       (event: KeyboardEvent) => {
         if (event && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+          event.preventDefault() // Prevent the default browser behavior
           // Handle Enter key to create SectionParagraphNodes
           editor.update(() => {
             const selection = $getSelection()
             if ($isRangeSelection(selection)) {
-              // Create a new SectionParagraphNode for the new line
+              // Create a new paragraph and properly position cursor
               const newParagraph = $createSectionParagraphNode()
               selection.insertNodes([newParagraph])
+
+              // Ensure the cursor is positioned in the new paragraph
               newParagraph.select()
             }
           })
@@ -498,6 +497,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
     enableAutoSave = true,
     autoSaveDelay = 10000,
     onAutoSave,
+    editable = true,
   }, ref) => {
     const [showSourceDebug, setShowSourceDebug] = useState(false)
     const editorRef = useRef<LexicalEditor | null>(null)
@@ -521,6 +521,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
     const initialConfig = React.useMemo(() => ({
       namespace: 'RichTextLyricsEditor',
       theme,
+      editable,
       nodes: [
         SectionNode,
         SyllableNode,
@@ -533,7 +534,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
       onError: (error: Error) => {
         console.error('Lexical error:', error)
       },
-    }), [])
+    }), [editable])
 
     // Get debug content (Lexical JSON)
     const getDebugContent = useCallback(() => {
@@ -907,7 +908,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
                 onChange={onChange}
                 onAutoSave={onAutoSave}
                 autoSaveDelay={autoSaveDelay}
-                enableAutoSave={enableAutoSave}
+                enableAutoSave={enableAutoSave && editable}
               />
               <AutoFocusPlugin />
               <SelectionPlugin onSelectionChange={handleSelectionChange} />
@@ -917,7 +918,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
               <EnterKeyPlugin />
               <StableTextToStressedPlugin
                 enabled={true}
-                debounceMs={2000}
+                debounceMs={3000}
               />
               <StressMarkDecoratorPlugin
                 enabled={true}
@@ -933,7 +934,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
               />
               <AutoStressDetectionPlugin
                 enabled={true}
-                debounceMs={3000}
+                debounceMs={4000}
               />
               <ComprehensiveStressPlugin
                 enabled={true}

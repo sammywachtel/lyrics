@@ -61,12 +61,31 @@ export function StressMarkDecoratorPlugin({
   useEffect(() => {
     console.log(`🎨 STRESS-DECORATOR [${pluginId}]: Plugin mounted, enabled:`, enabled)
 
+    // Track user typing to avoid disrupting focus
+    let isUserTyping = false
+    let lastUserActivity = 0
+
     // Add manual trigger for testing - press F1 to force update
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'F1') {
         e.preventDefault()
         console.log('🔥 MANUAL TRIGGER: Forcing stress overlay update')
         updateStressOverlays()
+        return
+      }
+
+      // Track user typing activity
+      if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Enter') {
+        isUserTyping = true
+        lastUserActivity = Date.now()
+
+        // Mark as not typing after a delay
+        setTimeout(() => {
+          const timeSinceActivity = Date.now() - lastUserActivity
+          if (timeSinceActivity >= 800) {
+            isUserTyping = false
+          }
+        }, 1000)
       }
     }
 
@@ -100,6 +119,14 @@ export function StressMarkDecoratorPlugin({
 
       // Debounce overlay updates to avoid excessive DOM queries
       updateTimeout = setTimeout(() => {
+        // Skip overlay updates if user is actively typing to avoid focus interruption
+        if (isUserTyping) {
+          console.log('🚫 STRESS-DECORATOR: Skipping overlay update - user is typing')
+          // Retry after a delay
+          setTimeout(updateStressOverlays, 1000)
+          return
+        }
+
         requestAnimationFrame(() => {
           const newOverlays: StressMarkOverlay[] = []
 
@@ -196,17 +223,18 @@ export function StressMarkDecoratorPlugin({
           console.log(`🎨 STRESS-DECORATOR [${pluginId}]: Updated overlays:`, newOverlays.length)
           setOverlays(newOverlays)
         })
-      }, 100)
+      }, 500)
     }
 
-    // Listen for editor changes
+    // Listen for editor changes - but only update for meaningful changes
     const removeListener = editor.registerUpdateListener(({ tags }) => {
-      // Only log important updates
+      // Only update overlays for stress-related changes to reduce interference
       if (tags.has('auto-stress-detection') || tags.has('stable-text-conversion')) {
-        console.log('🔄 STRESS-DECORATOR: Important update with tags:', Array.from(tags))
-      }
-      // Update overlays for any content change, but avoid recursive updates
-      if (!tags.has('stress-decorator-update')) {
+        console.log('🔄 STRESS-DECORATOR: Stress-related update, updating overlays')
+        updateStressOverlays()
+      } else if (!tags.has('stress-decorator-update') && !tags.has('history-merge') && !isUserTyping) {
+        // Only update for non-history changes when user is not typing
+        console.log('🔄 STRESS-DECORATOR: Content change detected, updating overlays')
         updateStressOverlays()
       }
     })

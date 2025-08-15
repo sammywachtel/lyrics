@@ -1,4 +1,5 @@
 import type { Song } from '../lib/api'
+import { getLyricsPreview } from '../utils/lyricsUtils'
 
 interface SongCardProps {
   song: Song
@@ -44,15 +45,12 @@ export function SongCard({ song, onEdit, onDelete }: SongCardProps) {
     return new Date(dateString).toLocaleDateString()
   }
 
-  const truncateLyrics = (lyrics: string, maxLength: number = 100) => {
-    if (lyrics.length <= maxLength) return lyrics
-    return lyrics.substring(0, maxLength) + '...'
-  }
+  // Remove the old truncateLyrics function since we're using the utility now
 
   const statusStyles = getStatusStyles(song.status)
 
   return (
-    <div className="group relative bg-white/70 backdrop-blur-sm shadow-medium hover:shadow-strong rounded-2xl border border-white/50 p-6 transition-all duration-300 hover:scale-[1.02] transform overflow-hidden">
+    <div className="group relative bg-white/70 backdrop-blur-sm shadow-medium hover:shadow-strong rounded-2xl border border-white/50 p-6 transition-all duration-300 hover:scale-[1.02] transform overflow-hidden" data-testid="song-card">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-creative from-primary-200/10 to-creative-200/10 rounded-full blur-2xl -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
 
@@ -78,8 +76,8 @@ export function SongCard({ song, onEdit, onDelete }: SongCardProps) {
 
         {/* Lyrics Preview */}
         <div className="mb-4 bg-gradient-to-br from-neutral-50/80 to-white/60 backdrop-blur-sm rounded-xl p-4 border border-neutral-200/30">
-          <div className="text-sm text-neutral-700 whitespace-pre-wrap font-mono leading-relaxed">
-            {song.lyrics ? truncateLyrics(song.lyrics) : (
+          <div className="text-sm text-neutral-700 whitespace-pre-wrap leading-relaxed">
+            {song.lyrics ? getLyricsPreview(song.lyrics, 3) : (
               <span className="text-neutral-500 italic">No lyrics yet... Click Edit to start writing!</span>
             )}
           </div>
@@ -122,6 +120,7 @@ export function SongCard({ song, onEdit, onDelete }: SongCardProps) {
         <div className="flex gap-3">
           <button
             onClick={onEdit}
+            data-testid="edit-song-button"
             className="group/btn flex-1 relative overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
           >
             <span className="relative z-10 flex items-center justify-center space-x-2">
@@ -132,6 +131,7 @@ export function SongCard({ song, onEdit, onDelete }: SongCardProps) {
           </button>
           <button
             onClick={onDelete}
+            data-testid="delete-song-button"
             className="group/del relative overflow-hidden bg-neutral-100 hover:bg-red-500 text-neutral-600 hover:text-white p-3 rounded-xl border border-neutral-200 hover:border-red-500 shadow-soft hover:shadow-medium transition-all duration-300 transform hover:scale-[1.02]"
             title="Delete song"
           >

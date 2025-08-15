@@ -1,6 +1,6 @@
 export default {
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  setupFilesAfterEnv: ['<rootDir>/tests/utils/setupTests.ts'],
 
   // Memory optimization settings
   maxWorkers: 1, // Use single worker to reduce memory usage
@@ -14,8 +14,8 @@ export default {
 
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/src/__mocks__/fileMock.js',
-    '^../lib/api$': '<rootDir>/src/__mocks__/api.ts'
+    '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/tests/__mocks__/fileMock.js',
+    '^../lib/api$': '<rootDir>/tests/__mocks__/api.ts'
   },
 
   // Transform ES modules in node_modules
@@ -35,14 +35,15 @@ export default {
     }]
   },
   testMatch: [
-    '<rootDir>/src/**/__tests__/**/*.(ts|tsx|js)',
-    '<rootDir>/src/**/?(*.)(spec|test).(ts|tsx|js)'
+    // Run all unit and integration tests in the centralized location
+    '<rootDir>/tests/unit/**/*.(test|spec).(ts|tsx|js)',
+    '<rootDir>/tests/integration/**/*.(test|spec).(ts|tsx|js)'
   ],
   collectCoverageFrom: [
     'src/**/*.(ts|tsx)',
     '!src/**/*.d.ts',
     '!src/main.tsx',
-    '!src/setupTests.ts'
+    '!tests/**/*'
   ],
   coverageReporters: ['text', 'lcov', 'html'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']

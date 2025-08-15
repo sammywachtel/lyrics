@@ -5,7 +5,7 @@
  * editing state, and UI-specific song data that doesn't belong in the API cache.
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 export interface SongState {
   // Currently selected/active song
