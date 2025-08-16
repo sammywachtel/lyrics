@@ -5,6 +5,7 @@ import {
   type Spread,
   type LexicalEditor,
   type LexicalNode,
+  $getNodeByKey,
 } from 'lexical'
 import React from 'react'
 
@@ -118,7 +119,7 @@ function SectionTagComponent({ sectionName, nodeKey, editor }: SectionTagCompone
   const handleSave = () => {
     if (editValue.trim() && editValue.trim() !== sectionName) {
       editor.update(() => {
-        const node = editor.getEditorState()._nodeMap.get(nodeKey) as SectionTagNode
+        const node = $getNodeByKey(nodeKey) as SectionTagNode
         if (node) {
           node.setSectionName(editValue.trim())
         }
@@ -139,7 +140,7 @@ function SectionTagComponent({ sectionName, nodeKey, editor }: SectionTagCompone
 
   const handleDelete = () => {
     editor.update(() => {
-      const node = editor.getEditorState()._nodeMap.get(nodeKey)
+      const node = $getNodeByKey(nodeKey)
       if (node) {
         node.remove()
       }

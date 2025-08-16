@@ -128,13 +128,22 @@ export function AutoStressDetectionPlugin({
                   const existingPatterns = node.getAllStressPatterns()
                   const textContent = node.getTextContent()
 
-                  // Skip if already has stress patterns (already analyzed)
-                  if (existingPatterns.size > 0) {
+                  // Check if ALL words have patterns (not just if ANY patterns exist)
+                  const words = textContent.trim().split(/\s+/).filter(w => w.length > 0)
+                  const wordsNeedingPatterns = words.filter(word => {
+                    const cleanWord = word.replace(/[^\w']/g, '').toLowerCase()
+                    return cleanWord.length > 2 && !existingPatterns.has(cleanWord)
+                  })
+
+                  // Skip if already fully analyzed (all words have patterns)
+                  if (existingPatterns.size > 0 && wordsNeedingPatterns.length === 0) {
                     // Only log in debug mode to reduce noise
                     if (process.env.NODE_ENV === 'development') {
-                      console.log(`⏭️ AUTO-DETECT: Skipping "${textContent.substring(0, 15)}..." - already has ${existingPatterns.size} patterns`)
+                      console.log(`⏭️ AUTO-DETECT: Skipping "${textContent.substring(0, 15)}..." - all ${words.length} words already have patterns`)
                     }
                     return
+                  } else if (existingPatterns.size > 0 && wordsNeedingPatterns.length > 0) {
+                    console.log(`🔄 AUTO-DETECT: Processing "${textContent.substring(0, 15)}..." - has ${existingPatterns.size} patterns but missing ${wordsNeedingPatterns.length} words: ${wordsNeedingPatterns.join(', ')}`)
                   }
 
                   // Skip if text appears to already be accented (contains accent marks)

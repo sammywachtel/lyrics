@@ -11,6 +11,10 @@ export interface LexicalNode {
   mode?: string
 }
 
+export interface LexicalData {
+  root?: LexicalNode
+}
+
 /**
  * Extract plain text from Lexical JSON format
  */
@@ -18,6 +22,8 @@ export function extractTextFromLexical(lexicalData: unknown): string {
   if (!lexicalData || typeof lexicalData !== 'object') {
     return ''
   }
+
+  const data = lexicalData as LexicalData
 
   function extractTextFromNode(node: LexicalNode): string {
     // If this node has text, return it
@@ -41,7 +47,7 @@ export function extractTextFromLexical(lexicalData: unknown): string {
   }
 
   try {
-    return extractTextFromNode(lexicalData.root || lexicalData).trim()
+    return extractTextFromNode(data.root || data as LexicalNode).trim()
   } catch (error) {
     console.warn('Error extracting text from Lexical data:', error)
     return ''

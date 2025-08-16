@@ -117,7 +117,7 @@ export function StressMarkDecoratorPlugin({
         clearTimeout(updateTimeout)
       }
 
-      // Debounce overlay updates to avoid excessive DOM queries
+      // Reduced debounce for more responsive updates
       updateTimeout = setTimeout(() => {
         // Skip overlay updates if user is actively typing to avoid focus interruption
         if (isUserTyping) {
@@ -223,7 +223,7 @@ export function StressMarkDecoratorPlugin({
           console.log(`🎨 STRESS-DECORATOR [${pluginId}]: Updated overlays:`, newOverlays.length)
           setOverlays(newOverlays)
         })
-      }, 500)
+      }, 200)
     }
 
     // Listen for editor changes - but only update for meaningful changes
@@ -245,11 +245,11 @@ export function StressMarkDecoratorPlugin({
         clearTimeout(scrollTimeout)
       }
 
-      // Debounce scroll updates to avoid excessive recalculations
+      // Reduced scroll debounce for smoother position updates
       scrollTimeout = setTimeout(() => {
         console.log('📜 STRESS-DECORATOR: Scroll detected, updating overlay positions')
         updateStressOverlays()
-      }, 50) // Short delay for smooth scrolling
+      }, 16) // ~60fps for smooth scrolling
     }
 
     // Add scroll event listeners to relevant containers

@@ -110,7 +110,7 @@ export default function SectionHeaderPlugin(): null {
             targetChild.insertBefore(sectionTagParagraph)
           }
         })
-      })
+      }, { tag: 'update-section-headers' })
     }
 
     // Listen for editor state changes that might affect sections

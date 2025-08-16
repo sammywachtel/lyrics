@@ -75,7 +75,12 @@
     "@playwright/test": "^1.54.2",
     "concurrently": "^8.2.2",
     "dotenv": "^17.2.1",
-    "playwright": "^1.54.2"
+    "node-plantuml": "^0.9.0",
+    "plantuml": "^0.0.2",
+    "plantuml-pipe": "^1.6.0",
+    "playwright": "^1.54.2",
+    "tsuml2": "^0.17.1",
+    "typescript-uml": "^0.3.0"
   },
   "dependencies": {
     "lint": "^1.1.2"

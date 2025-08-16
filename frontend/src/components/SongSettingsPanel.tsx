@@ -50,10 +50,11 @@ export const SongSettingsPanel: React.FC<SongSettingsPanelProps> = ({
     value: unknown
   ) => {
     const parentValue = settings[parentKey] as T
-    updateSettings(parentKey, {
+    const updatedValue: SongSettings[typeof parentKey] = {
       ...parentValue,
       [childKey]: value
-    } as SongSettings[typeof parentKey])
+    }
+    updateSettings(parentKey, updatedValue)
   }, [settings, updateSettings])
 
 

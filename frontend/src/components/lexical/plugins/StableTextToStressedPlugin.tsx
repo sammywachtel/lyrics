@@ -99,9 +99,17 @@ export function StableTextToStressedPlugin({
                 // 1. Have substantial content (>2 chars)
                 // 2. Have 0 stress patterns OR patterns for words that don't match current content
                 const words = text.split(/\s+/).filter(w => w.trim().length > 0)
+                console.log(`🔍 STABLE-PLUGIN: Checking StressedTextNode "${text}" with ${patterns.size} patterns:`, Array.from(patterns.keys()))
                 const wordsNeedingPatterns = words.filter(word => {
                   const cleanWord = word.replace(/[^\w']/g, '').toLowerCase()
-                  return cleanWord.length > 2 && !patterns.has(cleanWord)
+                  const hasPattern = patterns.has(cleanWord)
+                  const needsPattern = cleanWord.length > 2 && !hasPattern
+
+                  if (cleanWord.length > 2) {
+                    console.log(`🔍 STABLE-PLUGIN: Word "${cleanWord}" - hasPattern: ${hasPattern}, needsPattern: ${needsPattern}`)
+                  }
+
+                  return needsPattern
                 })
 
                 if (text.trim().length > 2 && (patterns.size === 0 || wordsNeedingPatterns.length > 0)) {

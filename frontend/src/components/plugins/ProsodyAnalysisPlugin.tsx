@@ -93,7 +93,7 @@ export default function ProsodyAnalysisPlugin(): null {
           })
         }
       })
-    })
+    }, { tag: 'remove-prosody-analysis' })
   }, [editor])
 
   useEffect(() => {

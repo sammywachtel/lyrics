@@ -32,7 +32,7 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ text, matches, classN
         // Custom styles for highlighted text
         '--highlight-bg': '#fef3c7',
         '--highlight-color': '#92400e'
-      } as React.CSSProperties}
+      } satisfies React.CSSProperties}
     />
   )
 }

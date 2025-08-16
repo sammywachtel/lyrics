@@ -598,6 +598,211 @@ Based on `/Users/samwachtel/PycharmProjects/lyrics/requirements.md`:
 - Collaboration and sharing features
 - Subscription and billing system
 
+## 🚨 CRITICAL: Lexical Framework Anti-Patterns Guide
+
+**MANDATORY READING**: This application uses Lexical.js as the rich text editor framework. Violating these patterns can cause editor corruption, data loss, and serious bugs that won't show up in linting but will break the application in production.
+
+### **NEVER DO THESE (Critical Anti-Patterns)**
+
+#### 1. **❌ NEVER Manipulate DOM Directly**
+```typescript
+// ❌ ABSOLUTELY FORBIDDEN - Breaks Lexical's reconciliation
+element.classList.add('some-class')
+element.scrollIntoView()
+element.style.color = 'red'
+element.innerHTML = 'text'
+
+// ✅ CORRECT - Use Lexical commands and decorators
+editor.dispatchCommand(SOME_COMMAND, payload)
+// OR use decorators and data attributes with CSS
+element.setAttribute('data-highlight', 'true')
+```
+
+#### 2. **❌ NEVER Access Private APIs**
+```typescript
+// ❌ FORBIDDEN - Private API usage
+editor.getEditorState()._nodeMap.get(key)
+editorState._nodeMap.size
+node._parentKey
+
+// ✅ CORRECT - Use public APIs only
+editor.getEditorState().read(() => {
+  const node = $getNodeByKey(key)
+  const root = $getRoot()
+  const children = root.getChildren()
+})
+```
+
+#### 3. **❌ NEVER Create Race Conditions with Nested Updates**
+```typescript
+// ❌ DANGEROUS - Race conditions
+editor.update(() => {
+  // First update
+}, { tag: 'update1' })
+
+setTimeout(() => {
+  editor.update(() => {
+    // Second update - RACE CONDITION!
+  }, { tag: 'update2' })
+}, 100)
+
+// ✅ CORRECT - Atomic updates
+editor.update(() => {
+  // Combine all operations in single update
+  // All changes happen atomically
+}, { tag: 'combined-update' })
+```
+
+#### 4. **❌ NEVER Store Plugin State Outside Lexical**
+```typescript
+// ❌ ANTI-PATTERN - Global state outside Lexical
+let activePluginId: string | null = null
+
+// ✅ CORRECT - Use Lexical's command system
+const REGISTER_PLUGIN_COMMAND = createCommand<string>('REGISTER_PLUGIN')
+// Handle state through commands and editor state
+```
+
+### **Required Patterns (Always Use These)**
+
+#### 1. **✅ Always Use Read/Update Boundaries**
+```typescript
+// ✅ CORRECT - Read operations
+editor.getEditorState().read(() => {
+  const root = $getRoot()
+  const selection = $getSelection()
+  // Only read operations here
+})
+
+// ✅ CORRECT - Update operations
+editor.update(() => {
+  const root = $getRoot()
+  // Modify editor state here
+}, { tag: 'descriptive-tag' })
+```
+
+#### 2. **✅ Always Use Proper Node Creation**
+```typescript
+// ✅ CORRECT - Node creation with replacement
+export function $createCustomNode(): CustomNode {
+  const node = new CustomNode()
+  return $applyNodeReplacement(node)
+}
+```
+
+#### 3. **✅ Always Use Command System for Communication**
+```typescript
+// ✅ CORRECT - Plugin communication
+const CUSTOM_COMMAND = createCommand<PayloadType>('CUSTOM_COMMAND')
+
+// Register handler
+editor.registerCommand(
+  CUSTOM_COMMAND,
+  (payload: PayloadType) => {
+    // Handle command
+    return false // Let other handlers process too
+  },
+  COMMAND_PRIORITY_LOW
+)
+
+// Dispatch command
+editor.dispatchCommand(CUSTOM_COMMAND, payload)
+```
+
+#### 4. **✅ Always Handle Errors in Node Operations**
+```typescript
+// ✅ CORRECT - Safe node access
+try {
+  const node = $getNodeByKey(nodeKey)
+  if (node && $isCustomNode(node)) {
+    // Safe to use node
+  }
+} catch (error) {
+  console.warn('Node no longer exists:', error)
+  // Handle gracefully
+}
+```
+
+#### 5. **✅ Always Use Type Guards**
+```typescript
+// ✅ CORRECT - Type safety
+if ($isTextNode(node)) {
+  // TypeScript knows node is TextNode
+  const text = node.getTextContent()
+}
+
+if ($isElementNode(node)) {
+  // TypeScript knows node is ElementNode
+  const children = node.getChildren()
+}
+```
+
+### **Plugin Development Rules**
+
+1. **Use `useLexicalComposerContext()`** - Never store editor reference differently
+2. **Cleanup in useEffect return** - Always remove listeners and clear timeouts
+3. **Use tags for updates** - Always provide descriptive tags for `editor.update()`
+4. **Avoid frequent updates** - Debounce/throttle user interactions
+5. **Handle selection carefully** - Selection can be null or invalid
+
+### **Node Development Rules**
+
+1. **Override `updateDOM()` correctly** - Return boolean indicating if DOM update is needed
+2. **Handle serialization** - Implement `exportJSON()` and `importJSON()` properly
+3. **Use `getWritable()` for mutations** - Never mutate nodes directly
+4. **Type node checks** - Always use `$isNodeType()` functions
+
+### **Performance Guidelines**
+
+1. **Batch DOM measurements** - Don't call `getBoundingClientRect()` in loops
+2. **Use `React.memo`** - For expensive plugin components
+3. **Debounce API calls** - Don't make requests on every keystroke
+4. **Cache computed values** - Use `useMemo` for expensive calculations
+
+### **Debugging Guidelines**
+
+1. **Use descriptive tags** - `{ tag: 'stress-analysis-update' }`
+2. **Log with NODE_ENV checks** - Only log in development
+3. **Use Lexical DevTools** - Install browser extension for debugging
+4. **Test with React StrictMode** - Catches many Lexical issues
+
+### **Common Lexical Patterns**
+
+```typescript
+// Reading current selection
+editor.getEditorState().read(() => {
+  const selection = $getSelection()
+  if ($isRangeSelection(selection)) {
+    const selectedText = selection.getTextContent()
+  }
+})
+
+// Creating custom nodes
+const paragraph = $createParagraphNode()
+const text = $createTextNode('Hello')
+paragraph.append(text)
+root.append(paragraph)
+
+// Safe node replacement
+const oldNode = existingNode
+const newNode = $createCustomNode()
+oldNode.replace(newNode)
+
+// Plugin cleanup pattern
+useEffect(() => {
+  if (!enabled) return
+
+  const removeListener = editor.registerCommand(COMMAND, handler, PRIORITY)
+
+  return () => {
+    removeListener()
+    // Clear any other resources
+  }
+}, [editor, enabled])
+```
+
+**Remember: Lexical anti-patterns cause subtle bugs that are hard to debug and can corrupt user data. When in doubt, always prefer Lexical's built-in patterns over custom solutions.**
+
 ## Important Notes for Claude Instances
 
 1. **Requirements Document is Master**: ALWAYS consult `requirements.md` before starting any work. It contains critical development warnings, AI constraints, and complete feature specifications.

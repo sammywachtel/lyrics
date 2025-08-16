@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "npm run typecheck && eslint . --ext .ts,.tsx --max-warnings=0",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix --cache",
+    "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
     "test": "jest",
     "test:watch": "jest --watch",

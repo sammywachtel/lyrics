@@ -97,7 +97,7 @@ export const apiSlice = createApi({
 
     getSong: builder.query<Song, string>({
       query: (id) => `/songs/${id}`,
-      providesTags: (result, error, id) => [{ type: 'Song', id }],
+      providesTags: (_result, _error, id) => [{ type: 'Song', id }],
 
       // Cache individual songs for 10 minutes
       keepUnusedDataFor: 600,
@@ -114,7 +114,7 @@ export const apiSlice = createApi({
       invalidatesTags: ['Song'],
 
       // Optimistic update for better UX
-      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
         try {
           const { data: newSong } = await queryFulfilled
 
@@ -138,7 +138,7 @@ export const apiSlice = createApi({
       }),
 
       // Update specific song cache only after successful response
-      invalidatesTags: (result, error, arg) => [
+      invalidatesTags: (_result, _error, arg) => [
         { type: 'Song', id: arg.id },
         'Song', // Also invalidate list
       ],
@@ -168,7 +168,7 @@ export const apiSlice = createApi({
         method: 'DELETE',
       }),
 
-      invalidatesTags: (result, error, id) => [
+      invalidatesTags: (_result, _error, id) => [
         { type: 'Song', id },
         'Song', // Invalidate list
       ],

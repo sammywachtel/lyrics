@@ -6,10 +6,12 @@ import {
   type LexicalCommand,
   type LexicalNode
 } from 'lexical'
+import type {
+  SectionParagraphNode
+} from '../nodes/SectionParagraphNode';
 import {
   $isSectionParagraphNode,
-  $convertToSectionParagraph,
-  SectionParagraphNode
+  $convertToSectionParagraph
 } from '../nodes/SectionParagraphNode'
 
 // Custom commands for section formatting

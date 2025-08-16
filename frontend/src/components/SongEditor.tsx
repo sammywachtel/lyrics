@@ -696,8 +696,9 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         }
 
         if (targetElement) {
-          // Scroll to the target element
-          targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          // Use Lexical's jumpToSection instead of direct DOM scrollIntoView
+          // This maintains proper Lexical selection state management
+          wysiwygEditorRef.current?.jumpToSection(sectionName)
 
           // Set cursor position
           const selection = window.getSelection()
