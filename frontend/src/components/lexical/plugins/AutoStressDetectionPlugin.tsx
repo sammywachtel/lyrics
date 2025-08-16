@@ -1,7 +1,8 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useEffect, useRef } from 'react'
-import { $getRoot, $isElementNode, type LexicalNode, $getSelection, $isRangeSelection } from 'lexical'
-import { $isStressedTextNode, StressedTextNode } from '../nodes/StressedTextNode'
+import { $getRoot, $isElementNode, type LexicalNode, $getSelection, $isRangeSelection, $getNodeByKey } from 'lexical'
+import type { StressedTextNode } from '../nodes/StressedTextNode';
+import { $isStressedTextNode } from '../nodes/StressedTextNode'
 // import { mergeRegister } from '@lexical/utils'
 
 interface AutoStressDetectionPluginProps {
@@ -16,7 +17,7 @@ interface AutoStressDetectionPluginProps {
  */
 export function AutoStressDetectionPlugin({
   enabled = true,
-  debounceMs = 2000 // Increased debounce to be less aggressive
+  debounceMs = 8000 // Increased to 8 seconds to reduce frequent analysis
 }: AutoStressDetectionPluginProps) {
   const [editor] = useLexicalComposerContext()
   const lastUserActivityRef = useRef<number>(0)
@@ -68,7 +69,10 @@ export function AutoStressDetectionPlugin({
         // Check if user is currently typing - if so, defer the update
         const timeSinceLastActivity = Date.now() - lastUserActivityRef.current
         if (isUserTypingRef.current || timeSinceLastActivity < 1500) {
-          console.log('🚫 AUTO-DETECT: Deferring analysis - user is actively typing')
+          // Only log in debug mode to reduce noise
+          if (process.env.NODE_ENV === 'development') {
+            console.log('🚫 AUTO-DETECT: Deferring analysis - user is actively typing')
+          }
           // Retry after user stops typing
           triggerAutoDetection()
           return
@@ -116,38 +120,76 @@ export function AutoStressDetectionPlugin({
 
             console.log(`📊 AUTO-DETECT: Starting analysis of ${nodesToProcess.length} StressedTextNodes`)
 
-            // Process each StressedTextNode
+            // Process each StressedTextNode - but only if it needs analysis
+            let processedCount = 0
             nodesToProcess.forEach(node => {
               if (node.isAutoDetectionEnabled() && node.getTextContent().trim()) {
                 try {
                   const existingPatterns = node.getAllStressPatterns()
-
-                  // Capture text content now while we're in editor context
                   const textContent = node.getTextContent()
 
-                  // Check if any existing patterns have user overrides
-                  const hasOverrides = Array.from(existingPatterns.values()).some(pattern => pattern.overridden)
-
-                  if (hasOverrides) {
-                    console.log(`🛡️ AUTO-DETECT: Skipping "${textContent.substring(0, 15)}..." - contains user overrides`)
+                  // Skip if already has stress patterns (already analyzed)
+                  if (existingPatterns.size > 0) {
+                    // Only log in debug mode to reduce noise
+                    if (process.env.NODE_ENV === 'development') {
+                      console.log(`⏭️ AUTO-DETECT: Skipping "${textContent.substring(0, 15)}..." - already has ${existingPatterns.size} patterns`)
+                    }
                     return
                   }
 
-                  // Only analyze if no user overrides exist
-                  const writableNode = node.getWritable()
-                  const patternCount = writableNode.getAllStressPatterns().size
+                  // Skip if text appears to already be accented (contains accent marks)
+                  const hasAccentMarks = /[áàâäãåēéèêëīíìîïōóòôöõūúùûü]/i.test(textContent)
+                  if (hasAccentMarks) {
+                    console.log(`⏭️ AUTO-DETECT: Skipping "${textContent.substring(0, 15)}..." - already contains accent marks`)
+                    return
+                  }
 
-                  writableNode.autoDetectStress().then(() => {
-                    console.log(`🎯 AUTO-DETECT: Detected stress for: "${textContent.substring(0, 15)}..."`)
-                    console.log(`📊 AUTO-DETECT: Patterns:`, patternCount)
-                  }).catch(error => {
-                    console.warn('Auto stress detection failed for node:', error)
-                  })
+                  // Check word count for timing optimization
+                  const wordCount = textContent.trim().split(/\s+/).filter(word => word.length > 0).length
+
+                  // Only analyze if no existing patterns and no accent marks
+                  const nodeKey = node.getKey()
+                  processedCount++
+
+                  // Use different delays based on content length
+                  const analysisDelay = wordCount <= 2 ? 200 : 0 // Reduced from 2000ms to 200ms for better responsiveness
+
+                  if (analysisDelay > 0) {
+                    console.log(`⏰ AUTO-DETECT: Delaying analysis for short text: "${textContent.substring(0, 25)}..." (${wordCount} words, ${analysisDelay}ms delay)`)
+                    setTimeout(() => {
+                      // CRITICAL FIX: Perform autoDetectStress inside editor.update() context
+                      editor.update(() => {
+                        const currentNode = $getNodeByKey(nodeKey)
+                        if ($isStressedTextNode(currentNode)) {
+                          const writableNode = currentNode.getWritable()
+                          writableNode.autoDetectStress().then(() => {
+                            console.log(`🎯 AUTO-DETECT: Analyzed (delayed): "${textContent.substring(0, 25)}..."`)
+                          }).catch(error => {
+                            console.warn('Auto stress detection failed for node:', error)
+                          })
+                        }
+                      }, { tag: 'delayed-auto-stress-detection' })
+                    }, analysisDelay)
+                  } else {
+                    // CRITICAL FIX: Perform autoDetectStress within the same editor.update() context
+                    const writableNode = node.getWritable()
+                    writableNode.autoDetectStress().then(() => {
+                      console.log(`🎯 AUTO-DETECT: Analyzed: "${textContent.substring(0, 25)}..."`)
+                    }).catch(error => {
+                      console.warn('Auto stress detection failed for node:', error)
+                    })
+                  }
                 } catch (error) {
                   console.warn('Auto stress detection failed for node:', error)
                 }
               }
             })
+
+            if (processedCount === 0) {
+              console.log('⏭️ AUTO-DETECT: No nodes needed analysis (all already processed)')
+            } else {
+              console.log(`📊 AUTO-DETECT: Analyzed ${processedCount} of ${nodesToProcess.length} nodes`)
+            }
           }, { tag: 'auto-stress-detection' })
 
           // Restore selection after stress analysis to maintain cursor position
@@ -157,22 +199,27 @@ export function AutoStressDetectionPlugin({
                 try {
                   const selection = $getSelection()
                   if ($isRangeSelection(selection)) {
-                    // Check if the nodes still exist and are valid for text selection
-                    const anchorNode = editor.getEditorState()._nodeMap.get(selectionInfo!.anchorKey)
-                    const focusNode = editor.getEditorState()._nodeMap.get(selectionInfo!.focusKey)
+                    // Use public APIs to check if nodes still exist
+                    try {
+                      const anchorNode = $getNodeByKey(selectionInfo!.anchorKey)
+                      const focusNode = $getNodeByKey(selectionInfo!.focusKey)
 
-                    // Only restore selection if the nodes are text nodes or elements that can contain text
-                    if (anchorNode && focusNode &&
-                        typeof anchorNode.getTextContent === 'function' &&
-                        typeof focusNode.getTextContent === 'function') {
-                      selection.anchor.set(selectionInfo!.anchorKey, selectionInfo!.anchorOffset, 'text')
-                      selection.focus.set(selectionInfo!.focusKey, selectionInfo!.focusOffset, 'text')
+                      // Only restore selection if the nodes are text nodes or elements that can contain text
+                      if (anchorNode && focusNode &&
+                          typeof anchorNode.getTextContent === 'function' &&
+                          typeof focusNode.getTextContent === 'function') {
+                        selection.anchor.set(selectionInfo!.anchorKey, selectionInfo!.anchorOffset, 'text')
+                        selection.focus.set(selectionInfo!.focusKey, selectionInfo!.focusOffset, 'text')
+                      }
+                    } catch (error) {
+                      // Node no longer exists, skip restoration
+                      console.warn('Selection nodes no longer exist, skipping restoration:', error)
                     }
                   }
                 } catch (error) {
                   console.warn('Failed to restore selection after stress analysis:', error)
                 }
-              })
+              }, { tag: 'restore-selection-after-stress-analysis' })
             }, 50)
           }
         })
@@ -183,7 +230,11 @@ export function AutoStressDetectionPlugin({
     const removeListener = editor.registerUpdateListener(({ editorState, dirtyLeaves, tags }) => {
       // Only ignore our own auto-stress-detection updates to prevent loops
       if (tags.has('auto-stress-detection')) {
-        console.log('🏷️ AUTO-DETECT: Ignoring own update to prevent loop')
+        return
+      }
+
+      // Ignore selection-only changes to prevent triggering on cursor movement
+      if (tags.has('selection-change-only')) {
         return
       }
 
@@ -194,18 +245,30 @@ export function AutoStressDetectionPlugin({
         return
       }
 
-      // Check if any StressedTextNodes were modified
-      let hasStressedTextChanges = false
+      // Only trigger if we have actual text content changes, not just selection changes
+      let hasTextContentChanges = false
 
-      dirtyLeaves.forEach(nodeKey => {
-        const node = editorState._nodeMap.get(nodeKey)
-        if ($isStressedTextNode(node)) {
-          hasStressedTextChanges = true
-        }
+      // Check dirty leaves using read() to access editor state properly
+      editorState.read(() => {
+        dirtyLeaves.forEach(nodeKey => {
+          try {
+            const node = $getNodeByKey(nodeKey)
+            if ($isStressedTextNode(node)) {
+              // Check if the node actually has text content that might need analysis
+              const textContent = node.getTextContent()
+              if (textContent && textContent.trim().length > 1) {
+                hasTextContentChanges = true
+              }
+            }
+          } catch (error) {
+            // Node may no longer exist, skip it
+            console.warn(`Node ${nodeKey} no longer exists during dirty check`, error)
+          }
+        })
       })
 
-      if (hasStressedTextChanges) {
-        console.log('🎯 AUTO-DETECT: StressedTextNode changes detected, triggering analysis')
+      if (hasTextContentChanges) {
+        console.log('🎯 AUTO-DETECT: Text content changes detected, triggering analysis')
         triggerAutoDetection()
       }
     })
@@ -213,10 +276,15 @@ export function AutoStressDetectionPlugin({
     // Also trigger on initial load if there's content
     const initialTimeout = setTimeout(() => {
       requestAnimationFrame(() => {
-        const editorState = editor.getEditorState()
-        if (editorState._nodeMap.size > 1) { // More than just root node
-          triggerAutoDetection()
-        }
+        // Check if editor has content using public APIs
+        editor.getEditorState().read(() => {
+          const root = $getRoot()
+          const children = root.getChildren()
+          if (children.length > 0) {
+            // Has content, trigger auto detection
+            triggerAutoDetection()
+          }
+        })
       })
     }, 1000)
 

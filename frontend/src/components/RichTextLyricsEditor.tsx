@@ -369,7 +369,7 @@ function SectionFormattingPlugin() {
       (sectionType: string | null) => {
         editor.update(() => {
           $applySectionFormatting(sectionType)
-        })
+        }, { tag: 'apply-section-formatting' })
         return true
       },
       COMMAND_PRIORITY_CRITICAL
@@ -383,7 +383,7 @@ function SectionFormattingPlugin() {
         event.preventDefault()
         editor.update(() => {
           $clearSectionFormatting()
-        })
+        }, { tag: 'clear-section-formatting' })
         return true
       }
       return false
@@ -439,7 +439,7 @@ function PastePlugin() {
               selection.insertNodes(paragraphNodes)
             }
           }
-        })
+        }, { tag: 'paste-lyrics-content' })
 
         return true
       },
@@ -471,7 +471,7 @@ function EnterKeyPlugin() {
               // Ensure the cursor is positioned in the new paragraph
               newParagraph.select()
             }
-          })
+          }, { tag: 'create-new-paragraph' })
           return true // Prevent default Enter behavior
         }
         return false
@@ -627,7 +627,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
       if (editorRef.current) {
         editorRef.current.update(() => {
           $clearSectionFormatting()
-        })
+        }, { tag: 'clear-section-formatting-callback' })
       }
     }, [])
 
@@ -749,35 +749,41 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
                 selection.focus.set(targetNodeKey!, 0, 'element')
               }
             }
-          })
+          }, { tag: 'section-navigation-position-cursor' })
 
-          // Scroll the target element into view with smooth animation
+          // Use Lexical's selection system for scrolling instead of direct DOM manipulation
           setTimeout(() => {
-            targetElement!.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start',
-              inline: 'nearest'
-            })
+            // Scroll via editor's built-in scrolling behavior
+            editorRef.current!.update(() => {
+              const targetNode = $getNodeByKey(targetNodeKey!)
+              if (targetNode) {
+                targetNode.selectStart()
+              }
+            }, { tag: 'section-navigation-scroll-and-select' })
 
-            // Add a subtle highlight effect to show the navigated section
-            targetElement!.classList.add('section-navigation-highlight')
-            setTimeout(() => {
-              targetElement!.classList.remove('section-navigation-highlight')
-            }, 2000)
+            // Use CSS-based highlighting instead of direct DOM manipulation
+            const rootElement = editorRef.current!.getRootElement()
+            if (rootElement && targetElement) {
+              // Add temporary CSS class via data attribute that CSS can target
+              targetElement.setAttribute('data-navigation-highlight', 'true')
+              setTimeout(() => {
+                targetElement?.removeAttribute('data-navigation-highlight')
+              }, 2000)
+            }
           }, 100)
 
           console.log(`Successfully navigated to section: ${sectionName}`)
         } else {
           console.warn(`Could not find section: ${sectionName}`)
-          // Fallback: focus the editor and scroll to top
+          // Fallback: focus the editor and move selection to top
           editorRef.current.focus()
-          const rootElement = editorRef.current.getRootElement()
-          if (rootElement) {
-            rootElement.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
-            })
-          }
+          editorRef.current.update(() => {
+            const root = $getRoot()
+            const firstChild = root.getFirstChild()
+            if (firstChild) {
+              firstChild.selectStart()
+            }
+          }, { tag: 'section-navigation-fallback-select-start' })
         }
       } catch (error) {
         console.error('Error during section navigation:', error)
@@ -799,7 +805,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
             if ($isRangeSelection(selection)) {
               selection.insertText(text)
             }
-          })
+          }, { tag: 'insert-text-at-cursor' })
         }
       },
       getCurrentCursorPosition: () => {
@@ -835,6 +841,36 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
         if (editorRef.current) {
           jumpToSection(sectionName)
         }
+      },
+      onEditorReady: (callback: () => void) => {
+        console.log('🎯 RICH-TEXT-EDITOR: onEditorReady called')
+
+        if (!editorRef.current) {
+          console.log('⚠️ RICH-TEXT-EDITOR: No editor ref available')
+          return () => {}
+        }
+
+        // Use Lexical's built-in editor ready state
+        const unregister = editorRef.current.registerUpdateListener(({ editorState }) => {
+          console.log('🔄 RICH-TEXT-EDITOR: Update listener fired')
+
+          // This fires when editor is fully initialized with content
+          editorState.read(() => {
+            const root = $getRoot()
+            const childrenSize = root.getChildrenSize()
+            console.log('📊 RICH-TEXT-EDITOR: Root children count:', childrenSize)
+
+            if (childrenSize > 0) {
+              // Editor has content and is ready
+              console.log('✅ RICH-TEXT-EDITOR: Editor is ready with content, calling callback')
+              callback()
+              unregister() // Only call once
+            }
+          })
+        })
+
+        console.log('🎯 RICH-TEXT-EDITOR: Update listener registered')
+        return unregister
       },
     }), [value, onChange, jumpToSection])
 
@@ -918,7 +954,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
               <EnterKeyPlugin />
               <StableTextToStressedPlugin
                 enabled={true}
-                debounceMs={3000}
+                debounceMs={500}
               />
               <StressMarkDecoratorPlugin
                 enabled={true}
@@ -934,10 +970,10 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
               />
               <AutoStressDetectionPlugin
                 enabled={true}
-                debounceMs={4000}
+                debounceMs={300}
               />
               <ComprehensiveStressPlugin
-                enabled={true}
+                enabled={false}
               />
               {/* TODO: Re-enable when plugins are fully TypeScript compliant */}
               {/* <SectionDetectionPlugin /> */}
@@ -986,23 +1022,14 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
                       console.log(`🔄 REFRESH: Converted StressedTextNode back to TextNode: "${textContent.substring(0, 15)}..."`)
                     }
                   })
-                }, { tag: 'stress-refresh' })
 
-                // Force re-evaluation after a short delay
-                setTimeout(() => {
-                  console.log('⏰ REFRESH: Triggering forced re-evaluation')
-                  if (editorRef.current) {
-                    editorRef.current.update(() => {
-                      // Trigger a dummy update to mark content as dirty
-                      const root = $getRoot()
-                      const firstChild = root.getFirstChild()
-                      if (firstChild) {
-                        const key = firstChild.getKey()
-                        console.log(`🎯 REFRESH: Marking node ${key} as dirty for re-evaluation`)
-                      }
-                    }, { tag: 'force-stress-reeval' })
+                  // Mark content as dirty for re-evaluation in the same update to avoid race conditions
+                  const firstChild = root.getFirstChild()
+                  if (firstChild) {
+                    const key = firstChild.getKey()
+                    console.log(`🎯 REFRESH: Marking node ${key} as dirty for re-evaluation`)
                   }
-                }, 100)
+                }, { tag: 'stress-refresh-and-reeval' })
               }
             }}
             className="px-2 py-1 text-xs font-mono rounded transition-all duration-200 bg-blue-50 text-blue-600 hover:text-blue-700 hover:bg-blue-100 border border-blue-200/50 hover:border-blue-300/70 backdrop-blur-sm opacity-70 hover:opacity-100"

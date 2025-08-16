@@ -92,7 +92,10 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
 
     // Helper function to check if lyrics need stress processing and trigger auto-save
     const checkAndProcessStresses = useCallback(async (lyrics: string) => {
+      console.log('🟡 STRESS-CHECK-ENTRY: Function called with lyrics length:', lyrics.length)
+
       if (!lyrics || !wysiwygEditorRef.current) {
+        console.log('🟡 STRESS-CHECK-EXIT: Early return - no lyrics or editor ref')
         return
       }
 
@@ -104,21 +107,30 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
           // Lexical JSON format - check if it has StressedTextNode instances
           try {
             const lexicalData = JSON.parse(lyrics)
-            const hasStressNodes = JSON.stringify(lexicalData).includes('"type":"stressedText"')
+            const hasStressNodes = JSON.stringify(lexicalData).includes('"type":"stressed-text"')
             needsStressProcessing = !hasStressNodes
-            // Only log in debug mode
-          } catch {
+
+            console.log('🔍 STRESS CHECK:', {
+              lyricsLength: lyrics.length,
+              startsWithJSON: lyrics.startsWith('{'),
+              hasStressNodes,
+              needsStressProcessing,
+              firstChars: lyrics.slice(0, 100),
+              stressNodeCount: (JSON.stringify(lexicalData).match(/"type":"stressedText"/g) || []).length
+            })
+          } catch (error) {
             // Invalid JSON, treat as plain text
             needsStressProcessing = true
-            // Invalid JSON, treat as plain text
+            console.log('🔍 STRESS CHECK: Invalid JSON, treating as plain text', { error: (error as Error).message })
           }
         } else {
           // Plain text format - always needs stress processing
           needsStressProcessing = true
-          // Plain text always needs stress processing
+          console.log('🔍 STRESS CHECK: Plain text format, needs processing')
         }
 
         if (needsStressProcessing) {
+          console.log('⚠️ STRESS PROCESSING: Starting auto-detection because stress nodes are missing')
           // Set processing state (TODO: implement UI state)
           // setIsProcessingStress(true)
 
@@ -135,9 +147,9 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
             } finally {
               // setIsProcessingStress(false)
             }
-          }, 3000) // Wait for stress detection to complete
+          }, 800) // Reduced from 3000ms to 800ms for better responsiveness
         } else {
-          // No stress processing needed
+          console.log('✅ STRESS PROCESSING: Skipped - song already has stress patterns')
         }
       } catch (error) {
         console.error('❌ STRESS-CHECK: Error during stress check:', error)
@@ -220,17 +232,14 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
             isInitialized.current = true
             lastAutoSaveRef.current = actualSong.lyrics || ''
 
-            // Post-load processing: detect missing stresses and trigger auto-save if needed
-            setTimeout(async () => {
-              console.log('🔄 LOADING: Starting post-load stress processing...')
-              await checkAndProcessStresses(actualSong.lyrics || '')
+            // Post-load processing will be triggered by editor ready event
+            console.log('🔄 LOADING: Song loaded, waiting for editor to be ready...')
 
-              // End loading state after stress processing completes
-              setTimeout(() => {
-                console.log('✅ LOADING: Full initialization complete, ending loading state')
-                setIsLoading(false)
-              }, 500) // Brief delay to ensure UI updates
-            }, 1000) // Allow editor to fully initialize first
+            // End loading state after a brief delay (editor ready will handle stress processing)
+            setTimeout(() => {
+              console.log('✅ LOADING: Full initialization complete, ending loading state')
+              setIsLoading(false)
+            }, 1000) // Shorter delay since we're not waiting for stress processing
           }, 1000) // Minimum loading time so user can see the loading state
 
         } catch (err) {
@@ -253,6 +262,23 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
 
       loadSong()
     }, [songId, onSongLoaded])
+
+    // Set up editor ready listener for stress processing
+    useEffect(() => {
+      if (!wysiwygEditorRef.current || !song) return
+
+      console.log('🎯 EDITOR-SETUP: Setting up editor ready listener')
+
+      const unregister = wysiwygEditorRef.current.onEditorReady(async () => {
+        console.log('✅ EDITOR-READY: Editor is ready, starting stress processing check')
+        await checkAndProcessStresses(song.lyrics || '')
+      })
+
+      return () => {
+        console.log('🧹 EDITOR-CLEANUP: Cleaning up editor ready listener')
+        unregister()
+      }
+    }, [song, checkAndProcessStresses])
 
     // Track metadata changes (non-content fields)
     useEffect(() => {
