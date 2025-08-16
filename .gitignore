@@ -25,3 +25,5 @@ classes_orphans.*
 **/__pycache__/
 *.pyc
 *.pyo
+# ESLint cache
+frontend/.eslintcache

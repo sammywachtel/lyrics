@@ -28,11 +28,6 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ text, matches, classN
     <span
       className={className}
       dangerouslySetInnerHTML={{ __html: highlightedHtml }}
-      style={{
-        // Custom styles for highlighted text
-        '--highlight-bg': '#fef3c7',
-        '--highlight-color': '#92400e'
-      } satisfies React.CSSProperties}
     />
   )
 }

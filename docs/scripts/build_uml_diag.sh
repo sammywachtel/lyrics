@@ -1,14 +1,14 @@
 #!/bin/bash
 # UML Class Diagram Generator
 # Generates PlantUML diagrams from Python codebase structure
-# 
+#
 # Generated files:
 # - classes.puml: PlantUML source code
-# - classes.png: PNG image of the diagram  
+# - classes.png: PNG image of the diagram
 # - classes.svg: SVG image of the diagram
 #
 # Usage: ./build_uml_diag.sh
-# 
+#
 # Prerequisites:
 # - plantuml.jar in project root
 # - Java runtime
@@ -16,7 +16,7 @@
 # NOTE: This script generates temporary files that should NOT be committed to git.
 # Add these patterns to .gitignore:
 # classes.png
-# classes.puml  
+# classes.puml
 # classes.svg
 # classes_orphans.*
 
@@ -37,7 +37,7 @@ echo "🔍 Analyzing Python codebase structure..."
 # Find all Python files and extract class definitions
 find backend/app -name "*.py" -type f | while read -r file; do
     echo "Processing: $file"
-    
+
     # Extract class definitions and their methods
     python3 -c "
 import ast
@@ -47,17 +47,17 @@ def analyze_file(filename):
     try:
         with open(filename, 'r', encoding='utf-8') as f:
             content = f.read()
-        
+
         tree = ast.parse(content)
         classes = []
-        
+
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
                 methods = []
                 for item in node.body:
                     if isinstance(item, ast.FunctionDef):
                         methods.append(item.name)
-                
+
                 # Get base classes
                 bases = []
                 for base in node.bases:
@@ -65,14 +65,14 @@ def analyze_file(filename):
                         bases.append(base.id)
                     elif isinstance(base, ast.Attribute):
                         bases.append(f'{base.value.id}.{base.attr}' if hasattr(base.value, 'id') else base.attr)
-                
+
                 classes.append({
                     'name': node.name,
                     'methods': methods,
                     'bases': bases,
                     'file': filename
                 })
-        
+
         return classes
     except Exception as e:
         print(f'Error processing {filename}: {e}', file=sys.stderr)
@@ -101,7 +101,7 @@ EOF
 while IFS=':' read -r prefix class_name file_path methods bases; do
     if [ "$prefix" = "CLASS" ]; then
         echo "  class $class_name {" >> classes.puml
-        
+
         # Add methods
         if [ -n "$methods" ]; then
             echo "$methods" | tr '|' '\n' | while read -r method; do
@@ -110,9 +110,9 @@ while IFS=':' read -r prefix class_name file_path methods bases; do
                 fi
             done
         fi
-        
+
         echo "  }" >> classes.puml
-        
+
         # Add inheritance relationships
         if [ -n "$bases" ]; then
             echo "$bases" | tr '|' '\n' | while read -r base; do
@@ -121,7 +121,7 @@ while IFS=':' read -r prefix class_name file_path methods bases; do
                 fi
             done
         fi
-        
+
         echo "" >> classes.puml
     fi
 done < /tmp/class_analysis.txt
@@ -134,7 +134,7 @@ echo "🎨 Generating diagram images..."
 # Generate PNG
 java -jar plantuml.jar -tpng classes.puml
 
-# Generate SVG  
+# Generate SVG
 java -jar plantuml.jar -tsvg classes.puml
 
 echo "✅ UML diagrams generated successfully:"
