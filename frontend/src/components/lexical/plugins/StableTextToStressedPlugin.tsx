@@ -35,7 +35,12 @@ export function StableTextToStressedPlugin({
     const convertStableTextNodes = () => {
       console.log('🔄 STABLE-PLUGIN: Starting analysis and conversion process...')
       if (isConverting) {
-        console.log('🚫 STABLE-PLUGIN: Conversion already in progress, skipping')
+        console.log('🔄 STABLE-PLUGIN: Conversion already in progress, will reschedule after current conversion')
+        // Schedule another conversion after current one finishes instead of skipping
+        setTimeout(() => {
+          console.log('🔄 STABLE-PLUGIN: Rescheduling conversion after current one finished')
+          scheduleConversion()
+        }, 1100) // Wait slightly longer than the isConverting reset (1000ms)
         return
       }
 
