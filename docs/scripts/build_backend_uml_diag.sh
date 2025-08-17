@@ -61,7 +61,7 @@ def analyze_file(filename):
             if isinstance(node, ast.ClassDef):
                 methods = []
                 properties = []
-                
+
                 for item in node.body:
                     if isinstance(item, ast.FunctionDef):
                         # Categorize methods
@@ -128,7 +128,7 @@ echo "package \"Backend Application\" {" >> docs/diagrams/backend-classes.puml
 while IFS=':' read -r prefix class_name file_path methods properties bases; do
     if [ "$prefix" = "CLASS" ]; then
         echo "  class $class_name {" >> docs/diagrams/backend-classes.puml
-        
+
         # Add properties
         if [ -n "$properties" ]; then
             echo "$properties" | tr '|' '\n' | while read -r prop; do
@@ -137,7 +137,7 @@ while IFS=':' read -r prefix class_name file_path methods properties bases; do
                 fi
             done
         fi
-        
+
         # Add methods (limit to avoid clutter)
         if [ -n "$methods" ]; then
             echo "$methods" | tr '|' '\n' | head -8 | while read -r method; do
@@ -150,7 +150,7 @@ while IFS=':' read -r prefix class_name file_path methods properties bases; do
                 echo "    +... ($((method_count - 8)) more methods)" >> docs/diagrams/backend-classes.puml
             fi
         fi
-        
+
         echo "  }" >> docs/diagrams/backend-classes.puml
         echo "" >> docs/diagrams/backend-classes.puml
     fi

@@ -168,7 +168,7 @@ def generate_plantuml():
     for root, dirs, files in os.walk('frontend/src'):
         # Skip node_modules and test directories
         dirs[:] = [d for d in dirs if d not in ['node_modules', '__tests__', 'test', 'tests']]
-        
+
         for file in files:
             if file.endswith(('.ts', '.tsx')) and not any(x in file for x in ['test', 'spec', '.d.ts']):
                 file_path = os.path.join(root, file)
@@ -241,13 +241,13 @@ def generate_plantuml():
 
     # Add key relationships (simplified for frontend)
     print("' Key Frontend Relationships")
-    
+
     # Look for common React patterns
     if 'App' in all_defined_names:
         main_components = [name for name in all_defined_names if name in ['SongEditor', 'SongList', 'CleanSongEditor']]
         for comp in main_components:
             print(f"App --> {comp} : renders")
-    
+
     # Props relationships
     for name in all_defined_names:
         if name.endswith('Props'):
@@ -308,7 +308,7 @@ if [ -f "docs/diagrams/frontend-classes.puml" ] && head -1 docs/diagrams/fronten
 
     if [ -f "plantuml.jar" ]; then
       echo "Running PlantUML jar..."
-      
+
       # Generate PNG
       if java -DPLANTUML_LIMIT_SIZE=16384 -jar plantuml.jar -tpng docs/diagrams/frontend-classes.puml 2>/dev/null; then
         echo "✅ PNG generated using PlantUML jar"
