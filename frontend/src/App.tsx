@@ -110,6 +110,24 @@ function AppContent() {
     // TODO: Handle view changes
   }, [])
 
+  const handleEditSong = useCallback((songId: string) => {
+    setSelectedSongId(songId)
+    setCurrentView('editor')
+    // Reset settings when switching songs
+    setSettings(undefined)
+  }, [])
+
+  const handleCloseSong = useCallback(() => {
+    setSelectedSongId(null)
+    setCurrentView('list')
+    // Reset editor state
+    setHasUnsavedChanges(false)
+    setIsSaving(false)
+    songEditorRef.current = null
+    setSaveStatus(undefined)
+    setAutoSaveStatus('saved')
+  }, [])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 via-creative-50 to-warm-50 flex items-center justify-center">
@@ -128,24 +146,6 @@ function AppContent() {
     return (
       <AuthForm mode={authMode} onModeChange={setAuthMode} />
     )
-  }
-
-  const handleEditSong = (songId: string) => {
-    setSelectedSongId(songId)
-    setCurrentView('editor')
-    // Reset settings when switching songs
-    setSettings(undefined)
-  }
-
-  const handleCloseSong = () => {
-    setSelectedSongId(null)
-    setCurrentView('list')
-    // Reset editor state
-    setHasUnsavedChanges(false)
-    setIsSaving(false)
-    songEditorRef.current = null
-    setSaveStatus(undefined)
-    setAutoSaveStatus('saved')
   }
 
   // If editing a song, show it in the professional layout

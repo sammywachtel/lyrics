@@ -34,7 +34,7 @@ import { AutoStressDetectionPlugin } from './lexical/plugins/AutoStressDetection
 import { StableTextToStressedPlugin } from './lexical/plugins/StableTextToStressedPlugin'
 import { ComprehensiveStressPlugin } from './lexical/plugins/ComprehensiveStressPlugin'
 import StressContextMenu from './lexical/ui/StressContextMenu'
-// import SectionHeaderPlugin from './plugins/SectionHeaderPlugin' // TODO: Re-enable when test environment supports full Lexical
+// Legacy plugin removed - SectionHeaderPlugin
 // TODO: Re-enable when plugins are fully TypeScript compliant
 // import { SectionDetectionPlugin } from './lexical/plugins/SectionDetectionPlugin'
 // import { ProsodyAnalysisPlugin } from './lexical/plugins/ProsodyAnalysisPlugin'
@@ -949,7 +949,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
               <AutoFocusPlugin />
               <SelectionPlugin onSelectionChange={handleSelectionChange} />
               <SectionFormattingPlugin />
-              {/* <SectionHeaderPlugin /> */} {/* TODO: Re-enable when test environment supports full Lexical */}
+              {/* Legacy SectionHeaderPlugin removed */}
               <PastePlugin />
               <EnterKeyPlugin />
               <StableTextToStressedPlugin

@@ -93,4 +93,12 @@ export default tseslint.config([
       ]
     },
   },
+  // Special configuration for Lexical nodes and plugins
+  // These files inherently need to export both components and utilities per Lexical architecture
+  {
+    files: ['**/lexical/nodes/**/*.tsx', '**/lexical/plugins/**/*.tsx', '**/nodes/**/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off'
+    }
+  },
 ])

@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 
 // Global flag to ensure only one plugin instance renders overlays
+// This prevents conflicts in React StrictMode double mounting
 let activePluginId: string | null = null
+let pluginInstanceCount = 0
 
 import {
   $isStressedTextNode,
@@ -59,7 +61,12 @@ export function StressMarkDecoratorPlugin({
   const [pluginId] = useState(() => Math.random().toString(36).substr(2, 9))
 
   useEffect(() => {
-    console.log(`🎨 STRESS-DECORATOR [${pluginId}]: Plugin mounted, enabled:`, enabled)
+    pluginInstanceCount++
+
+    // Only log in development mode with debug flag to reduce noise
+    if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+      console.log(`🎨 STRESS-DECORATOR [${pluginId}]: Plugin mounted (instance #${pluginInstanceCount}), enabled:`, enabled)
+    }
 
     // Track user typing to avoid disrupting focus
     let isUserTyping = false
@@ -102,10 +109,15 @@ export function StressMarkDecoratorPlugin({
 
     if (!activePluginId) {
       activePluginId = pluginId
-      console.log(`🏆 STRESS-DECORATOR [${pluginId}]: Became the active plugin`)
+      if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+        console.log(`🏆 STRESS-DECORATOR [${pluginId}]: Became the active plugin`)
+      }
     } else if (activePluginId !== pluginId) {
-      console.log(`⏸️ STRESS-DECORATOR [${pluginId}]: Another plugin is active (${activePluginId}), staying passive`)
+      if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+        console.log(`⏸️ STRESS-DECORATOR [${pluginId}]: Another plugin is active (${activePluginId}), staying passive`)
+      }
       setOverlays([]) // Clear overlays from inactive plugin
+      document.removeEventListener('keydown', handleKeyDown)
       return
     }
 
@@ -121,7 +133,9 @@ export function StressMarkDecoratorPlugin({
       updateTimeout = setTimeout(() => {
         // Skip overlay updates if user is actively typing to avoid focus interruption
         if (isUserTyping) {
-          console.log('🚫 STRESS-DECORATOR: Skipping overlay update - user is typing')
+          if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+            console.log('🚫 STRESS-DECORATOR: Skipping overlay update - user is typing')
+          }
           // Retry after a delay
           setTimeout(updateStressOverlays, 1000)
           return
@@ -155,14 +169,18 @@ export function StressMarkDecoratorPlugin({
 
             function processTextChild(child: LexicalNode) {
                   const text = child.getTextContent() || 'N/A'
-                  if ($isStressedTextNode(child)) {
-                    const stressPatterns = child.getAllStressPatterns()
-                    console.log(`✅ FOUND: StressedTextNode "${text}" with ${stressPatterns.size} patterns`)
-                    if (stressPatterns.size === 0) {
-                      console.log(`⚠️  NO PATTERNS: StressedTextNode "${text}" has no stress patterns - needs auto-detection`)
+
+                  // Only log in debug mode to reduce console noise
+                  if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress-verbose')) {
+                    if ($isStressedTextNode(child)) {
+                      const stressPatterns = child.getAllStressPatterns()
+                      console.log(`✅ FOUND: StressedTextNode "${text}" with ${stressPatterns.size} patterns`)
+                      if (stressPatterns.size === 0) {
+                        console.log(`⚠️  NO PATTERNS: StressedTextNode "${text}" has no stress patterns - needs auto-detection`)
+                      }
+                    } else {
+                      console.log(`❌ SKIP: ${child?.constructor?.name} "${text}" (not StressedTextNode)`)
                     }
-                  } else {
-                    console.log(`❌ SKIP: ${child?.constructor?.name} "${text}" (not StressedTextNode)`)
                   }
 
                   if ($isStressedTextNode(child)) {
@@ -170,10 +188,13 @@ export function StressMarkDecoratorPlugin({
                     if (stressPatterns.size > 0) {
                       // Find the DOM element for this node
                       const domElement = editor.getElementByKey(child.getKey())
-                      console.log(`🔍 STRESS-DECORATOR: DOM element found:`, !!domElement)
-                      if (domElement) {
-                        const elementRect = domElement.getBoundingClientRect()
-                        console.log(`🔍 STRESS-DECORATOR: Element "${child.getTextContent()}" rect:`, elementRect)
+
+                      if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress-verbose')) {
+                        console.log(`🔍 STRESS-DECORATOR: DOM element found:`, !!domElement)
+                        if (domElement) {
+                          const elementRect = domElement.getBoundingClientRect()
+                          console.log(`🔍 STRESS-DECORATOR: Element "${child.getTextContent()}" rect:`, elementRect)
+                        }
                       }
                       if (domElement) {
                         const text = child.getTextContent()
@@ -183,15 +204,23 @@ export function StressMarkDecoratorPlugin({
                         words.forEach(({ word, startIndex, endIndex }) => {
                           const cleanWord = word.replace(/[^a-zA-Z']/g, '').toLowerCase()
                           const pattern = stressPatterns.get(cleanWord)
-                          console.log(`🔍 STRESS-DECORATOR: Word "${cleanWord}" has pattern:`, !!pattern)
+
+                          if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress-verbose')) {
+                            console.log(`🔍 STRESS-DECORATOR: Word "${cleanWord}" has pattern:`, !!pattern)
+                          }
 
                           if (pattern && pattern.syllables.length > 0) {
                             // Calculate word position within the text
                             const rect = getWordRect(domElement, startIndex, endIndex)
-                            console.log(`🔍 STRESS-DECORATOR: Word "${cleanWord}" rect:`, rect ? `{left: ${rect.left}, top: ${rect.top}, width: ${rect.width}}` : 'null')
+
+                            if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress-verbose')) {
+                              console.log(`🔍 STRESS-DECORATOR: Word "${cleanWord}" rect:`, rect ? `{left: ${rect.left}, top: ${rect.top}, width: ${rect.width}}` : 'null')
+                            }
+
                             if (rect) {
-                              // Use viewport coordinates directly (simpler approach)
-                              console.log(`📍 VIEWPORT: Using direct coordinates for "${cleanWord}" at (${rect.left}, ${rect.top})`)
+                              if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress-verbose')) {
+                                console.log(`📍 VIEWPORT: Using direct coordinates for "${cleanWord}" at (${rect.left}, ${rect.top})`)
+                              }
 
                               const isDuplicate = newOverlays.some(existing => {
                                 return existing.nodeKey === child.getKey() &&
@@ -207,7 +236,9 @@ export function StressMarkDecoratorPlugin({
                                   pattern,
                                   rect
                                 })
-                                console.log(`✅ OVERLAY: "${cleanWord}" → rect(${rect.left.toFixed(1)}, ${rect.top.toFixed(1)}) wordRect should be ${getWordRect(domElement, startIndex, endIndex)?.top.toFixed(1)}`)
+                                if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress-verbose')) {
+                                  console.log(`✅ OVERLAY: "${cleanWord}" → rect(${rect.left.toFixed(1)}, ${rect.top.toFixed(1)})`)
+                                }
                               }
                             }
                           }
@@ -220,21 +251,27 @@ export function StressMarkDecoratorPlugin({
             processNode(root)
           })
 
-          console.log(`🎨 STRESS-DECORATOR [${pluginId}]: Updated overlays:`, newOverlays.length)
+          if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+            console.log(`🎨 STRESS-DECORATOR [${pluginId}]: Updated overlays:`, newOverlays.length)
+          }
           setOverlays(newOverlays)
         })
-      }, 200)
+      }, 300) // Increased debounce to reduce conflicts
     }
 
     // Listen for editor changes - but only update for meaningful changes
     const removeListener = editor.registerUpdateListener(({ tags }) => {
       // Only update overlays for stress-related changes to reduce interference
       if (tags.has('auto-stress-detection') || tags.has('stable-text-conversion')) {
-        console.log('🔄 STRESS-DECORATOR: Stress-related update, updating overlays')
+        if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+          console.log('🔄 STRESS-DECORATOR: Stress-related update, updating overlays')
+        }
         updateStressOverlays()
       } else if (!tags.has('stress-decorator-update') && !tags.has('history-merge') && !isUserTyping) {
         // Only update for non-history changes when user is not typing
-        console.log('🔄 STRESS-DECORATOR: Content change detected, updating overlays')
+        if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+          console.log('🔄 STRESS-DECORATOR: Content change detected, updating overlays')
+        }
         updateStressOverlays()
       }
     })
@@ -245,11 +282,13 @@ export function StressMarkDecoratorPlugin({
         clearTimeout(scrollTimeout)
       }
 
-      // Reduced scroll debounce for smoother position updates
+      // Optimized scroll debounce for better performance
       scrollTimeout = setTimeout(() => {
-        console.log('📜 STRESS-DECORATOR: Scroll detected, updating overlay positions')
+        if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+          console.log('📜 STRESS-DECORATOR: Scroll detected, updating overlay positions')
+        }
         updateStressOverlays()
-      }, 16) // ~60fps for smooth scrolling
+      }, 100) // Increased from 16ms to reduce excessive updates
     }
 
     // Add scroll event listeners to relevant containers
@@ -269,7 +308,9 @@ export function StressMarkDecoratorPlugin({
 
       // Watch for size changes that might affect text positioning
       resizeObserver = new ResizeObserver(() => {
-        console.log('📏 STRESS-DECORATOR: Resize detected, updating overlay positions')
+        if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+          console.log('📏 STRESS-DECORATOR: Resize detected, updating overlay positions')
+        }
         updateStressOverlays()
       })
 
@@ -283,8 +324,12 @@ export function StressMarkDecoratorPlugin({
       // Reset active plugin if this was the active one
       if (activePluginId === pluginId) {
         activePluginId = null
-        console.log(`🏁 STRESS-DECORATOR [${pluginId}]: Active plugin unmounted, resetting`)
+        if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+          console.log(`🏁 STRESS-DECORATOR [${pluginId}]: Active plugin unmounted, resetting`)
+        }
       }
+
+      pluginInstanceCount = Math.max(0, pluginInstanceCount - 1)
 
       removeListener()
       if (updateTimeout) {
@@ -339,7 +384,9 @@ export function StressMarkDecoratorPlugin({
       }}
     >
       {overlays.map((overlay, index) => {
-        console.log(`🎭 PLUGIN-${pluginId}: Rendering overlay ${index} "${overlay.word}"`)
+        if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress-verbose')) {
+          console.log(`🎭 PLUGIN-${pluginId}: Rendering overlay ${index} "${overlay.word}"`)
+        }
         return (
           <StressMarkOverlay
             key={`${overlay.nodeKey}-${overlay.word}-${index}`}
@@ -525,21 +572,22 @@ function getWordRect(element: Element, startIndex: number, endIndex: number): DO
       return null
     }
 
-    // Debug: log what we're trying to select
-    const fullText = textNode.textContent || ''
-    const selectedText = fullText.substring(startIndex, endIndex)
-    console.log(`🔍 getWordRect: Selecting "${selectedText}" from "${fullText}" (${startIndex}-${endIndex})`)
-
     const range = document.createRange()
     range.setStart(textNode, startIndex)
     range.setEnd(textNode, endIndex)
 
     const rect = range.getBoundingClientRect()
-    console.log(`🔍 getWordRect: Range rect for "${selectedText}":`, rect)
 
-    // Also get the full element rect for comparison
-    const elementRect = element.getBoundingClientRect()
-    console.log(`🔍 getWordRect: Full element rect:`, elementRect)
+    // Debug logging only in verbose mode
+    if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress-verbose')) {
+      const fullText = textNode.textContent || ''
+      const selectedText = fullText.substring(startIndex, endIndex)
+      console.log(`🔍 getWordRect: Selecting "${selectedText}" from "${fullText}" (${startIndex}-${endIndex})`)
+      console.log(`🔍 getWordRect: Range rect for "${selectedText}":`, rect)
+
+      const elementRect = element.getBoundingClientRect()
+      console.log(`🔍 getWordRect: Full element rect:`, elementRect)
+    }
 
     range.detach()
 

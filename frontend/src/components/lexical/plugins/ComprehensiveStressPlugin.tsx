@@ -24,14 +24,14 @@ interface LineAnalysisFromNodes {
  * It simply reads the syllable data from the nodes and displays it as overlays.
  */
 export function ComprehensiveStressPlugin({
-  enabled = true
+  enabled = false  // Disabled by default to prevent conflicts with StressMarkDecoratorPlugin
 }: ComprehensiveStressPluginProps) {
   const [editor] = useLexicalComposerContext()
   const [lineAnalyses, setLineAnalyses] = useState<LineAnalysisFromNodes[]>([])
 
   // Only log initialization once in debug mode
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled:', enabled)
+  if (process.env.NODE_ENV === 'development' && enabled) {
+    console.log('🚀 COMPREHENSIVE-STRESS: Plugin initialized and enabled')
   }
 
   useEffect(() => {
@@ -42,7 +42,12 @@ export function ComprehensiveStressPlugin({
 
     const updateStressAnalysis = () => {
       const rootElement = editor.getRootElement()
-      if (!rootElement) return
+      if (!rootElement) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🚫 COMPREHENSIVE-STRESS: No root element, skipping analysis')
+        }
+        return
+      }
 
       editor.read(() => {
         const lines: LineAnalysisFromNodes[] = []
@@ -97,7 +102,7 @@ export function ComprehensiveStressPlugin({
                     hasData
                   })
                   // Only log in debug mode to reduce noise
-                  if (process.env.NODE_ENV === 'development') {
+                  if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
                     console.log(`📊 Line ${lineNumber}: "${textContent.substring(0, 25)}..." - ${stressedSyllables}/${totalSyllables} syllables`)
                   }
                 }
@@ -115,7 +120,7 @@ export function ComprehensiveStressPlugin({
         processNode(root)
 
         // Only log when the count changes to reduce noise
-        if (lines.length !== lineAnalyses.length) {
+        if (lines.length !== lineAnalyses.length && process.env.NODE_ENV === 'development') {
           console.log(`📈 COMPREHENSIVE-STRESS: Found ${lines.length} lines with stress data (was ${lineAnalyses.length})`)
         }
 
@@ -134,14 +139,14 @@ export function ComprehensiveStressPlugin({
       }
       timeoutId = setTimeout(() => {
         updateStressAnalysis()
-      }, 500) // Shorter debounce since we're just reading data, not making API calls
+      }, 1000) // Increased debounce to reduce conflicts with other plugins
     }
 
     const removeListener = editor.registerUpdateListener(({ tags }) => {
       // Trigger update on various changes, especially after stress detection
       if (tags.has('auto-stress-detection') || tags.has('history-push') || tags.has('collaboration')) {
         // Only log in debug mode to reduce noise
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
           console.log('🔄 COMPREHENSIVE-STRESS: Updating syllable counts after stress detection')
         }
         debouncedUpdate()

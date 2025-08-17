@@ -262,7 +262,7 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
       }
 
       loadSong()
-    }, [songId])
+    }, [songId, onClose, onSongLoaded])
 
     // Set up editor ready listener for stress processing
     useEffect(() => {
