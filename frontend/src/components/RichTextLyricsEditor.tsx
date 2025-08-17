@@ -872,7 +872,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
         console.log('🎯 RICH-TEXT-EDITOR: Update listener registered')
         return unregister
       },
-    }), [value, onChange, jumpToSection])
+    }), [jumpToSection])
 
     // Store editor reference
     const storeEditorRef = useCallback((editor: LexicalEditor) => {

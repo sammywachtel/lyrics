@@ -261,7 +261,7 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
       }
 
       loadSong()
-    }, [songId, onSongLoaded])
+    }, [songId, onSongLoaded, onClose])
 
     // Set up editor ready listener for stress processing
     useEffect(() => {
@@ -429,7 +429,7 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
           setIsSaving(false)
         }
       }
-    }, [song, songId, title, artist, status, tags, settings, onSongChange, onSettingsChange, onSaveStatusChange, onHasUnsavedChangesChange, isSaving])
+    }, [song, songId, title, artist, status, tags, settings, onSongChange, onSettingsChange, onSaveStatusChange, onHasUnsavedChangesChange, onAutoSaveStatusChange, isSaving])
 
     // Update save ref
     useEffect(() => {
@@ -676,7 +676,7 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
       } catch (error) {
         console.debug('Section detection error:', error)
       }
-    }, [plainTextRef.current, sections, currentSection])
+    }, [sections, currentSection])
 
     // Section manipulation functions
     const handleInsertSection = useCallback((sectionType: SectionType) => {

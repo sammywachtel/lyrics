@@ -34,7 +34,7 @@ export default function SectionLabelsPlugin(): null {
             paragraph.append(sectionNode)
             selection.insertNodes([paragraph])
           }
-        })
+        }, { tag: 'insert-section-tag-command' })
         return true
       },
       COMMAND_PRIORITY_EDITOR
@@ -64,7 +64,7 @@ export default function SectionLabelsPlugin(): null {
               contentParagraph.append($createTextNode(''))
               selection.insertNodes([contentParagraph])
             }
-          })
+          }, { tag: 'keyboard-insert-section' })
 
           return true
         }
@@ -103,7 +103,7 @@ export default function SectionLabelsPlugin(): null {
             }
           }
         })
-      })
+      }, { tag: 'auto-detect-section-tags' })
     })
 
     return () => {

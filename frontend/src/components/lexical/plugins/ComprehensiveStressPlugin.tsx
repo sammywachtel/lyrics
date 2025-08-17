@@ -154,7 +154,7 @@ export function ComprehensiveStressPlugin({
         clearTimeout(timeoutId)
       }
     }
-  }, [editor, enabled])
+  }, [editor, enabled, lineAnalyses.length])
 
   // Render syllable counts using React Portals
   const analysisElements = lineAnalyses.map((analysis) => {

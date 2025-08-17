@@ -5,7 +5,8 @@ import {
   $createTextNode,
   COMMAND_PRIORITY_EDITOR,
   createCommand,
-  type LexicalCommand
+  type LexicalCommand,
+  type LexicalNode
 } from 'lexical'
 import { useEffect } from 'react'
 import {
@@ -48,7 +49,7 @@ export default function SyllableMarkingPlugin(): null {
             } else {
               // Add syllable marking
               const words = selectedText.split(/(\s+)/)
-              const syllableNodes: import('lexical').LexicalNode[] = []
+              const syllableNodes: LexicalNode[] = []
 
               words.forEach(word => {
                 if (word.trim()) {
@@ -67,7 +68,7 @@ export default function SyllableMarkingPlugin(): null {
               selection.insertNodes(syllableNodes)
             }
           }
-        })
+        }, { tag: 'toggle-syllable-marking' })
         return true
       },
       COMMAND_PRIORITY_EDITOR
@@ -85,7 +86,7 @@ export default function SyllableMarkingPlugin(): null {
           if ($isRangeSelection(selection)) {
             selection.insertNodes([syllableNode])
           }
-        })
+        }, { tag: 'mark-word-syllables' })
         return true
       },
       COMMAND_PRIORITY_EDITOR
@@ -122,7 +123,7 @@ export default function SyllableMarkingPlugin(): null {
                         lexicalSelection.insertNodes([syllableNode])
                       }
                     }
-                  })
+                  }, { tag: 'double-click-syllable-mark' })
                 }
               }
             }
