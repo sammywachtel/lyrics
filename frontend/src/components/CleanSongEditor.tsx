@@ -200,12 +200,13 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
           const songData = await response.json()
           const actualSong = songData.song || songData
 
-          console.log('📂 Song loaded via direct fetch:', {
-            id: actualSong.id,
-            title: actualSong.title,
-            lyricsLength: actualSong.lyrics?.length || 0,
-            hasSettings: !!actualSong.settings
-          })
+          // Debug: Song loaded
+          // console.log('📂 Song loaded via direct fetch:', {
+          //   id: actualSong.id,
+          //   title: actualSong.title,
+          //   lyricsLength: actualSong.lyrics?.length || 0,
+          //   hasSettings: !!actualSong.settings
+          // })
 
           // Set all metadata state at once
           setSong(actualSong)
@@ -233,11 +234,11 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
             lastAutoSaveRef.current = actualSong.lyrics || ''
 
             // Post-load processing will be triggered by editor ready event
-            console.log('🔄 LOADING: Song loaded, waiting for editor to be ready...')
+            // console.log('🔄 LOADING: Song loaded, waiting for editor to be ready...')
 
             // End loading state after a brief delay (editor ready will handle stress processing)
             setTimeout(() => {
-              console.log('✅ LOADING: Full initialization complete, ending loading state')
+              // console.log('✅ LOADING: Full initialization complete, ending loading state')
               setIsLoading(false)
             }, 1000) // Shorter delay since we're not waiting for stress processing
           }, 1000) // Minimum loading time so user can see the loading state
@@ -261,21 +262,21 @@ export const CleanSongEditor = forwardRef<CleanSongEditorRef, CleanSongEditorPro
       }
 
       loadSong()
-    }, [songId, onSongLoaded, onClose])
+    }, [songId])
 
     // Set up editor ready listener for stress processing
     useEffect(() => {
       if (!wysiwygEditorRef.current || !song) return
 
-      console.log('🎯 EDITOR-SETUP: Setting up editor ready listener')
+      // console.log('🎯 EDITOR-SETUP: Setting up editor ready listener')
 
       const unregister = wysiwygEditorRef.current.onEditorReady(async () => {
-        console.log('✅ EDITOR-READY: Editor is ready, starting stress processing check')
+        // console.log('✅ EDITOR-READY: Editor is ready, starting stress processing check')
         await checkAndProcessStresses(song.lyrics || '')
       })
 
       return () => {
-        console.log('🧹 EDITOR-CLEANUP: Cleaning up editor ready listener')
+        // console.log('🧹 EDITOR-CLEANUP: Cleaning up editor ready listener')
         unregister()
       }
     }, [song, checkAndProcessStresses])

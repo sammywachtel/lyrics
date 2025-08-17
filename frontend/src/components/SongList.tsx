@@ -45,16 +45,16 @@ export function SongList({ onEditSong }: SongListProps) {
 
   const songs = songsData || []
 
-  // Debug: Enable to see RTK Query response
-  if (songsData) {
-    console.log('🎵 SongList received data:', {
-      songsData,
-      songsArray: songs,
-      songsLength: songs.length,
-      loading,
-      error
-    });
-  }
+  // Debug: Enable to see RTK Query response (commented out to prevent render loops)
+  // if (songsData) {
+  //   console.log('🎵 SongList received data:', {
+  //     songsData,
+  //     songsArray: songs,
+  //     songsLength: songs.length,
+  //     loading,
+  //     error
+  //   });
+  // }
 
 
   // Songs are automatically loaded via RTK Query
