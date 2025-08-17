@@ -4,7 +4,7 @@ Use these helpers across all Python tests for consistency
 """
 
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
