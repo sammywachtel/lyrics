@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react'
-import type { Song, SongSettings } from '../store/api/apiSlice'
-import { createDefaultSettings } from '../lib/api'
-import { useGetSongQuery, useUpdateSongMutation } from '../store/api/apiSlice'
+import type { Song, SongSettings } from '../lib/api'
+import { createDefaultSettings, backendApiClient } from '../lib/api'
 import SectionNavigation from './SectionNavigation'
 import SectionSidebar from './editor/SectionSidebar'
 import RichTextLyricsEditor, { type RichTextLyricsEditorRef } from './RichTextLyricsEditor'
@@ -70,90 +69,79 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
     }
   }, [])
 
-  // Load song data using RTK Query
-  const { data: songData, isLoading: isSongLoading, error: songError } = useGetSongQuery(songId)
-  const [updateSong] = useUpdateSongMutation()
-
-  // Set up local state when song data is loaded
+  // Load song data from API
   useEffect(() => {
-    if (songData && !isInitialized.current) {
-      // songData is directly the Song object from RTK Query
-      const actualSong = songData
-      const lyrics = actualSong.lyrics || ''
-      const loadedNewlineCount = (lyrics.match(/\n/g) || []).length
-      const loadedDoubleNewlineCount = (lyrics.match(/\n\n/g) || []).length
-      const loadedTripleNewlineCount = (lyrics.match(/\n\n\n/g) || []).length
+    const loadSong = async () => {
+      if (!songId || !isMountedRef.current) return
 
-      console.log('📂 Song loaded from RTK Query:', {
-        songData,
-        actualSong,
-        lyricsLength: lyrics.length,
-        newlineCount: loadedNewlineCount,
-        doubleNewlineCount: loadedDoubleNewlineCount,
-        tripleNewlineCount: loadedTripleNewlineCount,
-        firstChars: lyrics.slice(0, 50),
-        rawNewlines: JSON.stringify(lyrics.slice(0, 100)),
-        hasLyrics: !!lyrics,
-        lyricsType: typeof lyrics,
-        actualLyrics: lyrics
-      })
-
-      setSong(actualSong)
-      setTitle(actualSong.title || '')
-      setArtist(actualSong.artist || '')
-      setLyrics(lyrics)
-      setStatus(actualSong.status || 'draft')
-      setTags(actualSong.tags || [])
-      setSettings(songData.settings || createDefaultSettings())
+      setIsLoading(true)
       setError(null)
 
-      // Mark as initialized after data is loaded and UI has settled
-      setTimeout(() => {
-        isInitialized.current = true
-        // Set initial auto-save reference
-        lastAutoSaveRef.current = songData.lyrics
-      }, 500)
+      try {
+        const songData = await backendApiClient.getSong(songId)
 
-      // Notify parent of song load
-      if (onSongLoaded) {
-        setTimeout(() => {
-          onSongLoaded(actualSong)
-        }, 0)
+        if (!isMountedRef.current) return
+
+        setIsLoading(false)
+
+        // Process loaded song data (existing logic continues below)
+        if (songData?.song && !isInitialized.current) {
+          const actualSong = songData.song
+          const lyrics = actualSong.lyrics || ''
+          const loadedNewlineCount = (lyrics.match(/\n/g) || []).length
+          const loadedDoubleNewlineCount = (lyrics.match(/\n\n/g) || []).length
+          const loadedTripleNewlineCount = (lyrics.match(/\n\n\n/g) || []).length
+
+          console.log('📂 Song loaded from API:', {
+            songData,
+            actualSong,
+            lyricsLength: lyrics.length,
+            newlineCount: loadedNewlineCount,
+            doubleNewlineCount: loadedDoubleNewlineCount,
+            tripleNewlineCount: loadedTripleNewlineCount,
+            firstChars: lyrics.slice(0, 50),
+            rawNewlines: JSON.stringify(lyrics.slice(0, 100)),
+            hasLyrics: !!lyrics,
+            lyricsType: typeof lyrics,
+            actualLyrics: lyrics
+          })
+
+          setSong(actualSong)
+          setTitle(actualSong.title || '')
+          setArtist(actualSong.artist || '')
+          setLyrics(lyrics)
+          setStatus(actualSong.status || 'draft')
+          setTags(actualSong.tags || [])
+          setSettings(actualSong.settings || createDefaultSettings())
+          setError(null)
+
+          // Mark as initialized after data is loaded and UI has settled
+          setTimeout(() => {
+            isInitialized.current = true
+            // Set initial auto-save reference
+            lastAutoSaveRef.current = actualSong.lyrics
+          }, 500)
+
+          // Notify parent of song load
+          if (onSongLoaded) {
+            setTimeout(() => {
+              onSongLoaded(actualSong)
+            }, 0)
+          }
+        }
+      } catch (err) {
+        if (!isMountedRef.current) return
+
+        setIsLoading(false)
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load song'
+        setError(errorMessage)
+        console.error('Failed to load song:', err)
       }
     }
-  }, [songData, onSongLoaded])
 
-  // Handle RTK Query optimistic updates without disrupting the editor
-  useEffect(() => {
-    if (songData && isInitialized.current) {
-      // Only update song reference, NOT the lyrics content
-      // This prevents disrupting the Lexical editor during typing
-      const actualSong = songData
+    loadSong()
+  }, [songId, onSongLoaded])
 
-      // Update song metadata but preserve current lyrics state
-      setSong(prevSong => ({
-        ...actualSong,
-        lyrics: prevSong?.lyrics || actualSong.lyrics // Preserve current lyrics
-      }))
-
-      // Update other fields that don't affect editor content
-      setTitle(actualSong.title || '')
-      setArtist(actualSong.artist || '')
-      setStatus(actualSong.status || 'draft')
-      setTags(actualSong.tags || [])
-      setSettings(songData.settings || createDefaultSettings())
-    }
-  }, [songData])
-
-  // Handle loading and error states from RTK Query
-  useEffect(() => {
-    setIsLoading(isSongLoading)
-    if (songError) {
-      setError('error' in songError ? songError.error : 'Failed to load song')
-    } else {
-      setError(null)
-    }
-  }, [isSongLoading, songError])
 
   // Track changes and notify parent
   useEffect(() => {
@@ -242,11 +230,15 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         rawNewlines: JSON.stringify(finalLyrics.slice(0, 100))
       })
 
-      const response = await updateSong({ id: songId, ...updateData }).unwrap()
+      const response = await backendApiClient.updateSong(songId, updateData)
 
       if (!isMountedRef.current) return
 
-      const updatedSong = response
+      const updatedSong = response.song
+
+      if (!updatedSong) {
+        throw new Error('No song data in response')
+      }
 
       // Enhanced logging to debug newline issues - with null safety
       const responseLyrics = updatedSong.lyrics || ''
@@ -304,7 +296,7 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         setIsSaving(false)
       }
     }
-  }, [song, songId, title, artist, lyrics, status, tags, settings, onSongChange, onSettingsChange, onSaveStatusChange, onHasUnsavedChangesChange, isSaving, updateSong])
+  }, [song, songId, title, artist, lyrics, status, tags, settings, onSongChange, onSettingsChange, onSaveStatusChange, onHasUnsavedChangesChange, isSaving])
 
   // Update the ref whenever handleSave changes
   useEffect(() => {
@@ -379,7 +371,7 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         setAutoSaveStatus('error')
       }
     }
-  }, [song, isSaving, title, artist, lyrics, status, tags, settings, handleSave])
+  }, [song, isSaving, title, artist, lyrics, status, tags, settings, handleSave, onHasUnsavedChangesChange])
 
   // Update auto-save status when changes occur
   useEffect(() => {

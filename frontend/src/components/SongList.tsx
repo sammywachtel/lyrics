@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useGetSongsQuery, useDeleteSongMutation } from '../store/api/apiSlice'
+import { backendApiClient } from '../lib/api'
+import type { Song } from '../lib/api'
 import { SongCard } from './SongCard'
 import { SongForm } from './SongForm'
 import SearchBar from './SearchBar'
@@ -12,17 +13,37 @@ interface SongListProps {
 }
 
 export function SongList({ onEditSong }: SongListProps) {
-  const { data: songsData, isLoading: loading, error } = useGetSongsQuery()
-  const [deleteSong] = useDeleteSongMutation()
+  const [songsData, setSongsData] = useState<Song[] | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [currentSearch, setCurrentSearch] = useState<SearchFilters>({ query: '', status: 'all', tags: [], sortBy: 'updated_at', sortOrder: 'desc' })
   const [isSearching, setIsSearching] = useState(false)
 
-  // The backend returns { songs: [...], total: x, page: y, per_page: z }
-  // So we need to extract the songs array from the response
-  const songs = Array.isArray(songsData) ? songsData :
-                Array.isArray(songsData?.songs) ? songsData.songs : []
+  // Load songs from API
+  useEffect(() => {
+    const loadSongs = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await backendApiClient.listSongs()
+        // Handle response format - extract songs array if wrapped
+        const songs = Array.isArray(response) ? response :
+                      Array.isArray(response?.songs) ? response.songs : []
+        setSongsData(songs)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load songs')
+        console.error('Failed to load songs:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadSongs()
+  }, [])
+
+  const songs = songsData || []
 
   // Debug: Enable to see RTK Query response
   if (songsData) {
@@ -40,15 +61,27 @@ export function SongList({ onEditSong }: SongListProps) {
 
   // Separate effect to update search results when songs or search criteria change
   useEffect(() => {
-    if (songs.length > 0) {
-      const results = filterSongs(songs, currentSearch)
+    const songsArray = songsData || []
+    if (songsArray.length > 0) {
+      const results = filterSongs(songsArray, currentSearch)
       setSearchResults(results)
     }
-  }, [songs, currentSearch])
+  }, [songsData, currentSearch])
 
   const handleSongCreated = () => {
     setShowCreateForm(false)
-    // RTK Query will automatically refetch songs due to cache invalidation
+    // Refresh songs list after creation
+    const loadSongs = async () => {
+      try {
+        const response = await backendApiClient.listSongs()
+        const songs = Array.isArray(response) ? response :
+                      Array.isArray(response?.songs) ? response.songs : []
+        setSongsData(songs)
+      } catch (err) {
+        console.error('Failed to reload songs after creation:', err)
+      }
+    }
+    loadSongs()
   }
 
   // Handle search
@@ -70,8 +103,9 @@ export function SongList({ onEditSong }: SongListProps) {
     }
 
     try {
-      await deleteSong(songId).unwrap()
-      // RTK Query will automatically remove the song from cache
+      await backendApiClient.deleteSong(songId)
+      // Remove the song from local state
+      setSongsData(prev => prev ? prev.filter(song => song.id !== songId) : null)
     } catch (err) {
       console.error('Failed to delete song:', err)
     }
@@ -142,13 +176,7 @@ export function SongList({ onEditSong }: SongListProps) {
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-4">
                 <span className="text-red-500 text-lg">⚠️</span>
               </div>
-              <div className="text-red-800 font-medium">{
-                error && 'error' in error
-                  ? error.error
-                  : 'message' in error
-                    ? error.message
-                    : 'Failed to load songs'
-              }</div>
+              <div className="text-red-800 font-medium">{error}</div>
             </div>
           </div>
         )}

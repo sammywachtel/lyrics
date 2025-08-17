@@ -6,7 +6,7 @@ import { SongList } from './components/SongList'
 // import SongEditor from './components/SongEditor'
 import CleanSongEditor from './components/CleanSongEditor'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import type { Song, SongSettings } from './store/api/apiSlice'
+import type { Song, SongSettings } from './lib/api'
 
 function AppContent() {
   const { user, loading } = useAuth()

@@ -35,7 +35,7 @@ export function SectionDetectionPlugin(): null {
                 editor.update(() => {
                   const sectionNode = $createSectionNode(sectionName, sectionType)
                   child.replace(sectionNode)
-                })
+                }, { tag: 'section-detection' })
                 break // Exit loop and let the next update cycle handle more changes
               }
             } else {

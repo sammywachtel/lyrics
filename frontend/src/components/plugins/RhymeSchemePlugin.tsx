@@ -121,7 +121,7 @@ export default function RhymeSchemePlugin(): null {
           }
         }
       })
-    })
+    }, { tag: 'rhyme-scheme-update' })
   }, [editor, extractLineEndings])
 
   const removeRhymeScheme = useCallback(() => {
@@ -137,7 +137,7 @@ export default function RhymeSchemePlugin(): null {
           })
         }
       })
-    })
+    }, { tag: 'rhyme-scheme-remove' })
 
     setRhymeMap(new Map())
   }, [editor])

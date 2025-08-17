@@ -83,7 +83,7 @@ This runs:
 ### Authenticated Feature Tests
 - **Song List**: Tests song listing, empty states, and navigation
 - **Song Editor**: Tests editor loading and basic functionality
-- **API Integration**: Tests Redux store and API connectivity
+- **API Integration**: Tests direct API client connectivity
 
 ### Test Utilities
 

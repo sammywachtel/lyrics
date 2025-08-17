@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react'
-import type { Song, SongSettings } from '../store/api/apiSlice'
+import type { Song, SongSettings } from '../lib/api'
 import { createDefaultSettings } from '../lib/api'
 import { authService } from '../lib/authService'
 

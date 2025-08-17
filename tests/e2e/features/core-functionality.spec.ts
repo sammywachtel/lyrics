@@ -71,11 +71,11 @@ test.describe('Core App Functionality', () => {
     // Wait a moment for any async errors
     await page.waitForTimeout(2000);
 
-    // Allow Redux DevTools warnings but catch real errors
+    // Filter out development warnings but catch real errors
     const criticalErrors = errors.filter(error =>
-      !error.includes('Redux DevTools') &&
       !error.includes('Warning:') &&
-      !error.includes('Download the React DevTools')
+      !error.includes('Download the React DevTools') &&
+      !error.includes('React DevTools')
     );
 
     expect(criticalErrors).toHaveLength(0);
@@ -249,7 +249,7 @@ test.describe('API and State Management', () => {
     await page.goto('/');
   });
 
-  test('Redux store is functioning', async ({ page }) => {
+  test('React app loads and API client is functioning', async ({ page }) => {
 
     // Check that React app loaded correctly
     const reactAppLoaded = await page.evaluate(() => {

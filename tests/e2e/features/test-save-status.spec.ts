@@ -2,7 +2,7 @@
  * E2E Tests for Save Status Functionality
  *
  * These tests verify that save status indicators work correctly
- * and that Redux integration doesn't break save state management.
+ * and that direct API integration doesn't break save state management.
  */
 
 import { test, expect, Page } from '@playwright/test';

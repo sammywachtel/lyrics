@@ -123,7 +123,7 @@ function SectionTagComponent({ sectionName, nodeKey, editor }: SectionTagCompone
         if (node) {
           node.setSectionName(editValue.trim())
         }
-      })
+      }, { tag: 'section-tag-update' })
     }
     setIsEditing(false)
   }
@@ -144,7 +144,7 @@ function SectionTagComponent({ sectionName, nodeKey, editor }: SectionTagCompone
       if (node) {
         node.remove()
       }
-    })
+    }, { tag: 'section-tag-delete' })
   }
 
   // Get section icon based on type

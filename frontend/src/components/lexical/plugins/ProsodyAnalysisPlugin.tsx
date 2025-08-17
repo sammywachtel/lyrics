@@ -174,7 +174,7 @@ export function ProsodyAnalysisPlugin(): null {
           }
         }
       }
-    })
+    }, { tag: 'prosody-analysis' })
   }, [editor])
 
   useEffect(() => {

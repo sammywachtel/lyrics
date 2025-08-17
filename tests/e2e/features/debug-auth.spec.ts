@@ -72,20 +72,20 @@ test.describe('Authentication Debug', () => {
     }
   });
 
-  test('Direct test of Redux store', async ({ page }) => {
+  test('Direct test of app state', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Check if Redux store is accessible
-    const reduxState = await page.evaluate(() => {
-      // Try to access Redux store from window (if DevTools are enabled)
-      return (window as any).__REDUX_DEVTOOLS_EXTENSION__ ? 'Redux DevTools Available' : 'Redux DevTools Not Found';
+    // Check if app is accessible
+    const appState = await page.evaluate(() => {
+      // Check if React is working
+      return document.querySelector('#root') ? 'React App Loaded' : 'React App Not Found';
     });
 
-    console.log('Redux status:', reduxState);
+    console.log('App status:', appState);
 
-    // Try to check store directly
-    const storeCheck = await page.evaluate(() => {
+    // Try to check React app directly
+    const appCheck = await page.evaluate(() => {
       try {
         // Check if React components are still mounted
         const reactRoot = document.getElementById('root');
@@ -101,7 +101,7 @@ test.describe('Authentication Debug', () => {
       }
     });
 
-    console.log('React app status:', storeCheck);
+    console.log('React app status:', appCheck);
   });
 
 });

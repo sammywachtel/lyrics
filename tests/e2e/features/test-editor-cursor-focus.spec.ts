@@ -2,7 +2,7 @@
  * E2E Tests for Editor Cursor Focus Issues
  *
  * These tests verify that the cursor focus is maintained while typing
- * and that the Redux integration doesn't break editor functionality.
+ * and that the direct API integration doesn't break editor functionality.
  */
 
 import { test, expect, Page } from '@playwright/test';

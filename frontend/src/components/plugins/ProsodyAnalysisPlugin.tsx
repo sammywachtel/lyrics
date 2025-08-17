@@ -61,7 +61,7 @@ export default function ProsodyAnalysisPlugin(): null {
           }
         }
       })
-    })
+    }, { tag: 'prosody-analysis-document' })
   }, [editor])
 
   const removeProsodyAnalysis = useCallback(() => {
@@ -117,7 +117,7 @@ export default function ProsodyAnalysisPlugin(): null {
           const prosodyData = analyzeProsody(lineText)
           // This could be used to update a specific line's analysis
           console.log('Line prosody analysis:', prosodyData)
-        })
+        }, { tag: 'prosody-analysis-line' })
         return true
       },
       COMMAND_PRIORITY_EDITOR

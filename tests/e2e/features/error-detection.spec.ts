@@ -107,9 +107,9 @@ test.describe('Enhanced Error Detection', () => {
 
   function filterCriticalConsoleErrors(consoleErrors: any[]) {
     return consoleErrors.filter(error =>
-      !error.text.includes('Redux DevTools') &&
       !error.text.includes('Warning:') &&
       !error.text.includes('Download the React DevTools') &&
+      !error.text.includes('React DevTools') &&
       !error.text.includes('favicon.ico') &&
       !error.text.includes('chunk-') &&
       !error.text.includes('sourcemap') &&
