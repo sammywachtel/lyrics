@@ -1,5 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $isTextNode, $isElementNode, TextNode, type LexicalNode } from 'lexical'
+import type { TextNode} from 'lexical';
+import { $isTextNode, $isElementNode, type LexicalNode, $getNodeByKey, $getRoot } from 'lexical'
 import { useEffect } from 'react'
 import { $createStressedTextNode, $isStressedTextNode } from '../nodes/StressedTextNode'
 import { $isSectionParagraphNode } from '../nodes/SectionParagraphNode'
@@ -15,14 +16,15 @@ interface StableTextToStressedPluginProps {
  */
 export function StableTextToStressedPlugin({
   enabled = true,
-  debounceMs = 2000 // Wait 2 seconds after changes stop
+  debounceMs = 500 // Reduced from 2000ms for better responsiveness
 }: StableTextToStressedPluginProps) {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
-    console.log('🚀 STABLE-PLUGIN: Plugin mounted, enabled:', enabled, 'debounceMs:', debounceMs)
+    const isDev = process.env.NODE_ENV === 'development'
+    if (isDev) console.log('🚀 STABLE-PLUGIN: Plugin mounted, enabled:', enabled, 'debounceMs:', debounceMs)
     if (!enabled) {
-      console.log('🚫 STABLE-PLUGIN: Plugin disabled')
+      if (isDev) console.log('🚫 STABLE-PLUGIN: Plugin disabled')
       return
     }
 
@@ -33,7 +35,12 @@ export function StableTextToStressedPlugin({
     const convertStableTextNodes = () => {
       console.log('🔄 STABLE-PLUGIN: Starting analysis and conversion process...')
       if (isConverting) {
-        console.log('🚫 STABLE-PLUGIN: Conversion already in progress, skipping')
+        console.log('🔄 STABLE-PLUGIN: Conversion already in progress, will reschedule after current conversion')
+        // Schedule another conversion after current one finishes instead of skipping
+        setTimeout(() => {
+          console.log('🔄 STABLE-PLUGIN: Rescheduling conversion after current one finished')
+          scheduleConversion()
+        }, 1100) // Wait slightly longer than the isConverting reset (1000ms)
         return
       }
 
@@ -92,9 +99,17 @@ export function StableTextToStressedPlugin({
                 // 1. Have substantial content (>2 chars)
                 // 2. Have 0 stress patterns OR patterns for words that don't match current content
                 const words = text.split(/\s+/).filter(w => w.trim().length > 0)
+                console.log(`🔍 STABLE-PLUGIN: Checking StressedTextNode "${text}" with ${patterns.size} patterns:`, Array.from(patterns.keys()))
                 const wordsNeedingPatterns = words.filter(word => {
                   const cleanWord = word.replace(/[^\w']/g, '').toLowerCase()
-                  return cleanWord.length > 2 && !patterns.has(cleanWord)
+                  const hasPattern = patterns.has(cleanWord)
+                  const needsPattern = cleanWord.length > 2 && !hasPattern
+
+                  if (cleanWord.length > 2) {
+                    console.log(`🔍 STABLE-PLUGIN: Word "${cleanWord}" - hasPattern: ${hasPattern}, needsPattern: ${needsPattern}`)
+                  }
+
+                  return needsPattern
                 })
 
                 if (text.trim().length > 2 && (patterns.size === 0 || wordsNeedingPatterns.length > 0)) {
@@ -108,7 +123,7 @@ export function StableTextToStressedPlugin({
         }
 
         // Start from root and collect text nodes
-        const root = editor.getEditorState()._nodeMap.get('root')
+        const root = $getRoot()
         console.log('🌳 STABLE-PLUGIN: Root node found:', !!root)
         if (root) {
           collectTextNodes(root)
@@ -192,12 +207,17 @@ export function StableTextToStressedPlugin({
       let hasContentChanges = false
 
       if (dirtyLeaves.size > 0) {
-        dirtyLeaves.forEach(nodeKey => {
-          const node = editor.getEditorState()._nodeMap.get(nodeKey)
-          // Check for any text-containing nodes (TextNode or StressedTextNode)
-          if ($isTextNode(node) || $isStressedTextNode(node)) {
-            hasContentChanges = true
-          }
+        // CRITICAL FIX: Wrap $getNodeByKey in editor.read() to comply with Lexical state management
+        hasContentChanges = editor.getEditorState().read(() => {
+          let changes = false
+          dirtyLeaves.forEach(nodeKey => {
+            const node = $getNodeByKey(nodeKey)
+            // Check for any text-containing nodes (TextNode or StressedTextNode)
+            if ($isTextNode(node) || $isStressedTextNode(node)) {
+              changes = true
+            }
+          })
+          return changes
         })
       }
 
@@ -208,13 +228,13 @@ export function StableTextToStressedPlugin({
     })
 
     // Also run an initial conversion after a delay
-    console.log('🏁 STABLE-PLUGIN: Setting up initial conversion in 1000ms')
+    console.log('🏁 STABLE-PLUGIN: Setting up initial conversion in 100ms')
     const initialTimeout = setTimeout(() => {
       console.log('🏁 STABLE-PLUGIN: Initial timeout fired')
       requestAnimationFrame(() => {
         convertStableTextNodes()
       })
-    }, 1000)
+    }, 100)
 
     return () => {
       removeListener()

@@ -88,7 +88,7 @@ export default function StressContextMenu({
       if ($isStressedTextNode(node)) {
         node.toggleSyllableStress(word, syllableIdx)
       }
-    })
+    }, { tag: 'stress-context-toggle' })
 
     onClose()
   }, [editor, word, contextState.nodeKey, onClose])
@@ -101,7 +101,7 @@ export default function StressContextMenu({
       if ($isStressedTextNode(node)) {
         node.setStressPattern(word, pattern)
       }
-    })
+    }, { tag: 'stress-context-set-pattern' })
 
     onClose()
   }, [editor, word, contextState.nodeKey, onClose])
@@ -114,7 +114,7 @@ export default function StressContextMenu({
       if ($isStressedTextNode(node)) {
         node.clearStressPattern(word)
       }
-    })
+    }, { tag: 'stress-context-clear' })
 
     onClose()
   }, [editor, word, contextState.nodeKey, onClose])

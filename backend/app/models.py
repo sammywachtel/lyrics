@@ -171,7 +171,7 @@ class NarrativeSettings(BaseModel):
     )
     central_theme: Optional[str] = Field(None, description="Main theme or message")
     six_best_friends: SixBestFriends = Field(
-        default_factory=SixBestFriends, description="Core story elements"
+        default_factory=lambda: SixBestFriends(), description="Core story elements"
     )
 
 
@@ -196,10 +196,10 @@ class SoundSettings(BaseModel):
     """Sound tab - Rhyme schemes and prosody."""
 
     rhyme_preferences: RhymePreferences = Field(
-        default_factory=RhymePreferences, description="Rhyme settings"
+        default_factory=lambda: RhymePreferences(), description="Rhyme settings"
     )
     prosody_settings: ProsodySettings = Field(
-        default_factory=ProsodySettings, description="Rhythm and meter"
+        default_factory=lambda: ProsodySettings(), description="Rhythm and meter"
     )
     syllable_emphasis: bool = Field(
         True, description="Consider syllable stress patterns"
@@ -264,34 +264,34 @@ class SongSettings(BaseModel):
 
     # Foundation tab - Core narrative
     foundation: NarrativeSettings = Field(
-        default_factory=NarrativeSettings,
+        default_factory=lambda: NarrativeSettings(),
         description="Foundation/narrative settings",
     )
 
     # Structure tab - Song organization
     structure: StructureSettings = Field(
-        default_factory=StructureSettings, description="Structure settings"
+        default_factory=lambda: StructureSettings(), description="Structure settings"
     )
 
     # Sound tab - Rhyme and prosody
     sound: SoundSettings = Field(
-        default_factory=SoundSettings, description="Sound/prosody settings"
+        default_factory=lambda: SoundSettings(), description="Sound/prosody settings"
     )
 
     # Style tab - Genre and artistic direction
     style: StyleSettings = Field(
-        default_factory=StyleSettings, description="Style and genre settings"
+        default_factory=lambda: StyleSettings(), description="Style and genre settings"
     )
 
     # Content tab - Keywords and content guidelines
     content: ContentSettings = Field(
-        default_factory=ContentSettings,
+        default_factory=lambda: ContentSettings(),
         description="Content management settings",
     )
 
     # AI tab - AI assistance configuration
     ai: AISettings = Field(
-        default_factory=AISettings, description="AI assistance settings"
+        default_factory=lambda: AISettings(), description="AI assistance settings"
     )
 
     # Backwards compatibility fields (deprecated but maintained)
@@ -402,7 +402,8 @@ class SongBase(BaseModel):
     status: SongStatus = Field(SongStatus.DRAFT, description="Song status")
     tags: List[str] = Field(default_factory=list, description="Tags for categorization")
     settings: SongSettings = Field(
-        default_factory=SongSettings, description="Comprehensive song settings"
+        default_factory=lambda: SongSettings(),
+        description="Comprehensive song settings",
     )
     metadata: Dict[str, Any] = Field(
         default_factory=dict,
@@ -522,7 +523,7 @@ class SongVersion(BaseModel):
         description="Settings at this version",
     )
     prosody_config: ProsodyConfig = Field(
-        default_factory=ProsodyConfig,
+        default_factory=lambda: ProsodyConfig(),
         description="Prosody config at this version",
     )
     change_summary: Optional[str] = Field(

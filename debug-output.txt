@@ -1,0 +1,1304 @@
+StableTextToStressedPlugin.tsx:205 📝 STABLE-PLUGIN: Content changes detected, scheduling analysis
+StableTextToStressedPlugin.tsx:168 ⏱️ STABLE-PLUGIN: Scheduling conversion in 3000 ms
+AutoStressDetectionPlugin.tsx:203 🎯 AUTO-DETECT: StressedTextNode changes detected, triggering analysis
+CleanSongEditor.tsx:424 🔍 CALLBACK: handlePlainTextChange called with: {length: 143, isInitialized: true, preview: 'Hello world\nThis is the second...', songLyricsLength: 2647, contentMatches: false}
+CleanSongEditor.tsx:447 🔍 PLAIN TEXT CHANGE DETECTED - updating state: {plainTextLength: 143, savedLyricsLength: 2647, different: true}
+App.tsx:82 🔄 App.handleHasUnsavedChangesChange: true
+App.tsx:77 🔄 App.handleAutoSaveStatusChange: pending
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'pending', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'pending', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+App.tsx:77 🔄 App.handleAutoSaveStatusChange: pending
+CleanSongEditor.tsx:424 🔍 CALLBACK: handlePlainTextChange called with: {length: 143, isInitialized: true, preview: 'Hello world\nThis is the second...', songLyricsLength: 2647, contentMatches: false}
+CleanSongEditor.tsx:447 🔍 PLAIN TEXT CHANGE DETECTED - updating state: {plainTextLength: 143, savedLyricsLength: 2647, different: true}
+App.tsx:82 🔄 App.handleHasUnsavedChangesChange: true
+App.tsx:77 🔄 App.handleAutoSaveStatusChange: pending
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'pending', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'pending', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+StableTextToStressedPlugin.tsx:175 ⏰ STABLE-PLUGIN: Timeout fired, starting conversion
+StableTextToStressedPlugin.tsx:34 🔄 STABLE-PLUGIN: Starting analysis and conversion process...
+StableTextToStressedPlugin.tsx:112 🌳 STABLE-PLUGIN: Root node found: true
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: []
+StableTextToStressedPlugin.tsx:61 🔍 STABLE-PLUGIN: Regular paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:117 📊 STABLE-PLUGIN: Found 0 text nodes to convert
+StableTextToStressedPlugin.tsx:118 🔍 STABLE-PLUGIN: Found 0 StressedTextNodes needing analysis
+StableTextToStressedPlugin.tsx:153 ✅ STABLE-PLUGIN: Process complete: 0 nodes converted, 0 nodes marked for analysis
+AutoStressDetectionPlugin.tsx:117 📊 AUTO-DETECT: Starting analysis of 8 StressedTextNodes
+StableTextToStressedPlugin.tsx:205 📝 STABLE-PLUGIN: Content changes detected, scheduling analysis
+StableTextToStressedPlugin.tsx:168 ⏱️ STABLE-PLUGIN: Scheduling conversion in 3000 ms
+StressMarkDecoratorPlugin.tsx:233 🔄 STRESS-DECORATOR: Stress-related update, updating overlays
+AutoStressDetectionPlugin.tsx:181 🏷️ AUTO-DETECT: Ignoring own update to prevent loop
+CleanSongEditor.tsx:424 🔍 CALLBACK: handlePlainTextChange called with: {length: 143, isInitialized: true, preview: 'Hello world\nThis is the second...', songLyricsLength: 2647, contentMatches: false}
+CleanSongEditor.tsx:447 🔍 PLAIN TEXT CHANGE DETECTED - updating state: {plainTextLength: 143, savedLyricsLength: 2647, different: true}
+App.tsx:82 🔄 App.handleHasUnsavedChangesChange: true
+App.tsx:77 🔄 App.handleAutoSaveStatusChange: pending
+AutoStressDetectionPlugin.tsx:139 Auto stress detection failed for node: Error: Unable to find an active editor state. State helpers or node methods can only be used synchronously during the callback of editor.update(), editor.read(), or editorState.read(). Detected on the page: 1 compatible editor(s) with version 0.34.0+dev.esm
+    at formatDevErrorMessage (chunk-5VGPTO6T.js?v=f719e459:3:9)
+    at getActiveEditorState (chunk-5VGPTO6T.js?v=f719e459:6531:7)
+    at $getNodeByKey (chunk-5VGPTO6T.js?v=f719e459:9224:39)
+    at StressedTextNode.getLatest (chunk-5VGPTO6T.js?v=f719e459:2825:20)
+    at StressedTextNode.getTextContent (chunk-5VGPTO6T.js?v=f719e459:3611:23)
+    at AutoStressDetectionPlugin.tsx:136:79
+overrideMethod @ hook.js:608
+(anonymous) @ AutoStressDetectionPlugin.tsx:139
+Promise.catch
+(anonymous) @ AutoStressDetectionPlugin.tsx:138
+editor.update.tag @ AutoStressDetectionPlugin.tsx:120
+$beginUpdate @ chunk-5VGPTO6T.js?v=f719e459:7068
+updateEditor @ chunk-5VGPTO6T.js?v=f719e459:7147
+update @ chunk-5VGPTO6T.js?v=f719e459:8863
+(anonymous) @ AutoStressDetectionPlugin.tsx:98
+requestAnimationFrame
+(anonymous) @ AutoStressDetectionPlugin.tsx:77
+setTimeout
+triggerAutoDetection @ AutoStressDetectionPlugin.tsx:67
+(anonymous) @ AutoStressDetectionPlugin.tsx:204
+triggerListeners @ chunk-5VGPTO6T.js?v=f719e459:6931
+$commitPendingUpdates @ chunk-5VGPTO6T.js?v=f719e459:6889
+(anonymous) @ chunk-5VGPTO6T.js?v=f719e459:7124
+AutoStressDetectionPlugin.tsx:139 Auto stress detection failed for node: Error: Unable to find an active editor state. State helpers or node methods can only be used synchronously during the callback of editor.update(), editor.read(), or editorState.read(). Detected on the page: 1 compatible editor(s) with version 0.34.0+dev.esm
+    at formatDevErrorMessage (chunk-5VGPTO6T.js?v=f719e459:3:9)
+    at getActiveEditorState (chunk-5VGPTO6T.js?v=f719e459:6531:7)
+    at $getNodeByKey (chunk-5VGPTO6T.js?v=f719e459:9224:39)
+    at StressedTextNode.getLatest (chunk-5VGPTO6T.js?v=f719e459:2825:20)
+    at StressedTextNode.getTextContent (chunk-5VGPTO6T.js?v=f719e459:3611:23)
+    at AutoStressDetectionPlugin.tsx:136:79
+overrideMethod @ hook.js:608
+(anonymous) @ AutoStressDetectionPlugin.tsx:139
+Promise.catch
+(anonymous) @ AutoStressDetectionPlugin.tsx:138
+editor.update.tag @ AutoStressDetectionPlugin.tsx:120
+$beginUpdate @ chunk-5VGPTO6T.js?v=f719e459:7068
+updateEditor @ chunk-5VGPTO6T.js?v=f719e459:7147
+update @ chunk-5VGPTO6T.js?v=f719e459:8863
+(anonymous) @ AutoStressDetectionPlugin.tsx:98
+requestAnimationFrame
+(anonymous) @ AutoStressDetectionPlugin.tsx:77
+setTimeout
+triggerAutoDetection @ AutoStressDetectionPlugin.tsx:67
+(anonymous) @ AutoStressDetectionPlugin.tsx:204
+triggerListeners @ chunk-5VGPTO6T.js?v=f719e459:6931
+$commitPendingUpdates @ chunk-5VGPTO6T.js?v=f719e459:6889
+(anonymous) @ chunk-5VGPTO6T.js?v=f719e459:7124
+AutoStressDetectionPlugin.tsx:139 Auto stress detection failed for node: Error: Unable to find an active editor state. State helpers or node methods can only be used synchronously during the callback of editor.update(), editor.read(), or editorState.read(). Detected on the page: 1 compatible editor(s) with version 0.34.0+dev.esm
+    at formatDevErrorMessage (chunk-5VGPTO6T.js?v=f719e459:3:9)
+    at getActiveEditorState (chunk-5VGPTO6T.js?v=f719e459:6531:7)
+    at $getNodeByKey (chunk-5VGPTO6T.js?v=f719e459:9224:39)
+    at StressedTextNode.getLatest (chunk-5VGPTO6T.js?v=f719e459:2825:20)
+    at StressedTextNode.getTextContent (chunk-5VGPTO6T.js?v=f719e459:3611:23)
+    at AutoStressDetectionPlugin.tsx:136:79
+overrideMethod @ hook.js:608
+(anonymous) @ AutoStressDetectionPlugin.tsx:139
+Promise.catch
+(anonymous) @ AutoStressDetectionPlugin.tsx:138
+editor.update.tag @ AutoStressDetectionPlugin.tsx:120
+$beginUpdate @ chunk-5VGPTO6T.js?v=f719e459:7068
+updateEditor @ chunk-5VGPTO6T.js?v=f719e459:7147
+update @ chunk-5VGPTO6T.js?v=f719e459:8863
+(anonymous) @ AutoStressDetectionPlugin.tsx:98
+requestAnimationFrame
+(anonymous) @ AutoStressDetectionPlugin.tsx:77
+setTimeout
+triggerAutoDetection @ AutoStressDetectionPlugin.tsx:67
+(anonymous) @ AutoStressDetectionPlugin.tsx:204
+triggerListeners @ chunk-5VGPTO6T.js?v=f719e459:6931
+$commitPendingUpdates @ chunk-5VGPTO6T.js?v=f719e459:6889
+(anonymous) @ chunk-5VGPTO6T.js?v=f719e459:7124
+AutoStressDetectionPlugin.tsx:139 Auto stress detection failed for node: Error: Unable to find an active editor state. State helpers or node methods can only be used synchronously during the callback of editor.update(), editor.read(), or editorState.read(). Detected on the page: 1 compatible editor(s) with version 0.34.0+dev.esm
+    at formatDevErrorMessage (chunk-5VGPTO6T.js?v=f719e459:3:9)
+    at getActiveEditorState (chunk-5VGPTO6T.js?v=f719e459:6531:7)
+    at $getNodeByKey (chunk-5VGPTO6T.js?v=f719e459:9224:39)
+    at StressedTextNode.getLatest (chunk-5VGPTO6T.js?v=f719e459:2825:20)
+    at StressedTextNode.getTextContent (chunk-5VGPTO6T.js?v=f719e459:3611:23)
+    at AutoStressDetectionPlugin.tsx:136:79
+overrideMethod @ hook.js:608
+(anonymous) @ AutoStressDetectionPlugin.tsx:139
+Promise.catch
+(anonymous) @ AutoStressDetectionPlugin.tsx:138
+editor.update.tag @ AutoStressDetectionPlugin.tsx:120
+$beginUpdate @ chunk-5VGPTO6T.js?v=f719e459:7068
+updateEditor @ chunk-5VGPTO6T.js?v=f719e459:7147
+update @ chunk-5VGPTO6T.js?v=f719e459:8863
+(anonymous) @ AutoStressDetectionPlugin.tsx:98
+requestAnimationFrame
+(anonymous) @ AutoStressDetectionPlugin.tsx:77
+setTimeout
+triggerAutoDetection @ AutoStressDetectionPlugin.tsx:67
+(anonymous) @ AutoStressDetectionPlugin.tsx:204
+triggerListeners @ chunk-5VGPTO6T.js?v=f719e459:6931
+$commitPendingUpdates @ chunk-5VGPTO6T.js?v=f719e459:6889
+(anonymous) @ chunk-5VGPTO6T.js?v=f719e459:7124
+AutoStressDetectionPlugin.tsx:139 Auto stress detection failed for node: Error: Unable to find an active editor state. State helpers or node methods can only be used synchronously during the callback of editor.update(), editor.read(), or editorState.read(). Detected on the page: 1 compatible editor(s) with version 0.34.0+dev.esm
+    at formatDevErrorMessage (chunk-5VGPTO6T.js?v=f719e459:3:9)
+    at getActiveEditorState (chunk-5VGPTO6T.js?v=f719e459:6531:7)
+    at $getNodeByKey (chunk-5VGPTO6T.js?v=f719e459:9224:39)
+    at StressedTextNode.getLatest (chunk-5VGPTO6T.js?v=f719e459:2825:20)
+    at StressedTextNode.getTextContent (chunk-5VGPTO6T.js?v=f719e459:3611:23)
+    at AutoStressDetectionPlugin.tsx:136:79
+overrideMethod @ hook.js:608
+(anonymous) @ AutoStressDetectionPlugin.tsx:139
+Promise.catch
+(anonymous) @ AutoStressDetectionPlugin.tsx:138
+editor.update.tag @ AutoStressDetectionPlugin.tsx:120
+$beginUpdate @ chunk-5VGPTO6T.js?v=f719e459:7068
+updateEditor @ chunk-5VGPTO6T.js?v=f719e459:7147
+update @ chunk-5VGPTO6T.js?v=f719e459:8863
+(anonymous) @ AutoStressDetectionPlugin.tsx:98
+requestAnimationFrame
+(anonymous) @ AutoStressDetectionPlugin.tsx:77
+setTimeout
+triggerAutoDetection @ AutoStressDetectionPlugin.tsx:67
+(anonymous) @ AutoStressDetectionPlugin.tsx:204
+triggerListeners @ chunk-5VGPTO6T.js?v=f719e459:6931
+$commitPendingUpdates @ chunk-5VGPTO6T.js?v=f719e459:6889
+(anonymous) @ chunk-5VGPTO6T.js?v=f719e459:7124
+AutoStressDetectionPlugin.tsx:139 Auto stress detection failed for node: Error: Unable to find an active editor state. State helpers or node methods can only be used synchronously during the callback of editor.update(), editor.read(), or editorState.read(). Detected on the page: 1 compatible editor(s) with version 0.34.0+dev.esm
+    at formatDevErrorMessage (chunk-5VGPTO6T.js?v=f719e459:3:9)
+    at getActiveEditorState (chunk-5VGPTO6T.js?v=f719e459:6531:7)
+    at $getNodeByKey (chunk-5VGPTO6T.js?v=f719e459:9224:39)
+    at StressedTextNode.getLatest (chunk-5VGPTO6T.js?v=f719e459:2825:20)
+    at StressedTextNode.getTextContent (chunk-5VGPTO6T.js?v=f719e459:3611:23)
+    at AutoStressDetectionPlugin.tsx:136:79
+overrideMethod @ hook.js:608
+(anonymous) @ AutoStressDetectionPlugin.tsx:139
+Promise.catch
+(anonymous) @ AutoStressDetectionPlugin.tsx:138
+editor.update.tag @ AutoStressDetectionPlugin.tsx:120
+$beginUpdate @ chunk-5VGPTO6T.js?v=f719e459:7068
+updateEditor @ chunk-5VGPTO6T.js?v=f719e459:7147
+update @ chunk-5VGPTO6T.js?v=f719e459:8863
+(anonymous) @ AutoStressDetectionPlugin.tsx:98
+requestAnimationFrame
+(anonymous) @ AutoStressDetectionPlugin.tsx:77
+setTimeout
+triggerAutoDetection @ AutoStressDetectionPlugin.tsx:67
+(anonymous) @ AutoStressDetectionPlugin.tsx:204
+triggerListeners @ chunk-5VGPTO6T.js?v=f719e459:6931
+$commitPendingUpdates @ chunk-5VGPTO6T.js?v=f719e459:6889
+(anonymous) @ chunk-5VGPTO6T.js?v=f719e459:7124
+AutoStressDetectionPlugin.tsx:139 Auto stress detection failed for node: Error: Unable to find an active editor state. State helpers or node methods can only be used synchronously during the callback of editor.update(), editor.read(), or editorState.read(). Detected on the page: 1 compatible editor(s) with version 0.34.0+dev.esm
+    at formatDevErrorMessage (chunk-5VGPTO6T.js?v=f719e459:3:9)
+    at getActiveEditorState (chunk-5VGPTO6T.js?v=f719e459:6531:7)
+    at $getNodeByKey (chunk-5VGPTO6T.js?v=f719e459:9224:39)
+    at StressedTextNode.getLatest (chunk-5VGPTO6T.js?v=f719e459:2825:20)
+    at StressedTextNode.getTextContent (chunk-5VGPTO6T.js?v=f719e459:3611:23)
+    at AutoStressDetectionPlugin.tsx:136:79
+overrideMethod @ hook.js:608
+(anonymous) @ AutoStressDetectionPlugin.tsx:139
+Promise.catch
+(anonymous) @ AutoStressDetectionPlugin.tsx:138
+editor.update.tag @ AutoStressDetectionPlugin.tsx:120
+$beginUpdate @ chunk-5VGPTO6T.js?v=f719e459:7068
+updateEditor @ chunk-5VGPTO6T.js?v=f719e459:7147
+update @ chunk-5VGPTO6T.js?v=f719e459:8863
+(anonymous) @ AutoStressDetectionPlugin.tsx:98
+requestAnimationFrame
+(anonymous) @ AutoStressDetectionPlugin.tsx:77
+setTimeout
+triggerAutoDetection @ AutoStressDetectionPlugin.tsx:67
+(anonymous) @ AutoStressDetectionPlugin.tsx:204
+triggerListeners @ chunk-5VGPTO6T.js?v=f719e459:6931
+$commitPendingUpdates @ chunk-5VGPTO6T.js?v=f719e459:6889
+(anonymous) @ chunk-5VGPTO6T.js?v=f719e459:7124
+AutoStressDetectionPlugin.tsx:139 Auto stress detection failed for node: Error: Unable to find an active editor state. State helpers or node methods can only be used synchronously during the callback of editor.update(), editor.read(), or editorState.read(). Detected on the page: 1 compatible editor(s) with version 0.34.0+dev.esm
+    at formatDevErrorMessage (chunk-5VGPTO6T.js?v=f719e459:3:9)
+    at getActiveEditorState (chunk-5VGPTO6T.js?v=f719e459:6531:7)
+    at $getNodeByKey (chunk-5VGPTO6T.js?v=f719e459:9224:39)
+    at StressedTextNode.getLatest (chunk-5VGPTO6T.js?v=f719e459:2825:20)
+    at StressedTextNode.getTextContent (chunk-5VGPTO6T.js?v=f719e459:3611:23)
+    at AutoStressDetectionPlugin.tsx:136:79
+overrideMethod @ hook.js:608
+(anonymous) @ AutoStressDetectionPlugin.tsx:139
+Promise.catch
+(anonymous) @ AutoStressDetectionPlugin.tsx:138
+editor.update.tag @ AutoStressDetectionPlugin.tsx:120
+$beginUpdate @ chunk-5VGPTO6T.js?v=f719e459:7068
+updateEditor @ chunk-5VGPTO6T.js?v=f719e459:7147
+update @ chunk-5VGPTO6T.js?v=f719e459:8863
+(anonymous) @ AutoStressDetectionPlugin.tsx:98
+requestAnimationFrame
+(anonymous) @ AutoStressDetectionPlugin.tsx:77
+setTimeout
+triggerAutoDetection @ AutoStressDetectionPlugin.tsx:67
+(anonymous) @ AutoStressDetectionPlugin.tsx:204
+triggerListeners @ chunk-5VGPTO6T.js?v=f719e459:6931
+$commitPendingUpdates @ chunk-5VGPTO6T.js?v=f719e459:6889
+(anonymous) @ chunk-5VGPTO6T.js?v=f719e459:7124
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'pending', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'pending', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+StressMarkDecoratorPlugin.tsx:237 🔄 STRESS-DECORATOR: Content change detected, updating overlays
+CleanSongEditor.tsx:424 🔍 CALLBACK: handlePlainTextChange called with: {length: 143, isInitialized: true, preview: 'Hello world\nThis is the second...', songLyricsLength: 2647, contentMatches: false}
+CleanSongEditor.tsx:447 🔍 PLAIN TEXT CHANGE DETECTED - updating state: {plainTextLength: 143, savedLyricsLength: 2647, different: true}
+App.tsx:82 🔄 App.handleHasUnsavedChangesChange: true
+App.tsx:77 🔄 App.handleAutoSaveStatusChange: pending
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'pending', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'pending', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+StressMarkDecoratorPlugin.tsx:160 ✅ FOUND: StressedTextNode "Hello world" with 2 patterns
+StressMarkDecoratorPlugin.tsx:173 🔍 STRESS-DECORATOR: DOM element found: true
+StressMarkDecoratorPlugin.tsx:176 🔍 STRESS-DECORATOR: Element "Hello world" rect: DOMRect {x: 345, y: 201, width: 105.625, height: 20, top: 201, …}
+StressMarkDecoratorPlugin.tsx:181 🔍 STRESS-DECORATOR: Found 2 words: (2) ['Hello', 'world']
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "hello" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "Hello" from "Hello world" (0-5)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "Hello": DOMRect {x: 345, y: 201, width: 48.015625, height: 20, top: 201, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 201, width: 105.625, height: 20, top: 201, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "hello" rect: {left: 345, top: 201, width: 48.015625}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "hello" at (345, 201)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "Hello" from "Hello world" (0-5)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "Hello": DOMRect {x: 345, y: 201, width: 48.015625, height: 20, top: 201, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 201, width: 105.625, height: 20, top: 201, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "hello" → rect(345.0, 201.0) wordRect should be 201.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "world" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "world" from "Hello world" (6-11)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "world": DOMRect {x: 402.609375, y: 201, width: 48.015625, height: 20, top: 201, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 201, width: 105.625, height: 20, top: 201, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "world" rect: {left: 402.609375, top: 201, width: 48.015625}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "world" at (402.609375, 201)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "world" from "Hello world" (6-11)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "world": DOMRect {x: 402.609375, y: 201, width: 48.015625, height: 20, top: 201, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 201, width: 105.625, height: 20, top: 201, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "world" → rect(402.6, 201.0) wordRect should be 201.0
+StressMarkDecoratorPlugin.tsx:160 ✅ FOUND: StressedTextNode "This is the second line" with 5 patterns
+StressMarkDecoratorPlugin.tsx:173 🔍 STRESS-DECORATOR: DOM element found: true
+StressMarkDecoratorPlugin.tsx:176 🔍 STRESS-DECORATOR: Element "This is the second line" rect: DOMRect {x: 345, y: 224, width: 220.84375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:181 🔍 STRESS-DECORATOR: Found 5 words: (5) ['This', 'is', 'the', 'second', 'line']
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "this" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "This" from "This is the second line" (0-4)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "This": DOMRect {x: 345, y: 224, width: 38.40625, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 224, width: 220.84375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "this" rect: {left: 345, top: 224, width: 38.40625}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "this" at (345, 224)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "This" from "This is the second line" (0-4)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "This": DOMRect {x: 345, y: 224, width: 38.40625, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 224, width: 220.84375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "this" → rect(345.0, 224.0) wordRect should be 224.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "is" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "is" from "This is the second line" (5-7)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "is": DOMRect {x: 393, y: 224, width: 19.21875, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 224, width: 220.84375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "is" rect: {left: 393, top: 224, width: 19.21875}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "is" at (393, 224)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "is" from "This is the second line" (5-7)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "is": DOMRect {x: 393, y: 224, width: 19.21875, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 224, width: 220.84375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "is" → rect(393.0, 224.0) wordRect should be 224.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "the" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "the" from "This is the second line" (8-11)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "the": DOMRect {x: 421.8125, y: 224, width: 28.8125, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 224, width: 220.84375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "the" rect: {left: 421.8125, top: 224, width: 28.8125}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "the" at (421.8125, 224)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "the" from "This is the second line" (8-11)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "the": DOMRect {x: 421.8125, y: 224, width: 28.8125, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 224, width: 220.84375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "the" → rect(421.8, 224.0) wordRect should be 224.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "second" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "second" from "This is the second line" (12-18)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "second": DOMRect {x: 460.21875, y: 224, width: 57.609375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 224, width: 220.84375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "second" rect: {left: 460.21875, top: 224, width: 57.609375}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "second" at (460.21875, 224)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "second" from "This is the second line" (12-18)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "second": DOMRect {x: 460.21875, y: 224, width: 57.609375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 224, width: 220.84375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "second" → rect(460.2, 224.0) wordRect should be 224.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "line" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "line" from "This is the second line" (19-23)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "line": DOMRect {x: 527.421875, y: 224, width: 38.421875, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 224, width: 220.84375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "line" rect: {left: 527.421875, top: 224, width: 38.421875}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "line" at (527.421875, 224)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "line" from "This is the second line" (19-23)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "line": DOMRect {x: 527.421875, y: 224, width: 38.421875, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 224, width: 220.84375, height: 20, top: 224, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "line" → rect(527.4, 224.0) wordRect should be 224.0
+StressMarkDecoratorPlugin.tsx:160 ✅ FOUND: StressedTextNode "how are you?" with 3 patterns
+StressMarkDecoratorPlugin.tsx:173 🔍 STRESS-DECORATOR: DOM element found: true
+StressMarkDecoratorPlugin.tsx:176 🔍 STRESS-DECORATOR: Element "how are you?" rect: DOMRect {x: 345, y: 247, width: 115.21875, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:181 🔍 STRESS-DECORATOR: Found 3 words: (3) ['how', 'are', 'you']
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "how" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "how" from "how are you?" (0-3)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "how": DOMRect {x: 345, y: 247, width: 28.8125, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 247, width: 115.21875, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "how" rect: {left: 345, top: 247, width: 28.8125}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "how" at (345, 247)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "how" from "how are you?" (0-3)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "how": DOMRect {x: 345, y: 247, width: 28.8125, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 247, width: 115.21875, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "how" → rect(345.0, 247.0) wordRect should be 247.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "are" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "are" from "how are you?" (4-7)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "are": DOMRect {x: 383.40625, y: 247, width: 28.8125, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 247, width: 115.21875, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "are" rect: {left: 383.40625, top: 247, width: 28.8125}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "are" at (383.40625, 247)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "are" from "how are you?" (4-7)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "are": DOMRect {x: 383.40625, y: 247, width: 28.8125, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 247, width: 115.21875, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "are" → rect(383.4, 247.0) wordRect should be 247.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "you" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "you" from "how are you?" (8-11)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "you": DOMRect {x: 421.8125, y: 247, width: 28.8125, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 247, width: 115.21875, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "you" rect: {left: 421.8125, top: 247, width: 28.8125}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "you" at (421.8125, 247)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "you" from "how are you?" (8-11)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "you": DOMRect {x: 421.8125, y: 247, width: 28.8125, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 247, width: 115.21875, height: 20, top: 247, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "you" → rect(421.8, 247.0) wordRect should be 247.0
+StressMarkDecoratorPlugin.tsx:160 ✅ FOUND: StressedTextNode "Look what we have accomplished" with 5 patterns
+StressMarkDecoratorPlugin.tsx:173 🔍 STRESS-DECORATOR: DOM element found: true
+StressMarkDecoratorPlugin.tsx:176 🔍 STRESS-DECORATOR: Element "Look what we have accomplished" rect: DOMRect {x: 345, y: 270, width: 288.046875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:181 🔍 STRESS-DECORATOR: Found 5 words: (5) ['Look', 'what', 'we', 'have', 'accomplished']
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "look" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "Look" from "Look what we have accomplished" (0-4)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "Look": DOMRect {x: 345, y: 270, width: 38.40625, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 270, width: 288.046875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "look" rect: {left: 345, top: 270, width: 38.40625}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "look" at (345, 270)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "Look" from "Look what we have accomplished" (0-4)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "Look": DOMRect {x: 345, y: 270, width: 38.40625, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 270, width: 288.046875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "look" → rect(345.0, 270.0) wordRect should be 270.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "what" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "what" from "Look what we have accomplished" (5-9)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "what": DOMRect {x: 393, y: 270, width: 38.421875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 270, width: 288.046875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "what" rect: {left: 393, top: 270, width: 38.421875}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "what" at (393, 270)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "what" from "Look what we have accomplished" (5-9)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "what": DOMRect {x: 393, y: 270, width: 38.421875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 270, width: 288.046875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "what" → rect(393.0, 270.0) wordRect should be 270.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "we" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "we" from "Look what we have accomplished" (10-12)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "we": DOMRect {x: 441.015625, y: 270, width: 19.203125, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 270, width: 288.046875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "we" rect: {left: 441.015625, top: 270, width: 19.203125}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "we" at (441.015625, 270)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "we" from "Look what we have accomplished" (10-12)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "we": DOMRect {x: 441.015625, y: 270, width: 19.203125, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 270, width: 288.046875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "we" → rect(441.0, 270.0) wordRect should be 270.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "have" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "have" from "Look what we have accomplished" (13-17)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "have": DOMRect {x: 469.8125, y: 270, width: 38.421875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 270, width: 288.046875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "have" rect: {left: 469.8125, top: 270, width: 38.421875}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "have" at (469.8125, 270)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "have" from "Look what we have accomplished" (13-17)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "have": DOMRect {x: 469.8125, y: 270, width: 38.421875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 270, width: 288.046875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "have" → rect(469.8, 270.0) wordRect should be 270.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "accomplished" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "accomplished" from "Look what we have accomplished" (18-30)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "accomplished": DOMRect {x: 517.828125, y: 270, width: 115.21875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 270, width: 288.046875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "accomplished" rect: {left: 517.828125, top: 270, width: 115.21875}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "accomplished" at (517.828125, 270)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "accomplished" from "Look what we have accomplished" (18-30)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "accomplished": DOMRect {x: 517.828125, y: 270, width: 115.21875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 270, width: 288.046875, height: 20, top: 270, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "accomplished" → rect(517.8, 270.0) wordRect should be 270.0
+StressMarkDecoratorPlugin.tsx:160 ✅ FOUND: StressedTextNode "I am jubilated" with 3 patterns
+StressMarkDecoratorPlugin.tsx:173 🔍 STRESS-DECORATOR: DOM element found: true
+StressMarkDecoratorPlugin.tsx:176 🔍 STRESS-DECORATOR: Element "I am jubilated" rect: DOMRect {x: 345, y: 293, width: 134.421875, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:181 🔍 STRESS-DECORATOR: Found 3 words: (3) ['I', 'am', 'jubilated']
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "i" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "I" from "I am jubilated" (0-1)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "I": DOMRect {x: 345, y: 293, width: 9.609375, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 293, width: 134.421875, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "i" rect: {left: 345, top: 293, width: 9.609375}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "i" at (345, 293)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "I" from "I am jubilated" (0-1)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "I": DOMRect {x: 345, y: 293, width: 9.609375, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 293, width: 134.421875, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "i" → rect(345.0, 293.0) wordRect should be 293.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "am" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "am" from "I am jubilated" (2-4)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "am": DOMRect {x: 364.203125, y: 293, width: 19.203125, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 293, width: 134.421875, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "am" rect: {left: 364.203125, top: 293, width: 19.203125}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "am" at (364.203125, 293)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "am" from "I am jubilated" (2-4)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "am": DOMRect {x: 364.203125, y: 293, width: 19.203125, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 293, width: 134.421875, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "am" → rect(364.2, 293.0) wordRect should be 293.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "jubilated" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "jubilated" from "I am jubilated" (5-14)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "jubilated": DOMRect {x: 393, y: 293, width: 86.421875, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 293, width: 134.421875, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "jubilated" rect: {left: 393, top: 293, width: 86.421875}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "jubilated" at (393, 293)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "jubilated" from "I am jubilated" (5-14)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "jubilated": DOMRect {x: 393, y: 293, width: 86.421875, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 293, width: 134.421875, height: 20, top: 293, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "jubilated" → rect(393.0, 293.0) wordRect should be 293.0
+StressMarkDecoratorPlugin.tsx:160 ✅ FOUND: StressedTextNode "My love is over there" with 5 patterns
+StressMarkDecoratorPlugin.tsx:173 🔍 STRESS-DECORATOR: DOM element found: true
+StressMarkDecoratorPlugin.tsx:176 🔍 STRESS-DECORATOR: Element "My love is over there" rect: DOMRect {x: 353, y: 324, width: 201.640625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:181 🔍 STRESS-DECORATOR: Found 5 words: (5) ['My', 'love', 'is', 'over', 'there']
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "my" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "My" from "My love is over there" (0-2)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "My": DOMRect {x: 353, y: 324, width: 19.203125, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 324, width: 201.640625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "my" rect: {left: 353, top: 324, width: 19.203125}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "my" at (353, 324)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "My" from "My love is over there" (0-2)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "My": DOMRect {x: 353, y: 324, width: 19.203125, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 324, width: 201.640625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "my" → rect(353.0, 324.0) wordRect should be 324.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "love" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "love" from "My love is over there" (3-7)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "love": DOMRect {x: 381.796875, y: 324, width: 38.421875, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 324, width: 201.640625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "love" rect: {left: 381.796875, top: 324, width: 38.421875}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "love" at (381.796875, 324)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "love" from "My love is over there" (3-7)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "love": DOMRect {x: 381.796875, y: 324, width: 38.421875, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 324, width: 201.640625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "love" → rect(381.8, 324.0) wordRect should be 324.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "is" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "is" from "My love is over there" (8-10)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "is": DOMRect {x: 429.8125, y: 324, width: 19.203125, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 324, width: 201.640625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "is" rect: {left: 429.8125, top: 324, width: 19.203125}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "is" at (429.8125, 324)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "is" from "My love is over there" (8-10)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "is": DOMRect {x: 429.8125, y: 324, width: 19.203125, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 324, width: 201.640625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "is" → rect(429.8, 324.0) wordRect should be 324.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "over" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "over" from "My love is over there" (11-15)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "over": DOMRect {x: 458.609375, y: 324, width: 38.421875, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 324, width: 201.640625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "over" rect: {left: 458.609375, top: 324, width: 38.421875}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "over" at (458.609375, 324)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "over" from "My love is over there" (11-15)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "over": DOMRect {x: 458.609375, y: 324, width: 38.421875, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 324, width: 201.640625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "over" → rect(458.6, 324.0) wordRect should be 324.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "there" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "there" from "My love is over there" (16-21)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "there": DOMRect {x: 506.625, y: 324, width: 48.015625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 324, width: 201.640625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "there" rect: {left: 506.625, top: 324, width: 48.015625}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "there" at (506.625, 324)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "there" from "My love is over there" (16-21)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "there": DOMRect {x: 506.625, y: 324, width: 48.015625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 324, width: 201.640625, height: 20, top: 324, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "there" → rect(506.6, 324.0) wordRect should be 324.0
+StressMarkDecoratorPlugin.tsx:160 ✅ FOUND: StressedTextNode "And I am over here" with 5 patterns
+StressMarkDecoratorPlugin.tsx:173 🔍 STRESS-DECORATOR: DOM element found: true
+StressMarkDecoratorPlugin.tsx:176 🔍 STRESS-DECORATOR: Element "And I am over here" rect: DOMRect {x: 353, y: 349, width: 172.828125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:181 🔍 STRESS-DECORATOR: Found 5 words: (5) ['And', 'I', 'am', 'over', 'here']
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "and" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "And" from "And I am over here" (0-3)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "And": DOMRect {x: 353, y: 349, width: 28.8125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 349, width: 172.828125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "and" rect: {left: 353, top: 349, width: 28.8125}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "and" at (353, 349)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "And" from "And I am over here" (0-3)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "And": DOMRect {x: 353, y: 349, width: 28.8125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 349, width: 172.828125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "and" → rect(353.0, 349.0) wordRect should be 349.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "i" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "I" from "And I am over here" (4-5)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "I": DOMRect {x: 391.40625, y: 349, width: 9.609375, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 349, width: 172.828125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "i" rect: {left: 391.40625, top: 349, width: 9.609375}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "i" at (391.40625, 349)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "I" from "And I am over here" (4-5)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "I": DOMRect {x: 391.40625, y: 349, width: 9.609375, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 349, width: 172.828125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "i" → rect(391.4, 349.0) wordRect should be 349.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "am" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "am" from "And I am over here" (6-8)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "am": DOMRect {x: 410.609375, y: 349, width: 19.203125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 349, width: 172.828125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "am" rect: {left: 410.609375, top: 349, width: 19.203125}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "am" at (410.609375, 349)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "am" from "And I am over here" (6-8)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "am": DOMRect {x: 410.609375, y: 349, width: 19.203125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 349, width: 172.828125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "am" → rect(410.6, 349.0) wordRect should be 349.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "over" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "over" from "And I am over here" (9-13)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "over": DOMRect {x: 439.40625, y: 349, width: 38.421875, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 349, width: 172.828125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "over" rect: {left: 439.40625, top: 349, width: 38.421875}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "over" at (439.40625, 349)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "over" from "And I am over here" (9-13)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "over": DOMRect {x: 439.40625, y: 349, width: 38.421875, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 349, width: 172.828125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "over" → rect(439.4, 349.0) wordRect should be 349.0
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "here" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "here" from "And I am over here" (14-18)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "here": DOMRect {x: 487.421875, y: 349, width: 38.40625, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 349, width: 172.828125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "here" rect: {left: 487.421875, top: 349, width: 38.40625}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "here" at (487.421875, 349)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "here" from "And I am over here" (14-18)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "here": DOMRect {x: 487.421875, y: 349, width: 38.40625, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 353, y: 349, width: 172.828125, height: 20, top: 349, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "here" → rect(487.4, 349.0) wordRect should be 349.0
+StressMarkDecoratorPlugin.tsx:160 ✅ FOUND: StressedTextNode "Yes!!!" with 1 patterns
+StressMarkDecoratorPlugin.tsx:173 🔍 STRESS-DECORATOR: DOM element found: true
+StressMarkDecoratorPlugin.tsx:176 🔍 STRESS-DECORATOR: Element "Yes!!!" rect: DOMRect {x: 345, y: 402.796875, width: 57.609375, height: 20, top: 402.796875, …}
+StressMarkDecoratorPlugin.tsx:181 🔍 STRESS-DECORATOR: Found 1 words: ['Yes']
+StressMarkDecoratorPlugin.tsx:186 🔍 STRESS-DECORATOR: Word "yes" has pattern: true
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "Yes" from "Yes!!!" (0-3)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "Yes": DOMRect {x: 345, y: 402.796875, width: 28.8125, height: 20, top: 402.796875, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 402.796875, width: 57.609375, height: 20, top: 402.796875, …}
+StressMarkDecoratorPlugin.tsx:191 🔍 STRESS-DECORATOR: Word "yes" rect: {left: 345, top: 402.796875, width: 28.8125}
+StressMarkDecoratorPlugin.tsx:194 📍 VIEWPORT: Using direct coordinates for "yes" at (345, 402.796875)
+StressMarkDecoratorPlugin.tsx:531 🔍 getWordRect: Selecting "Yes" from "Yes!!!" (0-3)
+StressMarkDecoratorPlugin.tsx:538 🔍 getWordRect: Range rect for "Yes": DOMRect {x: 345, y: 402.796875, width: 28.8125, height: 20, top: 402.796875, …}
+StressMarkDecoratorPlugin.tsx:542 🔍 getWordRect: Full element rect: DOMRect {x: 345, y: 402.796875, width: 57.609375, height: 20, top: 402.796875, …}
+StressMarkDecoratorPlugin.tsx:210 ✅ OVERLAY: "yes" → rect(345.0, 402.8) wordRect should be 402.8
+StressMarkDecoratorPlugin.tsx:223 🎨 STRESS-DECORATOR [ppk5v3n3z]: Updated overlays: 29
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+ComprehensiveStressPlugin.tsx:95 📈 COMPREHENSIVE-STRESS: updateStressAnalysis called, rootElement: true
+ComprehensiveStressPlugin.tsx:101 📈 COMPREHENSIVE-STRESS: Reading editor content...
+ComprehensiveStressPlugin.tsx:130 📈 COMPREHENSIVE-STRESS: Starting to process root node
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: root isParagraph: false isSection: false
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: section-paragraph isParagraph: true isSection: true
+ComprehensiveStressPlugin.tsx:108 📈 COMPREHENSIVE-STRESS: Node text content: Hello world
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: stressed-text isParagraph: false isSection: false
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: section-paragraph isParagraph: true isSection: true
+ComprehensiveStressPlugin.tsx:108 📈 COMPREHENSIVE-STRESS: Node text content: This is the second line
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: stressed-text isParagraph: false isSection: false
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: section-paragraph isParagraph: true isSection: true
+ComprehensiveStressPlugin.tsx:108 📈 COMPREHENSIVE-STRESS: Node text content: how are you?
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: stressed-text isParagraph: false isSection: false
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: section-paragraph isParagraph: true isSection: true
+ComprehensiveStressPlugin.tsx:108 📈 COMPREHENSIVE-STRESS: Node text content: Look what we have accomplished
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: stressed-text isParagraph: false isSection: false
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: section-paragraph isParagraph: true isSection: true
+ComprehensiveStressPlugin.tsx:108 📈 COMPREHENSIVE-STRESS: Node text content: I am jubilated
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: stressed-text isParagraph: false isSection: false
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: section-paragraph isParagraph: true isSection: true
+ComprehensiveStressPlugin.tsx:108 📈 COMPREHENSIVE-STRESS: Node text content: My love is over there
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: stressed-text isParagraph: false isSection: false
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: section-paragraph isParagraph: true isSection: true
+ComprehensiveStressPlugin.tsx:108 📈 COMPREHENSIVE-STRESS: Node text content: And I am over here
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: stressed-text isParagraph: false isSection: false
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: section-paragraph isParagraph: true isSection: true
+ComprehensiveStressPlugin.tsx:108 📈 COMPREHENSIVE-STRESS: Node text content:
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: paragraph isParagraph: true isSection: false
+ComprehensiveStressPlugin.tsx:108 📈 COMPREHENSIVE-STRESS: Node text content: Yes!!!
+ComprehensiveStressPlugin.tsx:105 📈 COMPREHENSIVE-STRESS: Processing node: stressed-text isParagraph: false isSection: false
+ComprehensiveStressPlugin.tsx:132 📈 COMPREHENSIVE-STRESS: Finished processing, found 8 lines
+ComprehensiveStressPlugin.tsx:64 🔍 COMPREHENSIVE-STRESS: Analyzing 8 lines with backend service
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:69 ✅ COMPREHENSIVE-STRESS: Batch analysis complete in 41.89443588256836 ms
+ComprehensiveStressPlugin.tsx:148 🎯 COMPREHENSIVE-STRESS: Analysis complete for 8 lines
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+StableTextToStressedPlugin.tsx:175 ⏰ STABLE-PLUGIN: Timeout fired, starting conversion
+StableTextToStressedPlugin.tsx:34 🔄 STABLE-PLUGIN: Starting analysis and conversion process...
+StableTextToStressedPlugin.tsx:112 🌳 STABLE-PLUGIN: Root node found: true
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:51 🔍 STABLE-PLUGIN: Section paragraph children: []
+StableTextToStressedPlugin.tsx:61 🔍 STABLE-PLUGIN: Regular paragraph children: [{…}]
+StableTextToStressedPlugin.tsx:117 📊 STABLE-PLUGIN: Found 0 text nodes to convert
+StableTextToStressedPlugin.tsx:118 🔍 STABLE-PLUGIN: Found 0 StressedTextNodes needing analysis
+StableTextToStressedPlugin.tsx:153 ✅ STABLE-PLUGIN: Process complete: 0 nodes converted, 0 nodes marked for analysis
+CleanSongEditor.tsx:399 🕒 Auto-save triggered after 10 seconds
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'saved', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'saved', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+App.tsx:77 🔄 App.handleAutoSaveStatusChange: saved
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'saved', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'saved', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+RichTextLyricsEditor.tsx:267 📝 Auto-save content check: {capturedAtChange: 2648, currentAtSave: 2648, hasFormatting: true, wasValidated: false}
+CleanSongEditor.tsx:469 🔍 CALLBACK: handleLexicalContentChange called with: {length: 2648, isInitialized: true, hasSong: true, isJSON: true}
+CleanSongEditor.tsx:483 🔍 STORING LEXICAL CONTENT: {"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Hello wo...
+CleanSongEditor.tsx:492 🔍 LEXICAL CHANGE DETECTED - updating state
+App.tsx:82 🔄 App.handleHasUnsavedChangesChange: true
+App.tsx:77 🔄 App.handleAutoSaveStatusChange: pending
+App.tsx:50 💾 App.handleSaveStatusChange: saving
+CleanSongEditor.tsx:248 🚀 Direct API save: {lyricsLength: 2648, isLexicalJSON: true, title: 'Song 2', artist: 'Sam'}
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'saving', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'saving', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+App.tsx:77 🔄 App.handleAutoSaveStatusChange: saving
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'saving', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: true, autoSaveStatus: 'saving', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+CleanSongEditor.tsx:279 📨 Save successful: {responseTitle: undefined, responseArtist: undefined, lyricsLength: 0}
+App.tsx:82 🔄 App.handleHasUnsavedChangesChange: false
+App.tsx:82 🔄 App.handleHasUnsavedChangesChange: false
+App.tsx:50 💾 App.handleSaveStatusChange: saved
+App.tsx:27 Song changed in App: ffa0770a-ed84-4589-b9cc-2f812a54ed3e Song 2
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: false, autoSaveStatus: 'saved', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: false, autoSaveStatus: 'saved', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+App.tsx:77 🔄 App.handleAutoSaveStatusChange: saved
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: false, autoSaveStatus: 'saved', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+CleanSongEditor.tsx:82 🔍 CleanSongEditor render: {hasUnsavedChanges: false, autoSaveStatus: 'saved', isInitialized: true, songId: 'ffa0770a-ed84-4589-b9cc-2f812a54ed3e'}
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 0 "hello"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 1 "world"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 2 "this"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 3 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 4 "the"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 5 "second"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 6 "line"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 7 "how"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 8 "are"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 9 "you"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 10 "look"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 11 "what"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 12 "we"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 13 "have"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 14 "accomplished"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 15 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 16 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 17 "jubilated"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 18 "my"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 19 "love"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 20 "is"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 21 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 22 "there"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 23 "and"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 24 "i"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 25 "am"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 26 "over"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 27 "here"
+StressMarkDecoratorPlugin.tsx:342 🎭 PLUGIN-ppk5v3n3z: Rendering overlay 28 "yes"
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true
+ComprehensiveStressPlugin.tsx:35 🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled: true

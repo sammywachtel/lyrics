@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
+import { backendApiClient } from '../lib/api'
 import type { Song } from '../lib/api'
-import { apiClient } from '../lib/api'
 import { SongCard } from './SongCard'
 import { SongForm } from './SongForm'
 import SearchBar from './SearchBar'
@@ -13,7 +13,7 @@ interface SongListProps {
 }
 
 export function SongList({ onEditSong }: SongListProps) {
-  const [songs, setSongs] = useState<Song[]>([])
+  const [songsData, setSongsData] = useState<Song[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -21,34 +21,66 @@ export function SongList({ onEditSong }: SongListProps) {
   const [currentSearch, setCurrentSearch] = useState<SearchFilters>({ query: '', status: 'all', tags: [], sortBy: 'updated_at', sortOrder: 'desc' })
   const [isSearching, setIsSearching] = useState(false)
 
-
-  const loadSongs = useCallback(async () => {
-    try {
-      setLoading(true)
-      const response = await apiClient.listSongs()
-      setSongs(response.songs)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load songs')
-    } finally {
-      setLoading(false)
+  // Load songs from API
+  useEffect(() => {
+    const loadSongs = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await backendApiClient.listSongs()
+        // Handle response format - extract songs array if wrapped
+        const songs = Array.isArray(response) ? response :
+                      Array.isArray(response?.songs) ? response.songs : []
+        setSongsData(songs)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load songs')
+        console.error('Failed to load songs:', err)
+      } finally {
+        setLoading(false)
+      }
     }
+
+    loadSongs()
   }, [])
 
-  useEffect(() => {
-    loadSongs()
-  }, [loadSongs])
+  const songs = songsData || []
+
+  // Debug: Enable to see RTK Query response (commented out to prevent render loops)
+  // if (songsData) {
+  //   console.log('🎵 SongList received data:', {
+  //     songsData,
+  //     songsArray: songs,
+  //     songsLength: songs.length,
+  //     loading,
+  //     error
+  //   });
+  // }
+
+
+  // Songs are automatically loaded via RTK Query
 
   // Separate effect to update search results when songs or search criteria change
   useEffect(() => {
-    if (songs.length > 0) {
-      const results = filterSongs(songs, currentSearch)
+    const songsArray = songsData || []
+    if (songsArray.length > 0) {
+      const results = filterSongs(songsArray, currentSearch)
       setSearchResults(results)
     }
-  }, [songs, currentSearch])
+  }, [songsData, currentSearch])
 
   const handleSongCreated = () => {
     setShowCreateForm(false)
+    // Refresh songs list after creation
+    const loadSongs = async () => {
+      try {
+        const response = await backendApiClient.listSongs()
+        const songs = Array.isArray(response) ? response :
+                      Array.isArray(response?.songs) ? response.songs : []
+        setSongsData(songs)
+      } catch (err) {
+        console.error('Failed to reload songs after creation:', err)
+      }
+    }
     loadSongs()
   }
 
@@ -71,10 +103,11 @@ export function SongList({ onEditSong }: SongListProps) {
     }
 
     try {
-      await apiClient.deleteSong(songId)
-      loadSongs()
+      await backendApiClient.deleteSong(songId)
+      // Remove the song from local state
+      setSongsData(prev => prev ? prev.filter(song => song.id !== songId) : null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete song')
+      console.error('Failed to delete song:', err)
     }
   }
 
@@ -121,6 +154,7 @@ export function SongList({ onEditSong }: SongListProps) {
             <div className="flex-shrink-0">
               <button
                 onClick={() => setShowCreateForm(true)}
+                data-testid="create-new-song-button"
                 className="group relative bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-2 px-5 rounded-xl shadow-md hover:shadow-indigo-500/50 transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 border border-indigo-400"
               >
                 <div className="relative">
@@ -241,6 +275,7 @@ export function SongList({ onEditSong }: SongListProps) {
                   </p>
                   <button
                     onClick={() => setShowCreateForm(true)}
+                    data-testid="create-first-song-button"
                     className="group relative bg-gradient-creative from-primary-500 to-creative-600 hover:from-primary-600 hover:to-creative-700 text-white font-semibold py-4 px-8 rounded-2xl shadow-strong hover:shadow-glow-creative transition-all duration-300 transform hover:scale-105"
                   >
                     <span className="relative z-10 flex items-center space-x-3">
@@ -252,7 +287,7 @@ export function SongList({ onEditSong }: SongListProps) {
                 </div>
               </div>
             ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-testid="song-grid">
                 {songs.map((song, index) => (
                   <div key={song.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
                     <SongCard

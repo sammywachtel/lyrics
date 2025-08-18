@@ -2,6 +2,15 @@
 
 This document provides a comprehensive guide for Claude instances working with the AI-assisted songwriting web application codebase.
 
+## 🚨 CRITICAL FIXES ALERT
+
+**MANDATORY: Review `CRITICAL_FIXES_DOCUMENTATION.md` before making ANY changes to:**
+- Authentication system (`frontend/src/store/api/apiSlice.ts`)
+- Lexical editor implementation (`frontend/src/components/CleanSongEditor.tsx`)
+- API client patterns (`frontend/src/lib/api.ts`)
+
+**These fixes resolve fundamental architectural issues. DO NOT REVERT without understanding the documented problems.**
+
 ## 📋 MASTER REQUIREMENTS DOCUMENT
 
 **CRITICAL: Always consult `requirements.md` as the authoritative source for:**
@@ -221,22 +230,46 @@ Tests should be written as part of the development process, not as an afterthoug
 
 ### Test Organization
 
-Tests are organized using the `__tests__` folder convention:
+**✅ REORGANIZED (2024): Tests now use a centralized structure** for better maintainability and organization.
+
+**📖 Complete Documentation**: See `docs/testing/test-organization.md` for comprehensive details on test structure, patterns, and best practices.
 
 ```
-frontend/src/
-├── components/
-│   ├── Component.tsx
-│   └── __tests__/
-│       └── Component.test.tsx
-├── utils/
-│   ├── utility.ts
-│   └── __tests__/
-│       └── utility.test.ts
-├── __mocks__/
-│   └── fileMock.js           # Mock for static assets
-└── setupTests.ts             # Global test setup
+/Users/samwachtel/PycharmProjects/lyrics/
+├── frontend/tests/              # Frontend test suite (Jest + React Testing Library)
+│   ├── unit/                   # Unit tests - organized by feature type
+│   │   ├── components/         # Component unit tests
+│   │   │   ├── *.test.tsx      # Main component tests
+│   │   │   ├── editor/         # Editor component tests
+│   │   │   └── lexical/        # Lexical editor component tests
+│   │   ├── utils/              # Utility function tests
+│   │   ├── hooks/              # React hook tests
+│   │   ├── store/              # Redux store tests
+│   │   ├── services/           # Service layer tests
+│   │   └── contexts/           # React context tests
+│   ├── integration/            # Integration tests
+│   ├── fixtures/               # Test data and mock objects
+│   ├── __mocks__/              # Jest mocks (Supabase, API, files)
+│   └── utils/                  # Shared test utilities
+│
+├── backend/tests/              # Backend test suite (Pytest)
+│   ├── unit/                   # Unit tests by module
+│   ├── integration/            # Integration tests
+│   ├── fixtures/               # Test data and fixtures
+│   └── utils/                  # Test helpers
+│
+└── tests/e2e/                  # End-to-end tests (Playwright)
+    ├── features/               # Feature-based E2E tests
+    ├── fixtures/               # E2E test data
+    ├── page-objects/           # Page object models
+    └── utils/                  # E2E test utilities
 ```
+
+**Key Improvements**:
+- **Centralized structure** - No more scattered `__tests__/` directories
+- **Consistent import paths** - All tests use absolute paths from `src/`
+- **Better CI/CD integration** - Tests can be run by category (unit/integration/e2e)
+- **Easier maintenance** - Predictable locations and patterns
 
 ### Test Configuration
 
@@ -247,7 +280,7 @@ frontend/src/
 - CSS and asset mocking
 - Coverage reporting
 
-**Test Setup** (`frontend/src/setupTests.ts`):
+**Test Setup** (`frontend/tests/utils/setupTests.ts`):
 - Jest DOM matchers import
 - Window object mocking (matchMedia, scrollTo, ResizeObserver)
 - Global test utilities and configuration
@@ -284,7 +317,9 @@ npm test -- --testPathPattern="SectionToolbar"
 Test pure functions with various inputs and edge cases:
 
 ```typescript
-// Example: src/utils/__tests__/sectionUtils.test.ts
+// Example: frontend/tests/unit/utils/sectionUtils.test.ts
+import { parseSections } from '../../../src/utils/sectionUtils'
+
 describe('parseSections', () => {
   it('should parse multiple sections correctly', () => {
     const lyrics = `[Verse 1]\nContent\n[Chorus]\nMore content`
@@ -299,7 +334,10 @@ describe('parseSections', () => {
 Test component rendering, user interactions, and prop handling:
 
 ```typescript
-// Example: src/components/__tests__/SectionToolbar.test.tsx
+// Example: frontend/tests/unit/components/SectionToolbar.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react'
+import SectionToolbar from '../../../src/components/SectionToolbar'
+
 describe('SectionToolbar', () => {
   it('should call onInsertSection when button clicked', () => {
     const mockInsert = jest.fn()
@@ -320,10 +358,22 @@ describe('SectionToolbar', () => {
 
 ### Current Test Status
 
-**Section Tagging Feature** (46 tests total):
-- ✅ `sectionUtils.test.ts` - 36 tests covering all utility functions
-- ✅ `SectionToolbar.test.tsx` - 8 tests covering component behavior
-- ✅ `SectionNavigation.test.tsx` - 12 tests covering navigation component
+**✅ REORGANIZATION COMPLETE**: 271 tests passing in centralized structure
+
+**Test Suite Summary** (after reorganization):
+- **Frontend Unit Tests**: 22 test suites with comprehensive coverage
+  - ✅ `utils/*` - 4 test files (121 tests total) - Core utility functions
+  - ✅ `components/*` - 16 test files - Component behavior and rendering
+  - ✅ `hooks/*` - 1 test file - Custom React hooks
+  - ✅ `store/*` - 2 test files - Redux state management (1 has ESM config issue)
+- **Backend Tests**: Properly organized in `backend/tests/unit/` and `backend/tests/integration/`
+- **E2E Tests**: Centralized in `tests/e2e/features/` with 2 feature test files
+
+**Key Test Files**:
+- ✅ `sectionUtils.test.ts` - 36 tests covering section parsing and manipulation
+- ✅ `SectionToolbar.test.tsx` - 8 tests covering section insertion UI
+- ✅ `FormattedTextPreview.test.tsx` - 14 tests covering text formatting display
+- ✅ `prosodyAnalysis.test.ts` - Comprehensive prosody and rhyme analysis testing
 
 ### Testing Best Practices
 
@@ -454,10 +504,13 @@ The app is configured for Google Cloud Run deployment:
 3. **Plan Implementation**: Consider test cases and edge scenarios during design
 4. **Make Changes**: Edit files in appropriate directories
 5. **Write/Update Tests**: Create or modify tests for your changes
-6. **Run Tests**: Execute `npm test` to ensure all tests pass
-7. **Manual Testing**: Verify functionality in browser if needed
-8. **Update Requirements**: Mark feature as "✅ COMPLETED" in requirements.md
-9. **Code Review**: Check that tests cover the implemented functionality
+6. **Run Unit Tests**: Execute `npm test` to ensure all tests pass
+7. **Run E2E Tests**: Execute `npx playwright test` to verify end-to-end functionality
+8. **Manual Testing**: Verify functionality in browser if needed
+9. **Update Requirements**: Mark feature as "✅ COMPLETED" in requirements.md
+10. **Code Review**: Check that tests cover the implemented functionality
+
+**⚠️ MANDATORY: E2E testing must be run after every change to ensure no regressions are introduced.**
 
 **Requirements Document Updates:**
 - **Before starting**: Update status to "🚧 IN PROGRESS"
@@ -482,8 +535,17 @@ The app is configured for Google Cloud Run deployment:
 **Before completing any development task:**
 
 ```bash
-# Run all tests (from project root)
+# Run unit tests (from project root)
 npm test
+
+# Run E2E tests (MANDATORY after any change)
+npx playwright test --config=playwright.e2e.config.ts  # Run from project root
+
+# Verify test coverage
+npm run test:coverage
+
+# Check manual functionality
+npm run dev  # Test in browser
 
 # OR run from frontend directory
 cd frontend && npm test
@@ -535,6 +597,211 @@ Based on `/Users/samwachtel/PycharmProjects/lyrics/requirements.md`:
 - Keyword and metaphor management
 - Collaboration and sharing features
 - Subscription and billing system
+
+## 🚨 CRITICAL: Lexical Framework Anti-Patterns Guide
+
+**MANDATORY READING**: This application uses Lexical.js as the rich text editor framework. Violating these patterns can cause editor corruption, data loss, and serious bugs that won't show up in linting but will break the application in production.
+
+### **NEVER DO THESE (Critical Anti-Patterns)**
+
+#### 1. **❌ NEVER Manipulate DOM Directly**
+```typescript
+// ❌ ABSOLUTELY FORBIDDEN - Breaks Lexical's reconciliation
+element.classList.add('some-class')
+element.scrollIntoView()
+element.style.color = 'red'
+element.innerHTML = 'text'
+
+// ✅ CORRECT - Use Lexical commands and decorators
+editor.dispatchCommand(SOME_COMMAND, payload)
+// OR use decorators and data attributes with CSS
+element.setAttribute('data-highlight', 'true')
+```
+
+#### 2. **❌ NEVER Access Private APIs**
+```typescript
+// ❌ FORBIDDEN - Private API usage
+editor.getEditorState()._nodeMap.get(key)
+editorState._nodeMap.size
+node._parentKey
+
+// ✅ CORRECT - Use public APIs only
+editor.getEditorState().read(() => {
+  const node = $getNodeByKey(key)
+  const root = $getRoot()
+  const children = root.getChildren()
+})
+```
+
+#### 3. **❌ NEVER Create Race Conditions with Nested Updates**
+```typescript
+// ❌ DANGEROUS - Race conditions
+editor.update(() => {
+  // First update
+}, { tag: 'update1' })
+
+setTimeout(() => {
+  editor.update(() => {
+    // Second update - RACE CONDITION!
+  }, { tag: 'update2' })
+}, 100)
+
+// ✅ CORRECT - Atomic updates
+editor.update(() => {
+  // Combine all operations in single update
+  // All changes happen atomically
+}, { tag: 'combined-update' })
+```
+
+#### 4. **❌ NEVER Store Plugin State Outside Lexical**
+```typescript
+// ❌ ANTI-PATTERN - Global state outside Lexical
+let activePluginId: string | null = null
+
+// ✅ CORRECT - Use Lexical's command system
+const REGISTER_PLUGIN_COMMAND = createCommand<string>('REGISTER_PLUGIN')
+// Handle state through commands and editor state
+```
+
+### **Required Patterns (Always Use These)**
+
+#### 1. **✅ Always Use Read/Update Boundaries**
+```typescript
+// ✅ CORRECT - Read operations
+editor.getEditorState().read(() => {
+  const root = $getRoot()
+  const selection = $getSelection()
+  // Only read operations here
+})
+
+// ✅ CORRECT - Update operations
+editor.update(() => {
+  const root = $getRoot()
+  // Modify editor state here
+}, { tag: 'descriptive-tag' })
+```
+
+#### 2. **✅ Always Use Proper Node Creation**
+```typescript
+// ✅ CORRECT - Node creation with replacement
+export function $createCustomNode(): CustomNode {
+  const node = new CustomNode()
+  return $applyNodeReplacement(node)
+}
+```
+
+#### 3. **✅ Always Use Command System for Communication**
+```typescript
+// ✅ CORRECT - Plugin communication
+const CUSTOM_COMMAND = createCommand<PayloadType>('CUSTOM_COMMAND')
+
+// Register handler
+editor.registerCommand(
+  CUSTOM_COMMAND,
+  (payload: PayloadType) => {
+    // Handle command
+    return false // Let other handlers process too
+  },
+  COMMAND_PRIORITY_LOW
+)
+
+// Dispatch command
+editor.dispatchCommand(CUSTOM_COMMAND, payload)
+```
+
+#### 4. **✅ Always Handle Errors in Node Operations**
+```typescript
+// ✅ CORRECT - Safe node access
+try {
+  const node = $getNodeByKey(nodeKey)
+  if (node && $isCustomNode(node)) {
+    // Safe to use node
+  }
+} catch (error) {
+  console.warn('Node no longer exists:', error)
+  // Handle gracefully
+}
+```
+
+#### 5. **✅ Always Use Type Guards**
+```typescript
+// ✅ CORRECT - Type safety
+if ($isTextNode(node)) {
+  // TypeScript knows node is TextNode
+  const text = node.getTextContent()
+}
+
+if ($isElementNode(node)) {
+  // TypeScript knows node is ElementNode
+  const children = node.getChildren()
+}
+```
+
+### **Plugin Development Rules**
+
+1. **Use `useLexicalComposerContext()`** - Never store editor reference differently
+2. **Cleanup in useEffect return** - Always remove listeners and clear timeouts
+3. **Use tags for updates** - Always provide descriptive tags for `editor.update()`
+4. **Avoid frequent updates** - Debounce/throttle user interactions
+5. **Handle selection carefully** - Selection can be null or invalid
+
+### **Node Development Rules**
+
+1. **Override `updateDOM()` correctly** - Return boolean indicating if DOM update is needed
+2. **Handle serialization** - Implement `exportJSON()` and `importJSON()` properly
+3. **Use `getWritable()` for mutations** - Never mutate nodes directly
+4. **Type node checks** - Always use `$isNodeType()` functions
+
+### **Performance Guidelines**
+
+1. **Batch DOM measurements** - Don't call `getBoundingClientRect()` in loops
+2. **Use `React.memo`** - For expensive plugin components
+3. **Debounce API calls** - Don't make requests on every keystroke
+4. **Cache computed values** - Use `useMemo` for expensive calculations
+
+### **Debugging Guidelines**
+
+1. **Use descriptive tags** - `{ tag: 'stress-analysis-update' }`
+2. **Log with NODE_ENV checks** - Only log in development
+3. **Use Lexical DevTools** - Install browser extension for debugging
+4. **Test with React StrictMode** - Catches many Lexical issues
+
+### **Common Lexical Patterns**
+
+```typescript
+// Reading current selection
+editor.getEditorState().read(() => {
+  const selection = $getSelection()
+  if ($isRangeSelection(selection)) {
+    const selectedText = selection.getTextContent()
+  }
+})
+
+// Creating custom nodes
+const paragraph = $createParagraphNode()
+const text = $createTextNode('Hello')
+paragraph.append(text)
+root.append(paragraph)
+
+// Safe node replacement
+const oldNode = existingNode
+const newNode = $createCustomNode()
+oldNode.replace(newNode)
+
+// Plugin cleanup pattern
+useEffect(() => {
+  if (!enabled) return
+
+  const removeListener = editor.registerCommand(COMMAND, handler, PRIORITY)
+
+  return () => {
+    removeListener()
+    // Clear any other resources
+  }
+}, [editor, enabled])
+```
+
+**Remember: Lexical anti-patterns cause subtle bugs that are hard to debug and can corrupt user data. When in doubt, always prefer Lexical's built-in patterns over custom solutions.**
 
 ## Important Notes for Claude Instances
 

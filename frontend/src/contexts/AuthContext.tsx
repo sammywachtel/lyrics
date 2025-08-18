@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import type { User, Session, AuthError } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
+import { authService, type User, type Session, type AuthError } from '../lib/authService'
 
 interface AuthContextType {
   user: User | null
@@ -28,9 +27,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    authService.getSession().then(({ data: { session } }) => {
       setSession(session)
-      setUser(session?.user ?? null)
+      setUser(authService.getUser())
       setLoading(false)
     }).catch((error) => {
       console.error('Error getting session:', error)
@@ -42,12 +41,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = authService.onAuthStateChange((event, session) => {
       console.log('Auth state change:', event, session)
 
       // Always update session and user state for all auth events
       setSession(session)
-      setUser(session?.user ?? null)
+      setUser(authService.getUser())
       setLoading(false)
     })
 
@@ -55,24 +54,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
+    const { error } = await authService.signUp(email, password)
     return { error }
   }
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error } = await authService.signIn(email, password)
     return { error }
   }
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut()
+      const { error } = await authService.signOut()
 
       // Ensure state is cleared even if there's an error
       setSession(null)

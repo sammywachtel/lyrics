@@ -474,6 +474,27 @@ span.syllable,
   }
 }
 
+/* Section Navigation Highlighting - Using data attributes instead of direct DOM manipulation */
+[data-navigation-highlight="true"] {
+  animation: section-highlight 2s ease-out;
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left: 4px solid #3b82f6;
+  padding-left: 8px;
+  margin-left: -12px;
+  border-radius: 4px;
+}
+
+@keyframes section-highlight {
+  0% {
+    background-color: rgba(59, 130, 246, 0.3);
+    border-color: #3b82f6;
+  }
+  100% {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+  }
+}
+
 /* DEBUG MODE - Disabled to clean up interface */
 /*
 .syllable {

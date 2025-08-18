@@ -1,121 +1,111 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { $getRoot, $isParagraphNode, type LexicalNode, $isElementNode } from 'lexical'
 import { $isSectionParagraphNode } from '../nodes/SectionParagraphNode'
+import { $isStressedTextNode } from '../nodes/StressedTextNode'
 import { createPortal } from 'react-dom'
-import { comprehensiveStressAnalysis, type WordAnalysis, type StressAnalysisResult } from '../../../services/stressAnalysis'
 
 interface ComprehensiveStressPluginProps {
   enabled?: boolean
 }
 
-interface LineAnalysisWithStress {
+interface LineAnalysisFromNodes {
   text: string
   lineNumber: number
   totalSyllables: number
   stressedSyllables: number
   element: HTMLElement
-  words: WordAnalysis[]
-  processingTime: number
+  hasData: boolean
 }
 
 /**
- * Plugin that displays comprehensive syllable counts using the backend stress analysis service.
- * This replaces the old frontend-only hardcoded approach with linguistically accurate
- * spaCy POS tagging + CMU dictionary + G2P fallback analysis.
+ * Plugin that displays comprehensive syllable counts by reading from existing StressedTextNodes.
+ * This avoids duplicate API calls by reusing the stress patterns already detected by AutoStressDetectionPlugin.
+ * It simply reads the syllable data from the nodes and displays it as overlays.
  */
 export function ComprehensiveStressPlugin({
-  enabled = true
+  enabled = false  // Disabled by default to prevent conflicts with StressMarkDecoratorPlugin
 }: ComprehensiveStressPluginProps) {
   const [editor] = useLexicalComposerContext()
-  const [lineAnalyses, setLineAnalyses] = useState<LineAnalysisWithStress[]>([])
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [analyzerReady, setAnalyzerReady] = useState(false)
+  const [lineAnalyses, setLineAnalyses] = useState<LineAnalysisFromNodes[]>([])
 
-  console.log('🚀 COMPREHENSIVE-STRESS: Plugin initialized, enabled:', enabled)
-
-  // Check if the comprehensive analyzer is ready
-  useEffect(() => {
-    const checkAnalyzerStatus = async () => {
-      try {
-        const isReady = await comprehensiveStressAnalysis.isReady()
-        setAnalyzerReady(isReady)
-        if (isReady) {
-          console.log('✅ COMPREHENSIVE-STRESS: Backend analyzer is ready')
-        } else {
-          console.log('⚠️ COMPREHENSIVE-STRESS: Backend analyzer not ready')
-        }
-      } catch (error) {
-        console.error('❌ COMPREHENSIVE-STRESS: Error checking analyzer status:', error)
-        setAnalyzerReady(false)
-      }
-    }
-
-    checkAnalyzerStatus()
-  }, [])
-
-  const analyzeStressComprehensively = useCallback(async (lines: string[]): Promise<StressAnalysisResult[]> => {
-    if (!analyzerReady || lines.length === 0) {
-      return []
-    }
-
-    setIsAnalyzing(true)
-    try {
-      console.log('🔍 COMPREHENSIVE-STRESS: Analyzing', lines.length, 'lines with backend service')
-
-      // Use batch analysis for efficiency
-      const batchResult = await comprehensiveStressAnalysis.analyzeBatch(lines, 'lyrical')
-
-      console.log('✅ COMPREHENSIVE-STRESS: Batch analysis complete in', batchResult.total_processing_time_ms, 'ms')
-
-      return batchResult.lines.map(line => ({
-        text: line.text,
-        total_syllables: line.total_syllables,
-        stressed_syllables: line.stressed_syllables,
-        processing_time_ms: line.processing_time_ms,
-        words: line.words
-      }))
-
-    } catch (error) {
-      console.error('❌ COMPREHENSIVE-STRESS: Analysis failed:', error)
-      return []
-    } finally {
-      setIsAnalyzing(false)
-    }
-  }, [analyzerReady])
+  // Only log initialization once in debug mode
+  if (process.env.NODE_ENV === 'development' && enabled) {
+    console.log('🚀 COMPREHENSIVE-STRESS: Plugin initialized and enabled')
+  }
 
   useEffect(() => {
-    if (!enabled || !analyzerReady) {
+    if (!enabled) {
       setLineAnalyses([])
       return
     }
 
-    const updateStressAnalysis = async () => {
+    const updateStressAnalysis = () => {
       const rootElement = editor.getRootElement()
-      console.log('📈 COMPREHENSIVE-STRESS: updateStressAnalysis called, rootElement:', !!rootElement)
-      if (!rootElement) return
+      if (!rootElement) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🚫 COMPREHENSIVE-STRESS: No root element, skipping analysis')
+        }
+        return
+      }
 
       editor.read(() => {
-        const lines: Array<{ text: string; element: HTMLElement }> = []
+        const lines: LineAnalysisFromNodes[] = []
         const root = $getRoot()
-        console.log('📈 COMPREHENSIVE-STRESS: Reading editor content...')
+        let lineNumber = 0
 
-        // Extract text lines and their DOM elements
+        // Extract syllable counts from existing StressedTextNodes
         function processNode(node: LexicalNode) {
-          console.log('📈 COMPREHENSIVE-STRESS: Processing node:', node.getType(), 'isParagraph:', $isParagraphNode(node), 'isSection:', $isSectionParagraphNode(node))
           if ($isSectionParagraphNode(node) || $isParagraphNode(node)) {
             const textContent = node.getTextContent().trim()
-            console.log('📈 COMPREHENSIVE-STRESS: Node text content:', textContent)
             if (textContent) {
-              // Find the DOM element for this paragraph
-              const nodeKey = node.getKey()
-              const domElement = editor.getElementByKey(nodeKey)
+              lineNumber++
 
-              if (domElement) {
-                lines.push({
-                  text: textContent,
-                  element: domElement as HTMLElement
-                })
+              // Count syllables from StressedTextNodes within this paragraph
+              let totalSyllables = 0
+              let stressedSyllables = 0
+              let hasData = false
+
+              // Check children for StressedTextNodes
+              const children = node.getChildren()
+              children.forEach(child => {
+                if ($isStressedTextNode(child)) {
+                  const stressPatterns = child.getAllStressPatterns()
+
+                  // Count syllables from all words in this node
+                  stressPatterns.forEach((pattern) => {
+                    if (pattern.syllables && pattern.syllables.length > 0) {
+                      hasData = true
+                      pattern.syllables.forEach(syllable => {
+                        totalSyllables++
+                        if (syllable.stressed) {
+                          stressedSyllables++
+                        }
+                      })
+                    }
+                  })
+                }
+              })
+
+              // Only add lines that have stress data
+              if (hasData) {
+                const nodeKey = node.getKey()
+                const domElement = editor.getElementByKey(nodeKey)
+
+                if (domElement) {
+                  lines.push({
+                    text: textContent,
+                    lineNumber,
+                    totalSyllables,
+                    stressedSyllables,
+                    element: domElement as HTMLElement,
+                    hasData
+                  })
+                  // Only log in debug mode to reduce noise
+                  if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+                    console.log(`📊 Line ${lineNumber}: "${textContent.substring(0, 25)}..." - ${stressedSyllables}/${totalSyllables} syllables`)
+                  }
+                }
               }
             }
           }
@@ -127,130 +117,83 @@ export function ComprehensiveStressPlugin({
           }
         }
 
-        console.log('📈 COMPREHENSIVE-STRESS: Starting to process root node')
         processNode(root)
-        console.log('📈 COMPREHENSIVE-STRESS: Finished processing, found', lines.length, 'lines')
 
-        // Perform comprehensive stress analysis
-        if (lines.length > 0) {
-          const textLines = lines.map(line => line.text)
-          analyzeStressComprehensively(textLines).then(results => {
-            const analysesWithElements: LineAnalysisWithStress[] = results.map((result, index) => ({
-              text: result.text,
-              lineNumber: index + 1,
-              totalSyllables: result.total_syllables,
-              stressedSyllables: result.stressed_syllables,
-              element: lines[index]?.element,
-              words: result.words,
-              processingTime: result.processing_time_ms
-            })).filter(analysis => analysis.element) // Only keep analyses with valid DOM elements
-
-            console.log('🎯 COMPREHENSIVE-STRESS: Analysis complete for', analysesWithElements.length, 'lines')
-            setLineAnalyses(analysesWithElements)
-          }).catch(error => {
-            console.error('❌ COMPREHENSIVE-STRESS: Failed to analyze stress:', error)
-          })
-        } else {
-          setLineAnalyses([])
+        // Only log when the count changes to reduce noise
+        if (lines.length !== lineAnalyses.length && process.env.NODE_ENV === 'development') {
+          console.log(`📈 COMPREHENSIVE-STRESS: Found ${lines.length} lines with stress data (was ${lineAnalyses.length})`)
         }
+
+        setLineAnalyses(lines)
       })
     }
-
-    // Update on any editor changes with debouncing
-    let timeoutId: NodeJS.Timeout
-    const debouncedUpdate = () => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(updateStressAnalysis, 500) // 500ms debounce
-    }
-
-    const removeListener = editor.registerUpdateListener(() => {
-      debouncedUpdate()
-    })
 
     // Initial update
     updateStressAnalysis()
 
+    // Update on any editor changes with debouncing
+    let timeoutId: NodeJS.Timeout | null = null
+    const debouncedUpdate = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+      timeoutId = setTimeout(() => {
+        updateStressAnalysis()
+      }, 1000) // Increased debounce to reduce conflicts with other plugins
+    }
+
+    const removeListener = editor.registerUpdateListener(({ tags }) => {
+      // Trigger update on various changes, especially after stress detection
+      if (tags.has('auto-stress-detection') || tags.has('history-push') || tags.has('collaboration')) {
+        // Only log in debug mode to reduce noise
+        if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=stress')) {
+          console.log('🔄 COMPREHENSIVE-STRESS: Updating syllable counts after stress detection')
+        }
+        debouncedUpdate()
+      }
+    })
+
     return () => {
       removeListener()
-      clearTimeout(timeoutId)
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
     }
-  }, [editor, enabled, analyzerReady, analyzeStressComprehensively])
+  }, [editor, enabled, lineAnalyses.length])
 
-  // Render syllable counts and analysis info using React Portals
+  // Render syllable counts using React Portals
   const analysisElements = lineAnalyses.map((analysis) => {
     const rect = analysis.element.getBoundingClientRect()
-    const scrollX = window.pageXOffset || document.documentElement.scrollLeft
-    const scrollY = window.pageYOffset || document.documentElement.scrollTop
+    const editorRect = editor.getRootElement()?.getBoundingClientRect()
 
-    // Enhanced display with more detailed information
-    const displayText = `(${analysis.totalSyllables}/${analysis.stressedSyllables})`
-    const tooltipText = [
-      `Line ${analysis.lineNumber}: "${analysis.text.substring(0, 30)}${analysis.text.length > 30 ? '...' : ''}"`,
-      `Total syllables: ${analysis.totalSyllables}`,
-      `Stressed syllables: ${analysis.stressedSyllables}`,
-      `Processing time: ${analysis.processingTime.toFixed(1)}ms`,
-      `Words analyzed: ${analysis.words.length}`,
-      `Backend: spaCy POS + CMU dict + G2P fallback`
-    ].join('\n')
+    if (!editorRect) return null
+
+    // Position the analysis to the left of the line
+    const top = rect.top - editorRect.top + editor.getRootElement()!.scrollTop
+    const left = -60 // Position to the left of the editor
+
+    const syllableRatio = analysis.totalSyllables > 0
+      ? (analysis.stressedSyllables / analysis.totalSyllables).toFixed(2)
+      : '0.00'
 
     return createPortal(
       <div
-        key={`comprehensive-stress-${analysis.lineNumber}`}
-        className="comprehensive-stress-display"
+        key={`${analysis.lineNumber}-${analysis.text.substring(0, 10)}`}
+        className="absolute text-xs text-gray-500 font-mono"
         style={{
-          position: 'absolute',
-          left: rect.right + scrollX + 8, // 8px to the right of the line
-          top: rect.top + scrollY,
-          zIndex: 1000,
-          backgroundColor: analyzerReady ? '#f3f4f6' : '#fef3cd',
-          color: analyzerReady ? '#6b7280' : '#92400e',
-          fontSize: '11px',
-          fontFamily: 'monospace',
-          padding: '2px 6px',
-          borderRadius: '4px',
-          border: `1px solid ${analyzerReady ? '#d1d5db' : '#f59e0b'}`,
-          userSelect: 'none',
-          pointerEvents: 'none',
-          whiteSpace: 'nowrap',
-          opacity: isAnalyzing ? 0.6 : 1
+          top: `${top}px`,
+          left: `${left}px`,
+          width: '50px',
+          textAlign: 'right'
         }}
-        title={tooltipText}
       >
-        {isAnalyzing ? '...' : displayText}
-        {!analyzerReady && ' ⚠️'}
+        <span title={`${analysis.stressedSyllables} stressed / ${analysis.totalSyllables} total (ratio: ${syllableRatio})`}>
+          {analysis.stressedSyllables}/{analysis.totalSyllables}
+        </span>
       </div>,
-      document.body
+      editor.getRootElement()!.parentElement!
     )
-  })
+  }).filter(el => el !== null)
 
-  // Show analyzer status indicator
-  const statusElement = analyzerReady ? null : createPortal(
-    <div
-      className="comprehensive-stress-status"
-      style={{
-        position: 'fixed',
-        top: '10px',
-        right: '10px',
-        zIndex: 10000,
-        backgroundColor: '#fef3cd',
-        color: '#92400e',
-        fontSize: '12px',
-        fontFamily: 'monospace',
-        padding: '4px 8px',
-        borderRadius: '4px',
-        border: '1px solid #f59e0b',
-        userSelect: 'none'
-      }}
-    >
-      ⚠️ Comprehensive stress analyzer not ready - using fallback
-    </div>,
-    document.body
-  )
-
-  return (
-    <>
-      {analysisElements}
-      {statusElement}
-    </>
-  )
+  return <>{analysisElements}</>
 }

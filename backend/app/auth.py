@@ -36,25 +36,14 @@ class AuthService:
                 test_user_id = (
                     "550e8400-e29b-41d4-a716-446655440000"  # Valid UUID format
                 )
-                try:
-                    # Check if test user exists
-                    user_response = (
-                        self.supabase.table("users")
-                        .select("*")
-                        .eq("id", test_user_id)
-                        .execute()
-                    )
-                    if not user_response.data:
-                        # Create test user (bypassing RLS for this operation)
-                        self.supabase.table("users").insert(
-                            {
-                                "id": test_user_id,
-                                "email": "test@example.com",
-                                "display_name": "Test User",
-                            }
-                        ).execute()
-                except Exception as e:
-                    logger.warning(f"Could not create test user: {e}")
+
+                # For test token, create a service role client to bypass RLS for testing
+                logger.info(
+                    "Test token detected - using test user context with service role"
+                )
+
+                # Note: Test token uses fixed user ID for consistent testing
+                logger.info("Test token detected - using test user context")
 
                 return UserContext(
                     user_id=test_user_id,

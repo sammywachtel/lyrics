@@ -17,6 +17,15 @@ This directory contains all project documentation organized by category for easy
 
 ### 🛠 Development
 - **[CLAUDE.md](../CLAUDE.md)** - Comprehensive codebase guide for Claude instances (kept at root)
+- **[code-review-typescript-lexical-antipatterns.md](development/code-review-typescript-lexical-antipatterns.md)** - TypeScript and Lexical framework best practices review
+- **[lexical-linting-guidelines.md](development/lexical-linting-guidelines.md)** - Lexical framework linting rules and enforcement
+
+### 🔧 Scripts & Tools
+- **[build_uml_diag.sh](scripts/build_uml_diag.sh)** - UML class diagram generator for Python backend architecture
+- **[build_backend_uml_diag.sh](scripts/build_backend_uml_diag.sh)** - Focused backend UML class diagram generator
+- **[build_frontend_uml_diag.sh](scripts/build_frontend_uml_diag.sh)** - Focused frontend component diagram generator
+
+**Note**: All UML diagram outputs are generated in `docs/diagrams/` and excluded from git (build artifacts)
 
 ### 🧠 Linguistic Technology
 - **[stress-analysis.md](technology/stress-analysis.md)** - Comprehensive stress analysis system documentation

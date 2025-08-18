@@ -100,20 +100,18 @@ export class StressedTextNode extends TextNode {
   }
 
   exportJSON(): SerializedStressedTextNode {
-    // Only save patterns that have been manually overridden by the user
-    // This prevents old auto-detected patterns from persisting across saves
-    const overriddenPatterns: [string, StressPattern][] = []
+    // Save all stress patterns (both auto-detected and user-overridden)
+    // This ensures that stress patterns persist across saves and loads
+    const allPatterns: [string, StressPattern][] = []
 
     this.__stressPatterns.forEach((pattern, word) => {
-      // Only save if the pattern or any of its syllables have been overridden
-      if (pattern.overridden || pattern.syllables.some(s => s.overridden)) {
-        overriddenPatterns.push([word, pattern])
-      }
+      // Save all patterns - both auto-detected and user overrides
+      allPatterns.push([word, pattern])
     })
 
     return {
       ...super.exportJSON(),
-      stressPatterns: overriddenPatterns, // Only save user overrides
+      stressPatterns: allPatterns, // Save all patterns including auto-detected ones
       autoDetectionEnabled: this.__autoDetectionEnabled,
       type: 'stressed-text',
       version: 1,

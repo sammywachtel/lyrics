@@ -2,8 +2,8 @@
  * Utilities for searching and filtering songs
  */
 
-import type { Song } from '../lib/api'
 import { formatTextToPlain } from './textFormatting'
+import type { Song } from '../types/song'
 
 export interface SearchFilters {
   query: string

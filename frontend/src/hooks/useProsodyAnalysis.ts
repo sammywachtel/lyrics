@@ -44,6 +44,11 @@ export function useProsodyAnalysis({
     [settings]
   );
 
+  // Stable callback reference to prevent infinite re-renders
+  const stableOnComplete = useCallback((result: ProsodyAnalysis) => {
+    onAnalysisComplete?.(result);
+  }, [onAnalysisComplete]);
+
   // Create debounced analysis function
   const debouncedAnalyze = useMemo(
     () =>
@@ -63,7 +68,7 @@ export function useProsodyAnalysis({
           };
 
           setAnalysis(filteredResult);
-          onAnalysisComplete?.(filteredResult);
+          stableOnComplete(filteredResult);
         } catch (error) {
           console.error('Prosody analysis error:', error);
           setAnalysis(null);
@@ -71,7 +76,7 @@ export function useProsodyAnalysis({
           setIsAnalyzing(false);
         }
       }, mergedSettings.analysisDelay),
-    [mergedSettings, onAnalysisComplete]
+    [mergedSettings.analysisDelay, mergedSettings.enableStabilityAnalysis, mergedSettings.enableClicheDetection, stableOnComplete]
   );
 
   // Effect to trigger analysis when text changes

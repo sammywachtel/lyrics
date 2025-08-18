@@ -170,10 +170,11 @@ function SettingsContent({ settings, onSettingsChange, activeTab, collapsedSecti
     value: unknown
   ) => {
     const parentValue = settings[parentKey] as T
-    updateSettings(parentKey, {
+    const updatedValue: SongSettings[typeof parentKey] = {
       ...parentValue,
       [childKey]: value
-    } as SongSettings[typeof parentKey])
+    }
+    updateSettings(parentKey, updatedValue)
   }, [settings, updateSettings])
 
   // Add new section structure

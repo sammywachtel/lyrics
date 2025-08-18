@@ -177,16 +177,7 @@ export function AppHeader({
                   <div className="text-xs text-neutral-500 max-w-48 truncate flex items-center gap-2">
                     <span>{currentSong.artist || 'No artist'}</span>
                     <span>•</span>
-                    <span className="capitalize">{currentSong.status.replace('_', ' ')}</span>
-                    {hasUnsavedChanges && (
-                      <>
-                        <span>•</span>
-                        <span className="text-warm-600 flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-warm-500 animate-pulse"></span>
-                          Unsaved
-                        </span>
-                      </>
-                    )}
+                    <span className="capitalize">{(currentSong.status || 'draft').replace('_', ' ')}</span>
                   </div>
                 </div>
                 <ChevronDownIcon className={`w-4 h-4 text-neutral-400 transition-transform ${showSongMeta ? 'rotate-180' : ''}`} />
@@ -237,19 +228,19 @@ export function AppHeader({
           {isEditorMode && onSave && (
             <button
               onClick={onSave}
-              disabled={!hasUnsavedChanges || isSaving}
+              disabled={!hasUnsavedChanges || isSaving || autoSaveStatus === 'saving'}
               className={`relative overflow-hidden px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-w-[120px] ${
-                hasUnsavedChanges && !isSaving
+                hasUnsavedChanges && !isSaving && autoSaveStatus !== 'saving'
                   ? 'bg-white hover:bg-neutral-50 text-primary-600 hover:text-primary-700 border border-primary-200 hover:border-primary-300 shadow-soft hover:shadow-medium'
-                  : isSaving || (autoSaveStatus === 'saving' && hasUnsavedChanges)
+                  : isSaving || autoSaveStatus === 'saving'
                   ? 'bg-white text-neutral-600 border border-neutral-200 shadow-soft cursor-wait'
                   : 'bg-white text-neutral-500 border border-neutral-200 shadow-soft cursor-default'
               }`}
               title={
                 isSaving
                   ? 'Saving changes...'
-                  : autoSaveStatus === 'saving' && hasUnsavedChanges
-                  ? 'Auto-saving...'
+                  : autoSaveStatus === 'saving'
+                  ? 'Auto-saving changes...'
                   : hasUnsavedChanges && autoSaveStatus === 'pending'
                   ? 'Click to save now or wait for auto-save'
                   : hasUnsavedChanges
@@ -263,7 +254,7 @@ export function AppHeader({
                     <div className="w-3 h-3 border-2 border-neutral-300 border-t-primary-500 rounded-full animate-spin"></div>
                     <span>Saving...</span>
                   </>
-                ) : autoSaveStatus === 'saving' && hasUnsavedChanges ? (
+                ) : autoSaveStatus === 'saving' ? (
                   <>
                     <div className="w-3 h-3 border-2 border-neutral-300 border-t-blue-500 rounded-full animate-spin"></div>
                     <span>Auto-saving...</span>
@@ -272,12 +263,12 @@ export function AppHeader({
                   autoSaveStatus === 'pending' ? (
                     <>
                       <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-                      <span>Save now</span>
+                      <span>Save Now</span>
                     </>
                   ) : (
                     <>
                       <span className="text-primary-500">💾</span>
-                      <span>Save now</span>
+                      <span>Save Now</span>
                     </>
                   )
                 ) : (
@@ -533,7 +524,7 @@ export function AppHeader({
                 </div>
                 <div>
                   <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Status</label>
-                  <div className="text-sm text-neutral-900 capitalize">{currentSong.status.replace('_', ' ')}</div>
+                  <div className="text-sm text-neutral-900 capitalize">{(currentSong.status || 'draft').replace('_', ' ')}</div>
                 </div>
                 {currentSong.tags && currentSong.tags.length > 0 && (
                   <div>

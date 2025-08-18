@@ -5,6 +5,7 @@ import {
   type Spread,
   type LexicalEditor,
   type LexicalNode,
+  $getNodeByKey,
 } from 'lexical'
 import React from 'react'
 
@@ -118,11 +119,11 @@ function SectionTagComponent({ sectionName, nodeKey, editor }: SectionTagCompone
   const handleSave = () => {
     if (editValue.trim() && editValue.trim() !== sectionName) {
       editor.update(() => {
-        const node = editor.getEditorState()._nodeMap.get(nodeKey) as SectionTagNode
+        const node = $getNodeByKey(nodeKey) as SectionTagNode
         if (node) {
           node.setSectionName(editValue.trim())
         }
-      })
+      }, { tag: 'section-tag-update' })
     }
     setIsEditing(false)
   }
@@ -139,11 +140,11 @@ function SectionTagComponent({ sectionName, nodeKey, editor }: SectionTagCompone
 
   const handleDelete = () => {
     editor.update(() => {
-      const node = editor.getEditorState()._nodeMap.get(nodeKey)
+      const node = $getNodeByKey(nodeKey)
       if (node) {
         node.remove()
       }
-    })
+    }, { tag: 'section-tag-delete' })
   }
 
   // Get section icon based on type

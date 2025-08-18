@@ -81,7 +81,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" data-testid="song-form">
       {error && (
         <div className="rounded-md bg-red-50 p-4">
           <div className="text-sm text-red-800">{error}</div>
@@ -96,6 +96,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
           type="text"
           id="title"
           required
+          data-testid="song-title-input"
           className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 bg-white"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -170,6 +171,7 @@ export function SongForm({ song, onSuccess, onCancel }: SongFormProps) {
         <button
           type="submit"
           disabled={loading}
+          data-testid="song-submit-button"
           className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
         >
           {loading ? 'Saving...' : song ? 'Update Song' : 'Create Song'}

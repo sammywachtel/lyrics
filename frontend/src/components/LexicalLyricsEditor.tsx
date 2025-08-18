@@ -29,6 +29,8 @@ export interface LexicalLyricsEditorRef {
   getSelectedText: () => string
   wrapSelectedText: (before: string, after: string) => void
   isSourceMode: () => boolean
+  jumpToSection: (sectionName: string) => void
+  onEditorReady: (callback: () => void) => () => void
 }
 
 // Lexical theme configuration
@@ -88,7 +90,7 @@ function ValueSyncPlugin({
           const emptyParagraph = $createParagraphNode()
           root.append(emptyParagraph)
         }
-      })
+      }, { tag: 'initialize-editor-content' })
 
       isInitialized.current = true
       // Wait longer before allowing changes to be detected
@@ -132,7 +134,7 @@ function ValueSyncPlugin({
             const emptyParagraph = $createParagraphNode()
             root.append(emptyParagraph)
           }
-        })
+        }, { tag: 'sync-external-content' })
 
         setTimeout(() => {
           isUpdatingFromProps.current = false
@@ -206,11 +208,11 @@ function ValueSyncPlugin({
               onAutoSave(currentContent).catch(error => {
                 console.error('Auto-save failed:', error)
               })
-            })
+            }, { tag: 'auto-save-content' })
           }
         }, autoSaveDelay)
       }
-    })
+    }, { tag: 'detect-content-changes' })
   }, [editor, onChange, onAutoSave, enableAutoSave, autoSaveDelay])
 
   // Cleanup auto-save timeout on unmount
@@ -326,6 +328,46 @@ const LexicalLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, LexicalLyri
         }
       },
       isSourceMode: () => isSourceMode,
+      jumpToSection: (sectionName: string) => {
+        // Basic implementation for source mode - just focuses the editor
+        // This could be enhanced to actually scroll to section tags in the future
+        if (isSourceMode && textareaRef.current) {
+          textareaRef.current.focus()
+        } else if (editorRef.current) {
+          editorRef.current.focus()
+        }
+        console.log(`LexicalLyricsEditor: jumpToSection called for "${sectionName}"`)
+      },
+      onEditorReady: (callback: () => void) => {
+        console.log('🎯 EDITOR-READY: onEditorReady called')
+
+        if (!editorRef.current) {
+          console.log('⚠️ EDITOR-READY: No editor ref available')
+          return () => {}
+        }
+
+        // Use Lexical's built-in editor ready state
+        const unregister = editorRef.current.registerUpdateListener(({ editorState }) => {
+          console.log('🔄 EDITOR-READY: Update listener fired')
+
+          // This fires when editor is fully initialized with content
+          editorState.read(() => {
+            const root = $getRoot()
+            const childrenSize = root.getChildrenSize()
+            console.log('📊 EDITOR-READY: Root children count:', childrenSize)
+
+            if (childrenSize > 0) {
+              // Editor has content and is ready
+              console.log('✅ EDITOR-READY: Editor is ready with content, calling callback')
+              callback()
+              unregister() // Only call once
+            }
+          })
+        })
+
+        console.log('🎯 EDITOR-READY: Update listener registered')
+        return unregister
+      },
     }), [isSourceMode, value, onChange])
 
     const minHeight = `${rows * 1.5}rem`

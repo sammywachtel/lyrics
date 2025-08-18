@@ -34,7 +34,7 @@ import { AutoStressDetectionPlugin } from './lexical/plugins/AutoStressDetection
 import { StableTextToStressedPlugin } from './lexical/plugins/StableTextToStressedPlugin'
 import { ComprehensiveStressPlugin } from './lexical/plugins/ComprehensiveStressPlugin'
 import StressContextMenu from './lexical/ui/StressContextMenu'
-// import SectionHeaderPlugin from './plugins/SectionHeaderPlugin' // TODO: Re-enable when test environment supports full Lexical
+// Legacy plugin removed - SectionHeaderPlugin
 // TODO: Re-enable when plugins are fully TypeScript compliant
 // import { SectionDetectionPlugin } from './lexical/plugins/SectionDetectionPlugin'
 // import { ProsodyAnalysisPlugin } from './lexical/plugins/ProsodyAnalysisPlugin'
@@ -44,7 +44,7 @@ import { SECTION_FORMAT_COMMAND, $getCurrentSectionType, $applySectionFormatting
 // Import prosody styles
 import '../styles/prosody.css'
 // Import validation utilities
-import { safeLexicalLoad, prepareLexicalForSave } from '../utils/lexicalDataValidation'
+import { prepareLexicalForSave } from '../utils/lexicalDataValidation'
 
 interface RichTextLyricsEditorProps {
   value: string
@@ -60,6 +60,7 @@ interface RichTextLyricsEditorProps {
   enableSyllableMarking?: boolean
   enableRhymeScheme?: boolean
   enableStressMarking?: boolean
+  editable?: boolean
 }
 
 // Enhanced Lexical theme configuration for rich text
@@ -156,14 +157,22 @@ function ValueSyncPlugin({
 
           // Fallback: treat as plain text and create section paragraph nodes
           const lines = value.split('\n')
-          lines.forEach((line) => {
-            const paragraph = $createSectionParagraphNode()
-            if (line.trim()) {
-              const textNode = $createStressedTextNode(line)
+
+          // Filter out empty lines to prevent extra newlines
+          const nonEmptyLines = lines.filter(line => line.trim().length > 0)
+
+          if (nonEmptyLines.length > 0) {
+            nonEmptyLines.forEach((line) => {
+              const paragraph = $createSectionParagraphNode()
+              const textNode = $createStressedTextNode(line.trim())
               paragraph.append(textNode)
-            }
-            root.append(paragraph)
-          })
+              root.append(paragraph)
+            })
+          } else {
+            // Create single empty paragraph for empty content
+            const emptyParagraph = $createSectionParagraphNode()
+            root.append(emptyParagraph)
+          }
         } else {
           // Create empty section paragraph
           const emptyParagraph = $createSectionParagraphNode()
@@ -179,65 +188,18 @@ function ValueSyncPlugin({
     }
   }, [editor, value])
 
-  // Update editor when external value changes (but not during initialization)
-  useEffect(() => {
-    if (isInitialized.current && !isUpdatingFromProps.current && value !== initialValueRef.current) {
-      // Get current editor content as JSON for comparison
-      const currentContent = JSON.stringify(editor.getEditorState().toJSON())
-
-      if (currentContent !== value) {
-        // Use safe loading for updates
-        const safeLoad = safeLexicalLoad(value)
-
-        if (safeLoad.wasRepaired) {
-          console.warn('⚠️ Lexical data was repaired during update:', safeLoad.errors)
-        }
-
-        isUpdatingFromProps.current = true
-        lastSavedContentRef.current = safeLoad.data
-
-        editor.update(() => {
-          const root = $getRoot()
-          root.clear()
-
-          if (safeLoad.data) {
-            try {
-              const editorState = editor.parseEditorState(safeLoad.data)
-              const hasContent = editorState.read(() => {
-                const root = $getRoot()
-                return root.getChildren().length > 0
-              })
-
-              if (hasContent) {
-                editor.setEditorState(editorState)
-                return
-              }
-            } catch (error) {
-              console.error('Failed to parse validated Lexical JSON during update:', error)
-            }
-
-            // Final fallback to plain text parsing
-            const lines = value.split('\n')
-            lines.forEach((line) => {
-              const paragraph = $createSectionParagraphNode()
-              if (line.trim()) {
-                const textNode = $createStressedTextNode(line)
-                paragraph.append(textNode)
-              }
-              root.append(paragraph)
-            })
-          } else {
-            const emptyParagraph = $createSectionParagraphNode()
-            root.append(emptyParagraph)
-          }
-        }, { tag: 'history-merge' })
-
-        setTimeout(() => {
-          isUpdatingFromProps.current = false
-        }, 100)
-      }
-    }
-  }, [editor, value])
+  // DISABLED: This useEffect was causing cursor focus issues
+  // It was triggering editor.setEditorState() when value prop changed from user typing,
+  // which disrupted the cursor position and caused text scrambling
+  //
+  // The controlled component pattern doesn't work well with Lexical's internal state management
+  // For now, we'll rely on the initial load and manual updates only
+  //
+  // useEffect(() => {
+  //   if (isInitialized.current && !isUpdatingFromProps.current && value !== initialValueRef.current) {
+  //     // ... editor update logic that was causing cursor issues
+  //   }
+  // }, [editor, value])
 
   // Handle editor content changes - now using Lexical JSON serialization
   const handleEditorChange = useCallback((editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => {
@@ -245,10 +207,9 @@ function ValueSyncPlugin({
       return
     }
 
-    // Ignore discrete updates from stress marking plugins
-    if (tags.has('stable-text-conversion') ||
-        tags.has('auto-stress-detection') ||
-        tags.has('decorator-replacement')) {
+    // Only ignore decorator replacement updates (not text conversion or stress detection)
+    // We want to capture word counts even after stress processing
+    if (tags.has('decorator-replacement')) {
       return
     }
 
@@ -267,8 +228,27 @@ function ValueSyncPlugin({
       return
     }
 
-    // Update parent component with validated content
-    onChange(safeData.data)
+    // Extract plain text for word counts and section parsing
+    // Use custom extraction to avoid newline duplication
+    const plainText = editorState.read(() => {
+      const root = $getRoot()
+      const children = root.getChildren()
+
+      // Extract text from each paragraph node and join with single newlines
+      const lines: string[] = []
+      children.forEach(child => {
+        if ($isSectionParagraphNode(child) || child.getType() === 'paragraph') {
+          const textContent = child.getTextContent()
+          lines.push(textContent)
+        }
+      })
+
+      // Join with single newlines to avoid duplication
+      return lines.join('\n')
+    })
+
+    // Update parent component with plain text for word counts and section parsing
+    onChange(plainText)
     lastChangeTimeRef.current = Date.now()
 
     // Setup debounced auto-save
@@ -294,7 +274,22 @@ function ValueSyncPlugin({
 
           if (safeCurrentData.data !== safeData.data) {
             console.log('🔧 React state behind Lexical - updating immediately')
-            onChange(safeCurrentData.data)
+            // Extract current plain text for word counts using custom extraction
+            const currentPlainText = currentEditorState.read(() => {
+              const root = $getRoot()
+              const children = root.getChildren()
+
+              const lines: string[] = []
+              children.forEach(child => {
+                if ($isSectionParagraphNode(child) || child.getType() === 'paragraph') {
+                  const textContent = child.getTextContent()
+                  lines.push(textContent)
+                }
+              })
+
+              return lines.join('\n')
+            })
+            onChange(currentPlainText)
           }
 
           lastSavedContentRef.current = safeCurrentData.data
@@ -374,7 +369,7 @@ function SectionFormattingPlugin() {
       (sectionType: string | null) => {
         editor.update(() => {
           $applySectionFormatting(sectionType)
-        })
+        }, { tag: 'apply-section-formatting' })
         return true
       },
       COMMAND_PRIORITY_CRITICAL
@@ -388,7 +383,7 @@ function SectionFormattingPlugin() {
         event.preventDefault()
         editor.update(() => {
           $clearSectionFormatting()
-        })
+        }, { tag: 'clear-section-formatting' })
         return true
       }
       return false
@@ -429,21 +424,22 @@ function PastePlugin() {
           if ($isRangeSelection(selection)) {
             // Work WITH Lexical's paragraph model - each line becomes a paragraph
             const lines = plainText.split(/\r?\n/)
+            const nonEmptyLines = lines.filter(line => line.trim().length > 0)
 
-            // Create section paragraph nodes for each line (Lexical's natural behavior)
-            const paragraphNodes = lines.map(line => {
+            // Create section paragraph nodes for each non-empty line
+            const paragraphNodes = nonEmptyLines.map(line => {
               const paragraph = $createSectionParagraphNode()
-              if (line.trim()) {
-                const textNode = $createStressedTextNode(line)
-                paragraph.append(textNode)
-              }
+              const textNode = $createStressedTextNode(line.trim())
+              paragraph.append(textNode)
               return paragraph
             })
 
             // Insert the paragraph nodes
-            selection.insertNodes(paragraphNodes)
+            if (paragraphNodes.length > 0) {
+              selection.insertNodes(paragraphNodes)
+            }
           }
-        })
+        }, { tag: 'paste-lyrics-content' })
 
         return true
       },
@@ -463,16 +459,19 @@ function EnterKeyPlugin() {
       KEY_ENTER_COMMAND,
       (event: KeyboardEvent) => {
         if (event && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+          event.preventDefault() // Prevent the default browser behavior
           // Handle Enter key to create SectionParagraphNodes
           editor.update(() => {
             const selection = $getSelection()
             if ($isRangeSelection(selection)) {
-              // Create a new SectionParagraphNode for the new line
+              // Create a new paragraph and properly position cursor
               const newParagraph = $createSectionParagraphNode()
               selection.insertNodes([newParagraph])
+
+              // Ensure the cursor is positioned in the new paragraph
               newParagraph.select()
             }
-          })
+          }, { tag: 'create-new-paragraph' })
           return true // Prevent default Enter behavior
         }
         return false
@@ -498,6 +497,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
     enableAutoSave = true,
     autoSaveDelay = 10000,
     onAutoSave,
+    editable = true,
   }, ref) => {
     const [showSourceDebug, setShowSourceDebug] = useState(false)
     const editorRef = useRef<LexicalEditor | null>(null)
@@ -521,6 +521,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
     const initialConfig = React.useMemo(() => ({
       namespace: 'RichTextLyricsEditor',
       theme,
+      editable,
       nodes: [
         SectionNode,
         SyllableNode,
@@ -533,7 +534,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
       onError: (error: Error) => {
         console.error('Lexical error:', error)
       },
-    }), [])
+    }), [editable])
 
     // Get debug content (Lexical JSON)
     const getDebugContent = useCallback(() => {
@@ -626,7 +627,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
       if (editorRef.current) {
         editorRef.current.update(() => {
           $clearSectionFormatting()
-        })
+        }, { tag: 'clear-section-formatting-callback' })
       }
     }, [])
 
@@ -748,35 +749,41 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
                 selection.focus.set(targetNodeKey!, 0, 'element')
               }
             }
-          })
+          }, { tag: 'section-navigation-position-cursor' })
 
-          // Scroll the target element into view with smooth animation
+          // Use Lexical's selection system for scrolling instead of direct DOM manipulation
           setTimeout(() => {
-            targetElement!.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start',
-              inline: 'nearest'
-            })
+            // Scroll via editor's built-in scrolling behavior
+            editorRef.current!.update(() => {
+              const targetNode = $getNodeByKey(targetNodeKey!)
+              if (targetNode) {
+                targetNode.selectStart()
+              }
+            }, { tag: 'section-navigation-scroll-and-select' })
 
-            // Add a subtle highlight effect to show the navigated section
-            targetElement!.classList.add('section-navigation-highlight')
-            setTimeout(() => {
-              targetElement!.classList.remove('section-navigation-highlight')
-            }, 2000)
+            // Use CSS-based highlighting instead of direct DOM manipulation
+            const rootElement = editorRef.current!.getRootElement()
+            if (rootElement && targetElement) {
+              // Add temporary CSS class via data attribute that CSS can target
+              targetElement.setAttribute('data-navigation-highlight', 'true')
+              setTimeout(() => {
+                targetElement?.removeAttribute('data-navigation-highlight')
+              }, 2000)
+            }
           }, 100)
 
           console.log(`Successfully navigated to section: ${sectionName}`)
         } else {
           console.warn(`Could not find section: ${sectionName}`)
-          // Fallback: focus the editor and scroll to top
+          // Fallback: focus the editor and move selection to top
           editorRef.current.focus()
-          const rootElement = editorRef.current.getRootElement()
-          if (rootElement) {
-            rootElement.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
-            })
-          }
+          editorRef.current.update(() => {
+            const root = $getRoot()
+            const firstChild = root.getFirstChild()
+            if (firstChild) {
+              firstChild.selectStart()
+            }
+          }, { tag: 'section-navigation-fallback-select-start' })
         }
       } catch (error) {
         console.error('Error during section navigation:', error)
@@ -798,7 +805,7 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
             if ($isRangeSelection(selection)) {
               selection.insertText(text)
             }
-          })
+          }, { tag: 'insert-text-at-cursor' })
         }
       },
       getCurrentCursorPosition: () => {
@@ -835,7 +842,37 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
           jumpToSection(sectionName)
         }
       },
-    }), [value, onChange, jumpToSection])
+      onEditorReady: (callback: () => void) => {
+        console.log('🎯 RICH-TEXT-EDITOR: onEditorReady called')
+
+        if (!editorRef.current) {
+          console.log('⚠️ RICH-TEXT-EDITOR: No editor ref available')
+          return () => {}
+        }
+
+        // Use Lexical's built-in editor ready state
+        const unregister = editorRef.current.registerUpdateListener(({ editorState }) => {
+          console.log('🔄 RICH-TEXT-EDITOR: Update listener fired')
+
+          // This fires when editor is fully initialized with content
+          editorState.read(() => {
+            const root = $getRoot()
+            const childrenSize = root.getChildrenSize()
+            console.log('📊 RICH-TEXT-EDITOR: Root children count:', childrenSize)
+
+            if (childrenSize > 0) {
+              // Editor has content and is ready
+              console.log('✅ RICH-TEXT-EDITOR: Editor is ready with content, calling callback')
+              callback()
+              unregister() // Only call once
+            }
+          })
+        })
+
+        console.log('🎯 RICH-TEXT-EDITOR: Update listener registered')
+        return unregister
+      },
+    }), [jumpToSection])
 
     // Store editor reference
     const storeEditorRef = useCallback((editor: LexicalEditor) => {
@@ -907,17 +944,17 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
                 onChange={onChange}
                 onAutoSave={onAutoSave}
                 autoSaveDelay={autoSaveDelay}
-                enableAutoSave={enableAutoSave}
+                enableAutoSave={enableAutoSave && editable}
               />
               <AutoFocusPlugin />
               <SelectionPlugin onSelectionChange={handleSelectionChange} />
               <SectionFormattingPlugin />
-              {/* <SectionHeaderPlugin /> */} {/* TODO: Re-enable when test environment supports full Lexical */}
+              {/* Legacy SectionHeaderPlugin removed */}
               <PastePlugin />
               <EnterKeyPlugin />
               <StableTextToStressedPlugin
                 enabled={true}
-                debounceMs={2000}
+                debounceMs={500}
               />
               <StressMarkDecoratorPlugin
                 enabled={true}
@@ -933,10 +970,10 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
               />
               <AutoStressDetectionPlugin
                 enabled={true}
-                debounceMs={3000}
+                debounceMs={300}
               />
               <ComprehensiveStressPlugin
-                enabled={true}
+                enabled={false}
               />
               {/* TODO: Re-enable when plugins are fully TypeScript compliant */}
               {/* <SectionDetectionPlugin /> */}
@@ -985,23 +1022,14 @@ const RichTextLyricsEditor = React.forwardRef<LexicalLyricsEditorRef, RichTextLy
                       console.log(`🔄 REFRESH: Converted StressedTextNode back to TextNode: "${textContent.substring(0, 15)}..."`)
                     }
                   })
-                }, { tag: 'stress-refresh' })
 
-                // Force re-evaluation after a short delay
-                setTimeout(() => {
-                  console.log('⏰ REFRESH: Triggering forced re-evaluation')
-                  if (editorRef.current) {
-                    editorRef.current.update(() => {
-                      // Trigger a dummy update to mark content as dirty
-                      const root = $getRoot()
-                      const firstChild = root.getFirstChild()
-                      if (firstChild) {
-                        const key = firstChild.getKey()
-                        console.log(`🎯 REFRESH: Marking node ${key} as dirty for re-evaluation`)
-                      }
-                    }, { tag: 'force-stress-reeval' })
+                  // Mark content as dirty for re-evaluation in the same update to avoid race conditions
+                  const firstChild = root.getFirstChild()
+                  if (firstChild) {
+                    const key = firstChild.getKey()
+                    console.log(`🎯 REFRESH: Marking node ${key} as dirty for re-evaluation`)
                   }
-                }, 100)
+                }, { tag: 'stress-refresh-and-reeval' })
               }
             }}
             className="px-2 py-1 text-xs font-mono rounded transition-all duration-200 bg-blue-50 text-blue-600 hover:text-blue-700 hover:bg-blue-100 border border-blue-200/50 hover:border-blue-300/70 backdrop-blur-sm opacity-70 hover:opacity-100"

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react'
 import type { Song, SongSettings } from '../lib/api'
-import { createDefaultSettings, apiClient } from '../lib/api'
+import { createDefaultSettings, backendApiClient } from '../lib/api'
 import SectionNavigation from './SectionNavigation'
 import SectionSidebar from './editor/SectionSidebar'
 import RichTextLyricsEditor, { type RichTextLyricsEditorRef } from './RichTextLyricsEditor'
@@ -69,60 +69,79 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
     }
   }, [])
 
-  // Load song data
+  // Load song data from API
   useEffect(() => {
     const loadSong = async () => {
+      if (!songId || !isMountedRef.current) return
+
+      setIsLoading(true)
+      setError(null)
+
       try {
-        setIsLoading(true)
-        const response = await apiClient.getSong(songId)
-        const songData = response.song!
+        const songData = await backendApiClient.getSong(songId)
 
-        // Enhanced logging to debug newline issues on load
-        const loadedNewlineCount = (songData.lyrics.match(/\n/g) || []).length
-        const loadedDoubleNewlineCount = (songData.lyrics.match(/\n\n/g) || []).length
-        const loadedTripleNewlineCount = (songData.lyrics.match(/\n\n\n/g) || []).length
+        if (!isMountedRef.current) return
 
-        console.log('📂 Song loaded from API:', {
-          lyricsLength: songData.lyrics.length,
-          newlineCount: loadedNewlineCount,
-          doubleNewlineCount: loadedDoubleNewlineCount,
-          tripleNewlineCount: loadedTripleNewlineCount,
-          firstChars: songData.lyrics.slice(0, 50),
-          rawNewlines: JSON.stringify(songData.lyrics.slice(0, 100))
-        })
+        setIsLoading(false)
 
-        setSong(songData)
-        setTitle(songData.title)
-        setArtist(songData.artist || '')
-        setLyrics(songData.lyrics)
-        setStatus(songData.status)
-        setTags(songData.tags)
-        setSettings(songData.settings || createDefaultSettings())
-        setError(null)
+        // Process loaded song data (existing logic continues below)
+        if (songData?.song && !isInitialized.current) {
+          const actualSong = songData.song
+          const lyrics = actualSong.lyrics || ''
+          const loadedNewlineCount = (lyrics.match(/\n/g) || []).length
+          const loadedDoubleNewlineCount = (lyrics.match(/\n\n/g) || []).length
+          const loadedTripleNewlineCount = (lyrics.match(/\n\n\n/g) || []).length
 
-        // Mark as initialized after data is loaded and UI has settled
-        setTimeout(() => {
-          isInitialized.current = true
-          // Set initial auto-save reference
-          lastAutoSaveRef.current = songData.lyrics
-        }, 500)
+          console.log('📂 Song loaded from API:', {
+            songData,
+            actualSong,
+            lyricsLength: lyrics.length,
+            newlineCount: loadedNewlineCount,
+            doubleNewlineCount: loadedDoubleNewlineCount,
+            tripleNewlineCount: loadedTripleNewlineCount,
+            firstChars: lyrics.slice(0, 50),
+            rawNewlines: JSON.stringify(lyrics.slice(0, 100)),
+            hasLyrics: !!lyrics,
+            lyricsType: typeof lyrics,
+            actualLyrics: lyrics
+          })
 
-        // Notify parent of song load
-        if (onSongLoaded) {
+          setSong(actualSong)
+          setTitle(actualSong.title || '')
+          setArtist(actualSong.artist || '')
+          setLyrics(lyrics)
+          setStatus(actualSong.status || 'draft')
+          setTags(actualSong.tags || [])
+          setSettings(actualSong.settings || createDefaultSettings())
+          setError(null)
+
+          // Mark as initialized after data is loaded and UI has settled
           setTimeout(() => {
-            onSongLoaded(songData)
-          }, 0)
+            isInitialized.current = true
+            // Set initial auto-save reference
+            lastAutoSaveRef.current = actualSong.lyrics
+          }, 500)
+
+          // Notify parent of song load
+          if (onSongLoaded) {
+            setTimeout(() => {
+              onSongLoaded(actualSong)
+            }, 0)
+          }
         }
       } catch (err) {
-        console.error('Failed to load song:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load song')
-      } finally {
+        if (!isMountedRef.current) return
+
         setIsLoading(false)
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load song'
+        setError(errorMessage)
+        console.error('Failed to load song:', err)
       }
     }
 
     loadSong()
   }, [songId, onSongLoaded])
+
 
   // Track changes and notify parent
   useEffect(() => {
@@ -211,38 +230,48 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         rawNewlines: JSON.stringify(finalLyrics.slice(0, 100))
       })
 
-      const response = await apiClient.updateSong(songId, updateData)
+      const response = await backendApiClient.updateSong(songId, updateData)
 
       if (!isMountedRef.current) return
 
-      const updatedSong = response.song!
+      const updatedSong = response.song
 
-      // Enhanced logging to debug newline issues
-      const receivedNewlineCount = (updatedSong.lyrics.match(/\n/g) || []).length
-      const receivedDoubleNewlineCount = (updatedSong.lyrics.match(/\n\n/g) || []).length
-      const receivedTripleNewlineCount = (updatedSong.lyrics.match(/\n\n\n/g) || []).length
+      if (!updatedSong) {
+        throw new Error('No song data in response')
+      }
+
+      // Enhanced logging to debug newline issues - with null safety
+      const responseLyrics = updatedSong.lyrics || ''
+      const receivedNewlineCount = (responseLyrics.match(/\n/g) || []).length
+      const receivedDoubleNewlineCount = (responseLyrics.match(/\n\n/g) || []).length
+      const receivedTripleNewlineCount = (responseLyrics.match(/\n\n\n/g) || []).length
 
       console.log('📨 Received from API:', {
-        lyricsLength: updatedSong.lyrics.length,
+        hasLyrics: !!updatedSong.lyrics,
+        lyricsType: typeof updatedSong.lyrics,
+        lyricsLength: responseLyrics.length,
         newlineCount: receivedNewlineCount,
         doubleNewlineCount: receivedDoubleNewlineCount,
         tripleNewlineCount: receivedTripleNewlineCount,
-        lastChars: updatedSong.lyrics.slice(-10),
-        firstChars: updatedSong.lyrics.slice(0, 50),
-        rawNewlines: JSON.stringify(updatedSong.lyrics.slice(0, 100)),
-        lengthChanged: finalLyrics.length !== updatedSong.lyrics.length,
-        contentChanged: finalLyrics !== updatedSong.lyrics
+        lastChars: responseLyrics.slice(-10),
+        firstChars: responseLyrics.slice(0, 50),
+        rawNewlines: JSON.stringify(responseLyrics.slice(0, 100)),
+        lengthChanged: finalLyrics.length !== responseLyrics.length,
+        contentChanged: finalLyrics !== responseLyrics,
+        fullResponse: updatedSong
       })
 
-      setSong(updatedSong)
-      // Defer state update to avoid updating during render
-      setTimeout(() => {
-        setHasUnsavedChanges(false)
-        // Notify parent that changes have been saved
-        if (onHasUnsavedChangesChange) {
-          onHasUnsavedChangesChange(false)
-        }
-      }, 0)
+      // Update song state without disrupting lyrics content
+      setSong(prevSong => ({
+        ...updatedSong,
+        lyrics: prevSong?.lyrics || updatedSong.lyrics // Preserve current editor content
+      }))
+      setHasUnsavedChanges(false)
+
+      // Notify parent immediately that changes have been saved
+      if (onHasUnsavedChangesChange) {
+        onHasUnsavedChangesChange(false)
+      }
 
       // Defer parent state updates to avoid render conflicts
       setTimeout(() => {
@@ -330,6 +359,11 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
 
       if (isMountedRef.current) {
         setAutoSaveStatus('saved')
+        setHasUnsavedChanges(false)
+        // Notify parent that auto-save completed
+        if (onHasUnsavedChangesChange) {
+          onHasUnsavedChangesChange(false)
+        }
       }
     } catch (error) {
       console.error('Auto-save failed:', error)
@@ -337,7 +371,7 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         setAutoSaveStatus('error')
       }
     }
-  }, [song, isSaving, title, artist, lyrics, status, tags, settings, handleSave])
+  }, [song, isSaving, title, artist, lyrics, status, tags, settings, handleSave, onHasUnsavedChangesChange])
 
   // Update auto-save status when changes occur
   useEffect(() => {
@@ -654,8 +688,9 @@ export const SongEditor = forwardRef<SongEditorRef, SongEditorProps>((
         }
 
         if (targetElement) {
-          // Scroll to the target element
-          targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          // Use Lexical's jumpToSection instead of direct DOM scrollIntoView
+          // This maintains proper Lexical selection state management
+          wysiwygEditorRef.current?.jumpToSection(sectionName)
 
           // Set cursor position
           const selection = window.getSelection()

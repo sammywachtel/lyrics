@@ -65,7 +65,10 @@ export function AuthForm({ mode, onModeChange }: AuthFormProps) {
           <p className="text-neutral-600 font-medium">AI-Powered Songwriting</p>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-xl shadow-strong rounded-3xl border border-white/50 p-8 overflow-hidden relative">
+        <div
+          className="bg-white/80 backdrop-blur-xl shadow-strong rounded-3xl border border-white/50 p-8 overflow-hidden relative"
+          data-testid="auth-form"
+        >
           {/* Card background decoration */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-creative from-primary-300/15 to-creative-300/15 rounded-full blur-2xl -translate-y-16 translate-x-16"></div>
 
@@ -117,6 +120,7 @@ export function AuthForm({ mode, onModeChange }: AuthFormProps) {
                     type="email"
                     autoComplete="email"
                     required
+                    data-testid="email-input"
                     className="w-full px-4 py-3 border border-neutral-300 rounded-xl placeholder:text-neutral-400 text-neutral-900 bg-white/80 backdrop-blur-sm hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 shadow-soft focus:shadow-medium"
                     placeholder="Enter your email"
                     value={email}
@@ -133,6 +137,7 @@ export function AuthForm({ mode, onModeChange }: AuthFormProps) {
                     type="password"
                     autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                     required
+                    data-testid="password-input"
                     className="w-full px-4 py-3 border border-neutral-300 rounded-xl placeholder:text-neutral-400 text-neutral-900 bg-white/80 backdrop-blur-sm hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 shadow-soft focus:shadow-medium"
                     placeholder="Enter your password"
                     value={password}
